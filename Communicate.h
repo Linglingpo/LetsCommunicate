@@ -1,6 +1,8 @@
 #ifndef COMMUNICATE_H
 #define COMMUNICATE_H
 
+#include <Arduino.h>
+
 #define HISTORY_SIZE 3
 #define PREAMBLE_SIZE 7
 #define PAYLOAD_DIGITAL_SIZE 3
@@ -36,24 +38,9 @@ struct payload {
 
 class Communicate {
 public:
-  Communicate() { Serial.println("Hello From Communicate"); };
-  Communicate(uint8_t comm_type, uint8_t source, uint8_t target, uint8_t action = 0) {
-    (*this).comm_type = comm_type;
-    (*this).source = source;
-    (*this).target = target;
-    (*this).action = action;
-  };
-
-  void initConfiguration() {
-    Serial.print("Configured comm_type: ");
-    Serial.println((*this).comm_type);
-    Serial.print("Configured source: ");
-    Serial.println((*this).source);
-    Serial.print("Configured target: ");
-    Serial.println((*this).target);
-    Serial.print("Configured action: ");
-    Serial.println((*this).action);
-  };
+  Communicate();
+  Communicate(uint8_t comm_type, uint8_t source, uint8_t target, uint8_t action = 0);
+  void initConfiguration();
 
 private:
   preamble * preamble_history[HISTORY_SIZE] = {0};

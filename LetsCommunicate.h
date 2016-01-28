@@ -3,8 +3,8 @@
 
 /* LETS COMMUNICATE ASSUMES ARDUINO IDE >= 100 */
 #include <Arduino.h>
-#include "StopWatch/StopWatch.h"
-#include "Communicate/Communicate.h"
+#include "StopWatch.h"
+#include "Communicate.h"
 
 class LetsCommunicate: public Communicate, public StopWatch {
 public:

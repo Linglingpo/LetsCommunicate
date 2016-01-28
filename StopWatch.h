@@ -1,6 +1,7 @@
 #ifndef STOPWATCH_H
 #define STOPWATCH_H
 
+#include <Arduino.h>
 /***********************************************************/
 /* StopWatch Variables for Monitoring Time - DO NOT CHANGE */
 /***********************************************************/
