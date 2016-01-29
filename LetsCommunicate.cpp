@@ -1,8 +1,8 @@
 #include "LetsCommunicate.h"
 
-void LetsCommunicate::status() { (*this).initConfiguration(); }
+void LetsCommunicate::status() {}
 
-void LetsCommunicate::initConfiguration() {
+void LetsCommunicate::initConfiguration(uint8_t _flag) {
 Serial.println((*this).comm_type);
 Serial.println((*this).source);
 Serial.println((*this).target);
@@ -12,24 +12,37 @@ if((*this).comm_type == HARDSERIAL) {
 // We know Digital 0 & 1 are non USE.... HARD TX/RX
   switch((*this).action) {
     case DIG:
-      //for(int i = OFFSET; i <= DIGSIZE; i++)
-        //pinMode(i, INPUT);
 
+    if(_flag == 0){
+      (*this).flag = _flag;
+      (*this).size = DIGSIZE;
+      for(int i = OFFSET; i <= (*this).size; i++){
+      pinMode(i, INPUT);
+       Serial.print("Pin ");
+       Serial.print(i);
+       Serial.print(" = input");
+       Serial.println();
+    }
+  } // end of flag 0
+   if (_flag == 1){
+     (*this).flag = _flag;
+     //(*this).size = size;
         for(int i = 0; i < (*this).size; i++){
           if ((*this).configIO[i] == 1){
             pinMode(i + OFFSET, INPUT);
-            // Serial.print("Pin ");
-            // Serial.print(i+ OFFSET);
-            // Serial.print(" = input");
-            // Serial.println();
+             Serial.print("Pin ");
+             Serial.print(i+ OFFSET);
+             Serial.print(" = input");
+             Serial.println();
           }else {
             pinMode(i + OFFSET, OUTPUT);
-            // Serial.print("Pin ");
-            // Serial.print(i+OFFSET, OUTPUT);
-            // Serial.print(" = output");
-            // Serial.println();
+             Serial.print("Pin ");
+             Serial.print(i+OFFSET, OUTPUT);
+             Serial.print(" = output");
+             Serial.println();
           }
       }
+    }
     break;
 
     case DXT:
@@ -48,10 +61,12 @@ if((*this).comm_type == HARDSERIAL) {
 
 void LetsCommunicate::run() {
   // Waiting for something to happen...
-  for(int i = 2; i <= 4; i++) {
-    if(digitalRead(i) == HIGH)  {
+  for(int i = 0; i < (*this).size; i++) {
+    if(digitalRead(i + OFFSET) == HIGH)  {
       Serial.print("Digital Pin: ");
-      Serial.println(i, DEC);
+      Serial.print(i + OFFSET, DEC);
+      Serial.print(" is HIGH");
+      Serial.println();
     }
   }
 

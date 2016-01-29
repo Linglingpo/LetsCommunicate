@@ -58,7 +58,7 @@ public:
       (*this).target = target;
       (*this).action = action;
       Serial.println("dig without IO");
-      initConfiguration();
+      initConfiguration(0);
     };
 
     // DIG OR DXT
@@ -71,11 +71,11 @@ public:
         (*this).configIO = configIO;
         (*this).size = size;
         Serial.println("dig with IO");
-        initConfiguration();
+        initConfiguration(1);
       };
 
   void status();
-  void initConfiguration();
+  void initConfiguration(uint8_t);
   void run();
   void pinActive(uint8_t);
 
@@ -90,6 +90,8 @@ private:
   uint8_t ack;
   uint8_t * configIO;
   uint8_t size;
+  uint8_t flag;
+  //uint8_t * myArray;
 };
 
 #endif // LETS_COMMUNICATE_H
