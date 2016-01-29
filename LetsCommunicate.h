@@ -3,7 +3,6 @@
 
 /* LETS COMMUNICATE ASSUMES ARDUINO IDE >= 100 */
 #include <Arduino.h>
-#include "StopWatch.h"
 #include "Communicate.h"
 
 #define HISTORY_SIZE 3
@@ -47,14 +46,27 @@ public:
     PARAMETERS:
     comm_type = {HARDSERIAL, SOFTSERIAL, ISQUAREDC}, source = {CLIENT},
     target = {target}, action = {DIG, DXT, ANA, ALL} */
-  LetsCommunicate(uint8_t comm_type, uint8_t source, uint8_t target, uint8_t action):
-    Communicate(comm_type, source, target, action) { };
+  LetsCommunicate(uint8_t comm_type, uint8_t source, uint8_t target, uint8_t action = 0):
+    Communicate(comm_type) {
+      // Setup the initial State for LetCommunicate3 Object....
+      (*this).comm_type = comm_type;
+      (*this).source = source;
+      (*this).target = target;
+      (*this).action = action;
+    };
 
   void status();
+  void initConfiguration();
+  void run();
+  void pinActive(uint8_t);
 
 private:
   preamble * preamble_history[HISTORY_SIZE] = {0};
   payload * payload_history[HISTORY_SIZE] = {0};
+  uint8_t comm_type;
+  uint8_t source; // MY_ID
+  uint8_t target; // THEIR_ID
+  uint8_t action; // DIG, DXT, ANA or DIG + ANA
   uint8_t syn;
   uint8_t ack;
 };

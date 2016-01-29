@@ -2,20 +2,16 @@
 #define COMMUNICATE_H
 
 #include <Arduino.h>
-
+#include "StopWatch.h"
 //3 why handshke
 //reciving and transmeting data
 
-class Communicate : public StopWatch {
+class Communicate: public StopWatch {
 public:
   Communicate();
-  Communicate(uint8_t comm_type, uint8_t source, uint8_t target, uint8_t action = 0);
-  void initConfiguration();
+  Communicate(uint8_t);
 
 private:
   uint8_t comm_type;
-  uint8_t source; // MY_ID
-  uint8_t target; // THEIR_ID
-  uint8_t action; // DIG, DXT, ANA or DIG + ANA
 };
 #endif // COMMUNICATE_H
