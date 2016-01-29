@@ -18,10 +18,14 @@
 #define CNT   3 // CNT = MORE THAN ONE MESSAGE - CHECK FOR FIN
 #define FIN   4 // FIN = COMMUNICATIONS FINISHED
 /* PAYLOAD MESSAGE TYPE */
+#define PWM   251 // PWM = PWM OUTPUT
 #define DIG   252 // DIG = DIGITAL
 #define DXT   253 // DXT = DIGITAL EXTENDED
 #define ANA   254 // ANA = ANALOG
 #define ALL   255 // ALL = DIGITAL + ANALOG
+
+#define OFFSET 2 // DIG OFFSET
+#define DIGSIZE 13
 /* SYN RESET CONTROL */
 #define MAXMSGS 255
 /* COMMUNICATIONS TYPE */
@@ -53,7 +57,22 @@ public:
       (*this).source = source;
       (*this).target = target;
       (*this).action = action;
+      Serial.println("dig without IO");
+      initConfiguration();
     };
+
+    // DIG OR DXT
+    LetsCommunicate(uint8_t comm_type, uint8_t source, uint8_t target, uint8_t action, uint8_t * configIO, uint8_t size):
+      Communicate(comm_type) {
+        (*this).comm_type = comm_type;
+        (*this).source = source;
+        (*this).target = target;
+        (*this).action = action;
+        (*this).configIO = configIO;
+        (*this).size = size;
+        Serial.println("dig with IO");
+        initConfiguration();
+      };
 
   void status();
   void initConfiguration();
@@ -69,6 +88,8 @@ private:
   uint8_t action; // DIG, DXT, ANA or DIG + ANA
   uint8_t syn;
   uint8_t ack;
+  uint8_t * configIO;
+  uint8_t size;
 };
 
 #endif // LETS_COMMUNICATE_H
