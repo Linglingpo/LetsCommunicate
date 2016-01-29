@@ -14,38 +14,16 @@
 class StopWatch
 {
   public:
-    StopWatch() {  };
-    unsigned long elapsed() { return stopWatchValue(); };
-
-    void stopWatchStart() {
-      if (stopWatchState == RESET || stopWatchState == STOPPED) {
-         stopWatchState = RUNNING;
-         unsigned long t = millis();
-         swStartTime += t - swStopTime;
-         swStopTime = t;
-      }
-    };
+    StopWatch();
+    uint32_t elapsed();
+    void stopWatchStart();
+    void stopWatchReset();
+    uint32_t stopWatchValue();
+    void stopWatchStop();
 
   private:
-    byte stopWatchState;
-    unsigned long swStartTime = 0UL;
-    unsigned long swStopTime = 0UL;
-
-    void stopWatchReset() {
-      stopWatchState = RESET;
-      swStartTime = swStopTime = 0;
-    }
-
-    unsigned long stopWatchValue() {
-      if (stopWatchState == RUNNING) swStopTime = millis();
-      return swStopTime - swStartTime;
-    }
-
-    void stopWatchStop() {
-      if (stopWatchState == RUNNING) {
-         stopWatchState = STOPPED;
-         swStopTime = millis();
-      }
-    }
+    uint8_t stopWatchState = STOPPED;
+    uint32_t swStartTime = 0UL;
+    uint32_t swStopTime = 0UL;
 };
 #endif // STOPWATCH_H

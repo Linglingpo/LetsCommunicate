@@ -1,6 +1,7 @@
 #include "Communicate.h"
 
-Communicate::Communicate() { Serial.println("Hello From Communicate"); };
+Communicate::Communicate() { Serial.println("Hello From Communicate"); }
+
 Communicate::Communicate(uint8_t comm_type, uint8_t source, uint8_t target, uint8_t action) {
   (*this).comm_type = comm_type;
   (*this).source = source;
