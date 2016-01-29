@@ -39,10 +39,10 @@ struct payload {
   uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
 };
 
-class LetsCommunicate: public Communicate, public StopWatch {
+class LetsCommunicate: public Communicate{
 public:
   /* Default CTOR - DOES NOT NOTHING */
-  LetsCommunicate() { Serial.println("Hello From LETSCommunicate"); };
+  LetsCommunicate() {Serial.println("Hello From LETSCommunicate"); };
   /* CUSTOM CONSTRUCTOR
     PARAMETERS:
     comm_type = {HARDSERIAL, SOFTSERIAL, ISQUAREDC}, source = {CLIENT},

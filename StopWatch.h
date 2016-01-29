@@ -15,6 +15,7 @@ class StopWatch
 {
   public:
     StopWatch();
+    //Able to override "virtual"
     uint32_t elapsed();
     void stopWatchStart();
     void stopWatchReset();
