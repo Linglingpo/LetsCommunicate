@@ -25,7 +25,7 @@
 #define ALL   255 // ALL = DIGITAL + ANALOG
 
 #define OFFSET 2 // DIG OFFSET
-#define DIGSIZE 13
+#define DIGSIZE 13 //13 Digital Pins
 /* SYN RESET CONTROL */
 #define MAXMSGS 255
 /* COMMUNICATIONS TYPE */
@@ -44,9 +44,11 @@ struct payload {
 
 class LetsCommunicate: public Communicate{
 public:
-  /* Default CTOR - DOES NOT NOTHING */
+  /* Default CTOR - DOES NOT NOTHING - CONSTRUCTOR 0*/
   LetsCommunicate() {Serial.println("Hello From LETSCommunicate"); };
-  /* CUSTOM CONSTRUCTOR
+
+    /* CUSTOM CONSTRUCTOR 1
+    (All Pins (11 pins) will be declare as INPUT)
     PARAMETERS:
     comm_type = {HARDSERIAL, SOFTSERIAL, ISQUAREDC}, source = {CLIENT},
     target = {target}, action = {DIG, DXT, ANA, ALL} */
@@ -58,10 +60,16 @@ public:
       (*this).target = target;
       (*this).action = action;
       Serial.println("dig without IO");
-      initConfiguration(0);
+      initConfiguration(1);
     };
 
-    // DIG OR DXT
+    /* DIG OR DXT
+    CUSTOM CONSTRUCTOR 2
+    PARAMETERS:
+    comm_type = {HARDSERIAL, SOFTSERIAL, ISQUAREDC}, source = {CLIENT},
+    target = {target}, action = {DIG, DXT, ANA, ALL}, configIO = {0 (OUTPUT),1 (INPUT)} (Index as the pins number),
+    size = {How many pins are used}
+    */
     LetsCommunicate(uint8_t comm_type, uint8_t source, uint8_t target, uint8_t action, uint8_t * configIO, uint8_t size):
       Communicate(comm_type) {
         (*this).comm_type = comm_type;
@@ -71,13 +79,14 @@ public:
         (*this).configIO = configIO;
         (*this).size = size;
         Serial.println("dig with IO");
-        initConfiguration(1);
+        initConfiguration(2);
       };
 
   void status();
   void initConfiguration(uint8_t);
   void run();
-  void pinActive(uint8_t);
+  void pinState();
+  //void pinActive(uint8_t);
 
 private:
   preamble * preamble_history[HISTORY_SIZE] = {0};
@@ -91,7 +100,7 @@ private:
   uint8_t * configIO;
   uint8_t size;
   uint8_t flag;
-  //uint8_t * myArray;
+  uint8_t * digStateArray;
 };
 
 #endif // LETS_COMMUNICATE_H

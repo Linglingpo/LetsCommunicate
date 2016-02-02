@@ -12,19 +12,22 @@ if((*this).comm_type == HARDSERIAL) {
 // We know Digital 0 & 1 are non USE.... HARD TX/RX
   switch((*this).action) {
     case DIG:
-
-    if(_flag == 0){
+//CONSTRUCTOR 1
+    if(_flag == 1){
       (*this).flag = _flag;
       (*this).size = DIGSIZE;
       for(int i = OFFSET; i <= (*this).size; i++){
       pinMode(i, INPUT);
+      /*
        Serial.print("Pin ");
        Serial.print(i);
        Serial.print(" = input");
        Serial.println();
+       */
     }
-  } // end of flag 0
-   if (_flag == 1){
+  }
+  //CONSTRUCTOR 2
+   if (_flag == 2){
      (*this).flag = _flag;
      //(*this).size = size;
         for(int i = 0; i < (*this).size; i++){
@@ -60,22 +63,23 @@ if((*this).comm_type == HARDSERIAL) {
 
 
 void LetsCommunicate::run() {
-  // Waiting for something to happen...
-  for(int i = 0; i < (*this).size; i++) {
-    if(digitalRead(i + OFFSET) == HIGH)  {
-      Serial.print("Digital Pin: ");
-      Serial.print(i + OFFSET, DEC);
-      Serial.print(" is HIGH");
-      Serial.println();
-    }
-  }
-
+  //Waiting for something to happen...
+  (*this).pinState();
 }
 
-void LetsCommunicate::pinActive(uint8_t _pinNumber) {
-  // Waiting for something to happen...
-  Serial.print("Pin ");
-  Serial.print(_pinNumber);
-  Serial.print(" = high");
+void LetsCommunicate::pinState(){
+  for(int i = OFFSET; i < (*this).size; i++){
+    if(digitalRead(i) == HIGH)  {
+      (*this).digStateArray[i] = 1 ;
+    } else {
+    (*this).digStateArray[i] = 0;
+  }
+    Serial.print((*this).digStateArray[i]);
+  }// end of for loop
   Serial.println();
+}
+
+
+void LetsCommunicate::pinActiveProsses(uint8_t _pinNumber) {
+//do something when active
 }
