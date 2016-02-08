@@ -14,7 +14,7 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-*/ 
+*/
 
 // Many definitions in /usr/avr/include/avr/io.h
 
@@ -48,7 +48,7 @@
 /* enableInterrupt- Sets up an interrupt on a selected Arduino pin.
  * or
  * enableInterruptFast- When used with the NEEDFORSPEED macro, sets up an interrupt on a selected Arduino pin.
- * 
+ *
  * Usage:
  * enableInterrupt(uint8_t pinNumber, void (*userFunction)(void), uint8_t mode);
  * or
@@ -77,11 +77,11 @@
  * to specify that you want to use a Pin Change Interrupt type of interrupt on those pins that
  * support both Pin Change and External Interrupts. Otherwise, the library will choose whatever
  * interrupt type (External, or Pin Change) normally applies to that pin, with priority to
- * External Interrupt. 
+ * External Interrupt.
  *
  * The interruptDesignator is required because on the ATmega328 processor pins 2 and 3 support
  * ''either'' pin change or * external interrupts. On 644/1284-based systems, pin change interrupts
- * are supported on all pins and external interruptsare supported on pins 2, 10, and 11. 
+ * are supported on all pins and external interruptsare supported on pins 2, 10, and 11.
  * Otherwise, each pin only supports a single type of interrupt and the
  * PINCHANGEINTERRUPT scheme changes nothing. This means you can ignore this whole discussion
  * for ATmega2560- or ATmega32U4-based Arduinos. You can probably safely ignore it for
@@ -559,7 +559,7 @@ static volatile uint8_t portSnapshotK;
 #define ARDUINO_PIN_D3 1
 #define ARDUINO_PIN_E6 7
 
-/* To derive this list: 
+/* To derive this list:
    sed -n -e '1,/digital_pin_to_port_PGM/d' -e '/^}/,$d' -e '/P/p' \
        /usr/share/arduino/hardware/arduino/variants/leonardo/pins_arduino.h | \
        awk '{print "  ", $5 ", // " $5 "  pin: " $3}'
@@ -773,7 +773,7 @@ static volatile uint8_t portSnapshotB;
 volatile uint8_t risingPinsPORTC=0;
 volatile uint8_t fallingPinsPORTC=0;
 static volatile uint8_t portSnapshotC;
-#endif 
+#endif
 
 #ifndef EI_NOTPORTD
 volatile uint8_t risingPinsPORTD=0;
@@ -984,7 +984,7 @@ static volatile uint8_t portSnapshotB;
 #define EI_printPSTR(x) EI_SerialPrint_P(PSTR(x))
 void EI_SerialPrint_P(const char *str) {
   for (uint8_t c; (c = pgm_read_byte(str)); str++) Serial.write(c);
-} 
+}
 #endif
 
 
@@ -1302,7 +1302,7 @@ ISR(INT0_vect) {/*{{{*/
 #endif
 #else
 #if defined MIGHTY1284
-  INTERRUPT_FLAG_PIN10++ 
+  INTERRUPT_FLAG_PIN10++
 #endif
 #if defined ARDUINO_MEGA
 #ifdef INTERRUPT_FLAG_PIN21
@@ -1353,7 +1353,7 @@ ISR(INT1_vect) {/*{{{*/
   (*functionPointerArrayEXTERNAL[1])();
 #else
 #if defined MIGHTY1284
-  INTERRUPT_FLAG_PIN11++ 
+  INTERRUPT_FLAG_PIN11++
 #endif
 #if defined ARDUINO_MEGA
 #ifdef INTERRUPT_FLAG_PIN20
@@ -1391,7 +1391,7 @@ ISR(INT2_vect) {/*{{{*/
   (*functionPointerArrayEXTERNAL[2])();
 #else
 #if defined MIGHTY1284
-  INTERRUPT_FLAG_PIN2++ 
+  INTERRUPT_FLAG_PIN2++
 #endif
 #if defined ARDUINO_MEGA
 #ifdef INTERRUPT_FLAG_PIN19

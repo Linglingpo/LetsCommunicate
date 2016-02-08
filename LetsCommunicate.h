@@ -3,7 +3,30 @@
 
 /* LETS COMMUNICATE ASSUMES ARDUINO IDE >= 100 */
 #include <Arduino.h>
-#include "Communicate.h"
+
+/* ARDUINO INTERRUPT LIBRARY & DEFINED STRUCTURES */
+#if defined __AVR_ATmega168__ || defined __AVR_ATmega168A__ || defined __AVR_ATmega168P__ || \
+  defined __AVR_ATmega168PA__ || defined __AVR_ATmega328__ || defined __AVR_ATmega328P__
+  //https://github.com/GreyGnome/EnableInterrupt/wiki/Usage#Calling_the_Library_from_Other_Libraries
+  //https://github.com/GreyGnome/EnableInterrupt/wiki
+  #define EI_ARDUINO_INTERRUPTED_PIN
+  #define LIBCALL_ENABLEINTERRUPT
+  #include "EnableInterrupt.h"
+  #include "Communicate.h"
+#endif
+
+#define PINCOUNT(x) pin ##x ##Count
+
+#define disablePCInterrupt(x) \
+  disableInterrupt( x | PINCHANGEINTERRUPT)
+
+#define setupPCInterrupt(x) \
+  pinMode( x, INPUT_PULLUP); \
+  enableInterrupt( x | PINCHANGEINTERRUPT, interruptFunction, CHANGE)
+
+#define setupInterrupt(x) \
+  pinMode( x, INPUT_PULLUP); \
+  enableInterrupt( x, interruptFunction, CHANGE)
 
 #define HISTORY_SIZE 3
 #define PREAMBLE_SIZE 7
@@ -45,7 +68,7 @@ struct payload {
 class LetsCommunicate: public Communicate{
 public:
   /* Default CTOR - DOES NOT NOTHING - CONSTRUCTOR 0*/
-  LetsCommunicate() {Serial.println("Hello From LETSCommunicate"); };
+  LetsCommunicate() { Serial.println("Hello From LETSCommunicate"); };
 
     /* CUSTOM CONSTRUCTOR 1
     (All Pins (11 pins) will be declare as INPUT)
@@ -86,9 +109,10 @@ public:
   void initConfiguration(uint8_t);
   void run();
   void pinState();
-  //void pinActive(uint8_t);
+  void pinActiveProsses(uint8_t);
 
 private:
+  void interruptFunction();
   preamble * preamble_history[HISTORY_SIZE] = {0};
   payload * payload_history[HISTORY_SIZE] = {0};
   uint8_t comm_type;
@@ -101,6 +125,10 @@ private:
   uint8_t size;
   uint8_t flag;
   uint8_t * digStateArray;
+
+  volatile uint8_t interrupt_id = -1;
+  volatile uint8_t previousInterrupt_id = -1;
+  volatile uint8_t interrupted = false;
 };
 
 #endif // LETS_COMMUNICATE_H

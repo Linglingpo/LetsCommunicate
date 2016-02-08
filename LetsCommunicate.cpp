@@ -1,5 +1,13 @@
 #include "LetsCommunicate.h"
 
+void LetsCommunicate::interruptFunction() {
+  interrupt_id = arduinoInterruptedPin;
+  interrupted = true;
+//  if(digitalRead(interrupt_id) == LOW) {
+//    interrupted = true;
+//  }
+}
+
 void LetsCommunicate::status() {}
 
 void LetsCommunicate::initConfiguration(uint8_t _flag) {
@@ -63,7 +71,34 @@ if((*this).comm_type == HARDSERIAL) {
 
 
 void LetsCommunicate::run() {
-  //Waiting for something to happen...
+  if(interrupted) {
+
+    if(digitalRead(interrupt_id) == LOW) {
+      Serial.print("Actived: ");
+    } else {
+      Serial.print("Deactived: ");
+    }
+
+    Serial.println(interrupt_id);
+      // need to debounce
+      delay(250);
+      interrupted = false;
+      previousInterrupt_id = interrupt_id;
+      interrupt_id = -1;
+//    if((previousInterrupt_id != interrupt_id) || (previousInterrupt_id == interrupt_id && digitalRead(interrupt_id) == LOW)) {
+//      if(previousInterrupt_id != interrupt_id) {
+//      Serial.print("Actived A: ");
+//      } else {
+//        Serial.print("Actived B: ");
+//      }
+//      Serial.println(interrupt_id);
+//      // need to debounce
+//      delay(250);
+//      interrupted = false;
+//      previousInterrupt_id = interrupt_id;
+//      interrupt_id = -1;
+//    }
+  }
   (*this).pinState();
 }
 
