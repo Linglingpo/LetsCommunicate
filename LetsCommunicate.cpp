@@ -2,35 +2,16 @@
 
 void LetsCommunicate::status() {}
 
-void LetsCommunicate::interruptHandler() {
+/* INTERRUPT GLOBALLY SCOPED VARIABLES */
+volatile uint8_t interrupt_id = -1;
+volatile uint8_t previousInterrupt_id = -1;
+volatile uint8_t interrupted = false;
+/* INTERRUPT GLOBALLY SCOPED VARIBLES */
+
+void interruptHandler() {
   interrupt_id = arduinoInterruptedPin;
   interrupted = true;
-//  if(digitalRead(interrupt_id) == LOW) {
-//    interrupted = true;
-//  }
 }
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-  void propogate(void *anObject) {
-    static_cast<LetsCommunicate*>((anObject))->interruptHandler();
-  }
-#ifdef __cplusplus
-}
-#endif
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-  void interrupt() {
-    //static_cast<LetsCommunicate*>(anObject)->interruptHandler();
-    propogate(&(*this));
-  }
-#ifdef __cplusplus
-}
-#endif
 
 void LetsCommunicate::configureInterrupts(uint8_t _action) {
 
@@ -38,7 +19,7 @@ void LetsCommunicate::configureInterrupts(uint8_t _action) {
     (*this).size = (_action == DIG) ? DIGSIZE : (DIGSIZE + DXTSIZE);
     for(int i = OFFSET; i <= (*this).size; i++) {
       pinMode(i, INPUT_PULLUP);
-      enableInterrupt(i, interrupt, CHANGE);
+      enableInterrupt(i, interruptHandler, CHANGE);
       Serial.print("Pin ");
       Serial.print(i);
       Serial.print(" = input");
@@ -58,7 +39,8 @@ void LetsCommunicate::initialiseInputAs(uint8_t _action) {
       (*this).configureInterrupts(_action);
     break;
     case ANA:
-      // USE ANA TO DETERMINE HOW TO READ FROM ANALOG PINS.
+      // USE (*this).ANA TO DETERMINE HOW TO READ FROM ANALOG PINS.
+      (*this).action = 1;
     break;
     case ALL:
       // HMMM. May not make sense here ?
@@ -137,7 +119,7 @@ void LetsCommunicate::run() {
 
     Serial.println(interrupt_id);
       // need to debounce
-      delay(250);
+      delay(125);
       interrupted = false;
       previousInterrupt_id = interrupt_id;
       interrupt_id = -1;
@@ -155,7 +137,13 @@ void LetsCommunicate::run() {
 //      interrupt_id = -1;
 //    }
   }
-  (*this).pinState();
+
+  if((*this).action) {
+    for(int i = 0; i < 6; i++) {
+      Serial.print("Analog "); Serial.print(i); Serial.print(" ");
+      Serial.print(analogRead(i)); Serial.println(" ");
+    }
+  }
 }
 
 void LetsCommunicate::pinState(){

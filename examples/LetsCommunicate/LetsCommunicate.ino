@@ -1,23 +1,20 @@
-
-#define EI_ARDUINO_INTERRUPTED_PIN
-#include <EnableInterrupt.h>
-#include <LetsCommunicate.h>
+#include <LingLingPo.h>
 LetsCommunicate first;
-//LetsCommunicate second;
-
 
 uint8_t configIO[3] {0, 1, 0};
 
-
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(115200);
 
-  //first = LetsCommunicate(0, 2, 3, 252);
-  first = LetsCommunicate(0, 2, 3, 252, configIO, 3);
+  //first = LetsCommunicate();
+  first = LetsCommunicate(0, 2, 3);
+  /* TEST THESE CONFIGS - ONE AT A TIME */
+  first.initialiseInputAs(DIG);
+  //first.initialiseInputAs(DXT);
+  //first.initialiseInputAs(ANA);
 }
 
 void loop() {
   first.run();
-  delay(500);
 }

@@ -100,7 +100,6 @@ public:
   void run();
   void pinState();
   void pinActiveProsses(uint8_t);
-  void interruptHandler();
 
 private:
   preamble * preamble_history[HISTORY_SIZE] = {0};
@@ -117,9 +116,6 @@ private:
   uint8_t * digStateArray;
 
   /* INTERRUPT PRIVATE VARIABLES */
-  volatile uint8_t interrupt_id = -1;
-  volatile uint8_t previousInterrupt_id = -1;
-  volatile uint8_t interrupted = false;
   void configureInterrupts(uint8_t);
   /* FINISH INTERRUPT VARIABLES */
 };
