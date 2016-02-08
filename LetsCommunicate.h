@@ -5,28 +5,16 @@
 #include <Arduino.h>
 
 /* ARDUINO INTERRUPT LIBRARY & DEFINED STRUCTURES */
-#if defined __AVR_ATmega168__ || defined __AVR_ATmega168A__ || defined __AVR_ATmega168P__ || \
+//#if defined __AVR_ATmega168__ || defined __AVR_ATmega168A__ || defined __AVR_ATmega168P__ || \
   defined __AVR_ATmega168PA__ || defined __AVR_ATmega328__ || defined __AVR_ATmega328P__
   //https://github.com/GreyGnome/EnableInterrupt/wiki/Usage#Calling_the_Library_from_Other_Libraries
   //https://github.com/GreyGnome/EnableInterrupt/wiki
-  #define EI_ARDUINO_INTERRUPTED_PIN
   #define LIBCALL_ENABLEINTERRUPT
+  #define EI_ARDUINO_INTERRUPTED_PIN
+
   #include "EnableInterrupt.h"
   #include "Communicate.h"
-#endif
-
-#define PINCOUNT(x) pin ##x ##Count
-
-#define disablePCInterrupt(x) \
-  disableInterrupt( x | PINCHANGEINTERRUPT)
-
-#define setupPCInterrupt(x) \
-  pinMode( x, INPUT_PULLUP); \
-  enableInterrupt( x | PINCHANGEINTERRUPT, interruptFunction, CHANGE)
-
-#define setupInterrupt(x) \
-  pinMode( x, INPUT_PULLUP); \
-  enableInterrupt( x, interruptFunction, CHANGE)
+//#endif
 
 #define HISTORY_SIZE 3
 #define PREAMBLE_SIZE 7
@@ -49,6 +37,7 @@
 
 #define OFFSET 2 // DIG OFFSET
 #define DIGSIZE 13 //13 Digital Pins
+#define DXTSIZE 6
 /* SYN RESET CONTROL */
 #define MAXMSGS 255
 /* COMMUNICATIONS TYPE */
@@ -75,15 +64,14 @@ public:
     PARAMETERS:
     comm_type = {HARDSERIAL, SOFTSERIAL, ISQUAREDC}, source = {CLIENT},
     target = {target}, action = {DIG, DXT, ANA, ALL} */
-  LetsCommunicate(uint8_t comm_type, uint8_t source, uint8_t target, uint8_t action = 0):
+  LetsCommunicate(uint8_t comm_type, uint8_t source, uint8_t target):
     Communicate(comm_type) {
       // Setup the initial State for LetCommunicate3 Object....
       (*this).comm_type = comm_type;
       (*this).source = source;
       (*this).target = target;
-      (*this).action = action;
-      Serial.println("dig without IO");
-      initConfiguration(1);
+      //(*this).action = action;
+      //initConfiguration(1);
     };
 
     /* DIG OR DXT
@@ -101,18 +89,24 @@ public:
         (*this).action = action;
         (*this).configIO = configIO;
         (*this).size = size;
-        Serial.println("dig with IO");
-        initConfiguration(2);
+        //Serial.println("dig with IO");
+        //initConfiguration(2);
       };
 
+  /* Initialise With Methods Describe the Intentions
+     initialiseWith(uint8_t); Initialise {DIG, DXT, ANA, ALL}
+        DIG = ALL DIG IO AS INPUT (INTERRUPT ENABLED BY DEFAULT)
+        DXT = ALL DIG IO & ANALOG AS DIGITAL INPUT (INTERRUPT ENABLED BY DEFAULT)
+        ANA = ALL ANALOG IO AS INPUT (NO INTERRUPTS)
+  */
+  void initialiseInputAs(uint8_t);
   void status();
-  void initConfiguration(uint8_t);
+  //void initConfiguration(uint8_t);
   void run();
   void pinState();
   void pinActiveProsses(uint8_t);
 
 private:
-  void interruptFunction();
   preamble * preamble_history[HISTORY_SIZE] = {0};
   payload * payload_history[HISTORY_SIZE] = {0};
   uint8_t comm_type;
@@ -126,9 +120,14 @@ private:
   uint8_t flag;
   uint8_t * digStateArray;
 
+  /* INTERRUPT PRIVATE VARIABLES */
   volatile uint8_t interrupt_id = -1;
   volatile uint8_t previousInterrupt_id = -1;
   volatile uint8_t interrupted = false;
+  static void interrupt(void);
+  void interruptHandler();
+  void configureInterrupts(uint8_t);
+  /* FINISH INTERRUPT VARIABLES */
 };
 
 #endif // LETS_COMMUNICATE_H

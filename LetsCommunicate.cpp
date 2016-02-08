@@ -1,73 +1,127 @@
 #include "LetsCommunicate.h"
 
-void LetsCommunicate::interruptFunction() {
+#define PINCOUNT(x) pin ##x ##Count
+
+// #define disablePCInterrupt(x) \
+//   disableInterrupt( x | PINCHANGEINTERRUPT)
+//
+// #define setupPCInterrupt(x) \
+//   pinMode( x, INPUT_PULLUP); \
+//   enableInterrupt( x | PINCHANGEINTERRUPT, interruptFunction, CHANGE)
+//
+// #define setupInterrupt(x) \
+//   pinMode( x, INPUT_PULLUP); \
+//   enableInterrupt( x, interruptFunction, CHANGE)
+
+// https://community.particle.io/t/cpp-attachinterrupt-to-class-function-help-solved/5147/2
+void LetsCommunicate::interrupt(void) {
+  static_cast<LetsCommunicate*>(void)->interruptHandler();
+}
+
+void LetsCommunicate::interruptHandler() {
   interrupt_id = arduinoInterruptedPin;
   interrupted = true;
 //  if(digitalRead(interrupt_id) == LOW) {
 //    interrupted = true;
 //  }
+
 }
 
 void LetsCommunicate::status() {}
 
-void LetsCommunicate::initConfiguration(uint8_t _flag) {
-Serial.println((*this).comm_type);
-Serial.println((*this).source);
-Serial.println((*this).target);
-Serial.println((*this).action);
+void LetsCommunicate::configureInterrupts(uint8_t _action) {
 
-if((*this).comm_type == HARDSERIAL) {
-// We know Digital 0 & 1 are non USE.... HARD TX/RX
-  switch((*this).action) {
-    case DIG:
-//CONSTRUCTOR 1
-    if(_flag == 1){
-      (*this).flag = _flag;
-      (*this).size = DIGSIZE;
-      for(int i = OFFSET; i <= (*this).size; i++){
-      pinMode(i, INPUT);
-      /*
-       Serial.print("Pin ");
-       Serial.print(i);
-       Serial.print(" = input");
-       Serial.println();
-       */
-    }
+  if((*this).comm_type == HARDSERIAL) {
+    (*this).size = (_action == DIG) ? DIGSIZE : (DIGSIZE + DXTSIZE);
+    for(int i = OFFSET; i <= (*this).size; i++) {
+      pinMode( i, INPUT_PULLUP);
+      enableInterrupt( i | PINCHANGEINTERRUPT, LetsCommunicate::interrupt, CHANGE);
+           Serial.print("Pin ");
+           Serial.print(i);
+           Serial.print(" = input");
+           Serial.println();
+
+     }
   }
-  //CONSTRUCTOR 2
-   if (_flag == 2){
-     (*this).flag = _flag;
-     //(*this).size = size;
-        for(int i = 0; i < (*this).size; i++){
-          if ((*this).configIO[i] == 1){
-            pinMode(i + OFFSET, INPUT);
-             Serial.print("Pin ");
-             Serial.print(i+ OFFSET);
-             Serial.print(" = input");
-             Serial.println();
-          }else {
-            pinMode(i + OFFSET, OUTPUT);
-             Serial.print("Pin ");
-             Serial.print(i+OFFSET, OUTPUT);
-             Serial.print(" = output");
-             Serial.println();
-          }
-      }
-    }
-    break;
+}
 
+/* ASSUMES INITIALISE AS DIG */
+void LetsCommunicate::initialiseInputAs(uint8_t _action) {
+
+  switch(_action) {
+    case DIG:
+      (*this).configureInterrupts(_action);
+    break;
     case DXT:
-    Serial.println("DXT");
+      (*this).configureInterrupts(_action);
     break;
     case ANA:
-    Serial.println("ANA");
+      // USE ANA TO DETERMINE HOW TO READ FROM ANALOG PINS.
     break;
     case ALL:
-    Serial.println("ALL");
+      // HMMM. May not make sense here ?
     break;
   }
 }
-}
+
+// void LetsCommunicate::initConfiguration(uint8_t _flag) {
+// Serial.println((*this).comm_type);
+// Serial.println((*this).source);
+// Serial.println((*this).target);
+// Serial.println((*this).action);
+//
+// if((*this).comm_type == HARDSERIAL) {
+// // We know Digital 0 & 1 are non USE.... HARD TX/RX
+//   switch((*this).action) {
+//     case DIG:
+// //CONSTRUCTOR 1
+//     if(_flag == 1){
+//       (*this).flag = _flag;
+//       (*this).size = DIGSIZE;
+//       for(int i = OFFSET; i <= (*this).size; i++){
+//       pinMode(i, INPUT);
+//       /*
+//        Serial.print("Pin ");
+//        Serial.print(i);
+//        Serial.print(" = input");
+//        Serial.println();
+//        */
+//     }
+//   }
+//   //CONSTRUCTOR 2
+//    if (_flag == 2){
+//      (*this).flag = _flag;
+//      //(*this).size = size;
+//         for(int i = 0; i < (*this).size; i++){
+//           if ((*this).configIO[i] == 1){
+//             pinMode(i + OFFSET, INPUT);
+//              Serial.print("Pin ");
+//              Serial.print(i+ OFFSET);
+//              Serial.print(" = input");
+//              Serial.println();
+//           }else {
+//             pinMode(i + OFFSET, OUTPUT);
+//              Serial.print("Pin ");
+//              Serial.print(i+OFFSET, OUTPUT);
+//              Serial.print(" = output");
+//              Serial.println();
+//           }
+//       }
+//     }
+//     break;
+//
+//     case DXT:
+//     Serial.println("DXT");
+//     break;
+//     case ANA:
+//     Serial.println("ANA");
+//     break;
+//     case ALL:
+//     Serial.println("ALL");
+//     break;
+//   }
+// }
+// }
 
 
 void LetsCommunicate::run() {
