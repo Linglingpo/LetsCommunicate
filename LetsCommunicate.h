@@ -5,16 +5,11 @@
 #include <Arduino.h>
 
 /* ARDUINO INTERRUPT LIBRARY & DEFINED STRUCTURES */
-//#if defined __AVR_ATmega168__ || defined __AVR_ATmega168A__ || defined __AVR_ATmega168P__ || \
-  defined __AVR_ATmega168PA__ || defined __AVR_ATmega328__ || defined __AVR_ATmega328P__
-  //https://github.com/GreyGnome/EnableInterrupt/wiki/Usage#Calling_the_Library_from_Other_Libraries
-  //https://github.com/GreyGnome/EnableInterrupt/wiki
-  #define LIBCALL_ENABLEINTERRUPT
-  #define EI_ARDUINO_INTERRUPTED_PIN
-
-  #include "EnableInterrupt.h"
-  #include "Communicate.h"
-//#endif
+/* https://github.com/GreyGnome/EnableInterrupt/wiki */
+#define LIBCALL_ENABLEINTERRUPT
+#define EI_ARDUINO_INTERRUPTED_PIN
+#include "EnableInterrupt.h"
+#include "Communicate.h"
 
 #define HISTORY_SIZE 3
 #define PREAMBLE_SIZE 7
@@ -54,7 +49,7 @@ struct payload {
   uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
 };
 
-class LetsCommunicate: public Communicate{
+class LetsCommunicate: public Communicate {
 public:
   /* Default CTOR - DOES NOT NOTHING - CONSTRUCTOR 0*/
   LetsCommunicate() { Serial.println("Hello From LETSCommunicate"); };
@@ -105,6 +100,7 @@ public:
   void run();
   void pinState();
   void pinActiveProsses(uint8_t);
+  void interruptHandler();
 
 private:
   preamble * preamble_history[HISTORY_SIZE] = {0};
@@ -124,8 +120,6 @@ private:
   volatile uint8_t interrupt_id = -1;
   volatile uint8_t previousInterrupt_id = -1;
   volatile uint8_t interrupted = false;
-  static void interrupt(void);
-  void interruptHandler();
   void configureInterrupts(uint8_t);
   /* FINISH INTERRUPT VARIABLES */
 };

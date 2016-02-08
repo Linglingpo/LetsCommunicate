@@ -1,22 +1,6 @@
 #include "LetsCommunicate.h"
 
-#define PINCOUNT(x) pin ##x ##Count
-
-// #define disablePCInterrupt(x) \
-//   disableInterrupt( x | PINCHANGEINTERRUPT)
-//
-// #define setupPCInterrupt(x) \
-//   pinMode( x, INPUT_PULLUP); \
-//   enableInterrupt( x | PINCHANGEINTERRUPT, interruptFunction, CHANGE)
-//
-// #define setupInterrupt(x) \
-//   pinMode( x, INPUT_PULLUP); \
-//   enableInterrupt( x, interruptFunction, CHANGE)
-
-// https://community.particle.io/t/cpp-attachinterrupt-to-class-function-help-solved/5147/2
-void LetsCommunicate::interrupt(void) {
-  static_cast<LetsCommunicate*>(void)->interruptHandler();
-}
+void LetsCommunicate::status() {}
 
 void LetsCommunicate::interruptHandler() {
   interrupt_id = arduinoInterruptedPin;
@@ -24,24 +8,42 @@ void LetsCommunicate::interruptHandler() {
 //  if(digitalRead(interrupt_id) == LOW) {
 //    interrupted = true;
 //  }
-
 }
 
-void LetsCommunicate::status() {}
+#ifdef __cplusplus
+extern "C" {
+#endif
+  void propogate(void *anObject) {
+    static_cast<LetsCommunicate*>((anObject))->interruptHandler();
+  }
+#ifdef __cplusplus
+}
+#endif
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+  void interrupt() {
+    //static_cast<LetsCommunicate*>(anObject)->interruptHandler();
+    propogate(&(*this));
+  }
+#ifdef __cplusplus
+}
+#endif
 
 void LetsCommunicate::configureInterrupts(uint8_t _action) {
 
   if((*this).comm_type == HARDSERIAL) {
     (*this).size = (_action == DIG) ? DIGSIZE : (DIGSIZE + DXTSIZE);
     for(int i = OFFSET; i <= (*this).size; i++) {
-      pinMode( i, INPUT_PULLUP);
-      enableInterrupt( i | PINCHANGEINTERRUPT, LetsCommunicate::interrupt, CHANGE);
-           Serial.print("Pin ");
-           Serial.print(i);
-           Serial.print(" = input");
-           Serial.println();
-
-     }
+      pinMode(i, INPUT_PULLUP);
+      enableInterrupt(i, interrupt, CHANGE);
+      Serial.print("Pin ");
+      Serial.print(i);
+      Serial.print(" = input");
+      Serial.println();
+    }
   }
 }
 

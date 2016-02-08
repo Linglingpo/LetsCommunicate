@@ -1,3 +1,6 @@
+
+#define EI_ARDUINO_INTERRUPTED_PIN
+#include <EnableInterrupt.h>
 #include <LetsCommunicate.h>
 LetsCommunicate first;
 //LetsCommunicate second;
