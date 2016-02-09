@@ -109,33 +109,20 @@ void LetsCommunicate::initialiseInputAs(uint8_t _action) {
 
 
 void LetsCommunicate::run() {
-  if(interrupted) {
 
+  if(interrupted) {
     if(digitalRead(interrupt_id) == LOW) {
       Serial.print("Actived: ");
     } else {
       Serial.print("Deactived: ");
     }
 
-    Serial.println(interrupt_id);
+      Serial.println(interrupt_id);
       // need to debounce
       delay(125);
       interrupted = false;
       previousInterrupt_id = interrupt_id;
       interrupt_id = -1;
-//    if((previousInterrupt_id != interrupt_id) || (previousInterrupt_id == interrupt_id && digitalRead(interrupt_id) == LOW)) {
-//      if(previousInterrupt_id != interrupt_id) {
-//      Serial.print("Actived A: ");
-//      } else {
-//        Serial.print("Actived B: ");
-//      }
-//      Serial.println(interrupt_id);
-//      // need to debounce
-//      delay(250);
-//      interrupted = false;
-//      previousInterrupt_id = interrupt_id;
-//      interrupt_id = -1;
-//    }
   }
 
   if((*this).action) {
