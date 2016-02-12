@@ -8,6 +8,7 @@ void setup() {
   Serial.begin(115200);
 
   //first = LetsCommunicate();
+  /* HARDSERIAL, to ID 2, from ID 3) */
   first = LetsCommunicate(0, 2, 3);
   /* TEST THESE CONFIGS - ONE AT A TIME */
   first.initialiseInputAs(DIG);

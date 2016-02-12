@@ -1,6 +1,6 @@
 /* ******** ******** ******** ******** ******** ******** ******** ******** */
 /* LingLingPo's LetsCommunicate Arduino Library Main Header                */
-/* Author: LingLingPo                                                      */
+/* Author: LingLingPo & Intrvalio                                          */
 /* Date: Some Time in 2016                                                 */
 /* ******** ******** ******** ******** ******** ******** ******** ******** */
 
@@ -12,6 +12,6 @@
 
 /* ******** ******** ******** ******** ******** ******** ******** ******** */
 /* LingLingPo's LetsCommunicate Arduino Library Main Header                */
-/* Author: LingLingPo                                                      */
+/* Author: LingLingPo & Intrvalio                                          */
 /* Date: Some Time in 2016                                                 */
 /* ******** ******** ******** ******** ******** ******** ******** ******** */

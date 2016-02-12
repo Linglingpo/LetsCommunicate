@@ -3,6 +3,7 @@
 void LetsCommunicate::status() {}
 
 /* INTERRUPT GLOBALLY SCOPED VARIABLES */
+// For interrupt pin numbers
 volatile uint8_t interrupt_id = -1;
 volatile uint8_t previousInterrupt_id = -1;
 volatile uint8_t interrupted = false;
@@ -14,11 +15,20 @@ void interruptHandler() {
 }
 
 void LetsCommunicate::configureInterrupts(uint8_t _action) {
-
+  // HARDSERIAL (RX/TX)+ DIG / DXT
   if((*this).comm_type == HARDSERIAL) {
+    /* The ternary operator: condition ? expression1 : expression2
+      if the condition is true, then the expression evaluates to the result of expression1;
+      otherwise it evaluates to the result of expresssion2. */
     (*this).size = (_action == DIG) ? DIGSIZE : (DIGSIZE + DXTSIZE);
+    //offset for the RX/TX pins
     for(int i = OFFSET; i <= (*this).size; i++) {
       pinMode(i, INPUT_PULLUP);
+      //setup the boolean array for interruptState
+      (*this).interruptState[i] = false ;
+      /* 1st parameter: pin
+      * 2nd para: user Function
+      * 3rd para: mode - CHANGE(SWITCH) / RISING (HIGH)/ FALLING(LOW) */
       enableInterrupt(i, interruptHandler, CHANGE);
       Serial.print("Pin ");
       Serial.print(i);
@@ -43,7 +53,7 @@ void LetsCommunicate::initialiseInputAs(uint8_t _action) {
       (*this).action = 1;
     break;
     case ALL:
-      // HMMM. May not make sense here ?
+      // HMMM. May not make sense here ? why ?
     break;
   }
 }
@@ -111,11 +121,12 @@ void LetsCommunicate::initialiseInputAs(uint8_t _action) {
 void LetsCommunicate::run() {
 
   if(interrupted) {
+    delay(25);
     if(digitalRead(interrupt_id) == LOW) {
       Serial.print("Actived: ");
     } else {
       Serial.print("Deactived: ");
-    }
+      }
 
       Serial.println(interrupt_id);
       // need to debounce
@@ -125,10 +136,11 @@ void LetsCommunicate::run() {
       interrupt_id = -1;
   }
 
+
   if((*this).action) {
     for(int i = 0; i < 6; i++) {
-      Serial.print("Analog "); Serial.print(i); Serial.print(" ");
-      Serial.print(analogRead(i)); Serial.println(" ");
+      //Serial.print("Analog "); Serial.print(i); Serial.print(" ");
+      //Serial.print(analogRead(i)); Serial.println(" ");
     }
   }
 }

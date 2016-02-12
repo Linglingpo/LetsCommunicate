@@ -10,7 +10,7 @@ ATmega328 Support
 
 Interrupt pins:
 Pin External           Pin  Pin Change       Pin  Pin Change
-    Interrupt               Interrupt             Interrupt 
+    Interrupt               Interrupt             Interrupt
  3 INT1      PD3        0   PCINT16   PD0     A0  PCINT8    PC0
  2 INT0      PD2        1   PCINT17   PD1     A1  PCINT9    PC1
                         2   PCINT18   PD2     A2  PCINT10   PC2
@@ -165,7 +165,7 @@ The generated assembly code looks like this:
 Notice a little optimization here: r1 is defined to always contain 0, so we don't even have to load
 a value from memory. 0 is an important number! This makes the initial command very quick, and by using
 an oscilloscope we can see just how quickly the chip reacts after receiving the signal.
-see just how fast 
+see just how fast
 
 
 ***** MACRO vs. INLINE the ISR frontend **************************
@@ -272,7 +272,7 @@ ATmega2560 Support
 
 External Interrupts ------------------------------------------------------------------------------
 The following External Interrupts are available on the Arduino:
-Arduino           
+Arduino
   Pin*  PORT INT  ATmega2560 pin
   21     PD0  0     43
   20     PD1  1     44
@@ -375,7 +375,7 @@ PCMSK1:7   6   5   4   3   2   1   0  (Selects whether pin change interrupt is e
   PCINT15           ...       PCINT8   If PCIE1 in PCICR and this bit is set, it is enabled on that
       rw  rw  rw  rw  rw  rw  rw  rw   pin.)
      PJ6 PJ5 PJ4 PJ3 PJ2 PJ1 PJ0 PE0   =PORTJ/E Note pin PE0 is the Arduino's RX pin for programming.
-                           +   +   +   
+                           +   +   +
 
 PCMSK0:7   6   5   4   3   2   1   0  (Selects whether pin change interrupt is enabled o2560n PCINT7:0
   PCINT7            ...       PCINT0   If PCIE0 in PCICR and this bit is set, it is enabled on that
@@ -417,14 +417,14 @@ INT1 TX1 (D 11) PD3 |17    24| PC2 (D 18) TCK
 
 External Interrupts ------------------------------------------------------------------------------
 The following External Interrupts are available on the Sanguino:
-Sanguino           
+Sanguino
   Pin*  PORT INT  ATmega644/1284 pin
    2    PB2   2      3
   10    PD2   0     16
   11    PD3   1     17
 
 The following Pin Change Interrupts are available on the ATmega1284p:
-Mighty                                 Mighty           
+Mighty                                 Mighty
   Pin*  PORT PCINT ATmega644/1284 pin    Pin*  PORT PCINT ATmega644/1284 pin
    0     PB0   8         1                15    PD7  31        21
    1     PB1   9         2                16    PC0  16        22
@@ -493,7 +493,7 @@ PCMSK0:7   6   5   4   3   2   1   0  (Selects whether pin change interrupt is e
       rw  rw  rw  rw  rw  rw  rw  rw   pin.)
      PA7 PA6 PA5 PA4 PA3 PA2 PA1 PA0   =PORTB
       24  25  26  27  28 29   30  31   -->Sanguino Pins, DIP40 package
- 
+
 
 =====================================================================================================
 =====================================================================================================
@@ -504,16 +504,16 @@ Only the 44/84 are supported.
 
 Support for this chip is based on David Mellis' work at https://github.com/damellis/attiny
 This is an ATmega that comes in a 14-pin configuration. There are two ports, A and B. PCint pins are
-configured on both ports. The following is the pinout, and shows the Arduino pin numbering scheme: 
+configured on both ports. The following is the pinout, and shows the Arduino pin numbering scheme:
 // ATtiny24/44/84 / ARDUINO
 //
 //                           +-\/-+
 //                     VCC  1|    |14  GND
 //             (D 10)  PB0  2|    |13  PA0  (D  0) == AREF
-//             (D  9)  PB1  3|    |12  PA1  (D  1) 
-//                     PB3  4|    |11  PA2  (D  2) 
-//  PWM  INT0  (D  8)  PB2  5|    |10  PA3  (D  3) 
-//  PWM        (D  7)  PA7  6|    |9   PA4  (D  4) 
+//             (D  9)  PB1  3|    |12  PA1  (D  1)
+//                     PB3  4|    |11  PA2  (D  2)
+//  PWM  INT0  (D  8)  PB2  5|    |10  PA3  (D  3)
+//  PWM        (D  7)  PA7  6|    |9   PA4  (D  4)
 //  PWM        (D  6)  PA6  7|    |8   PA5  (D  5)        PWM
 //                           +----+
 
@@ -636,7 +636,7 @@ When INT0 == 1 and SREG I-flag set, External Interrupt enabled.
 When PCIE == 1 and SREG I-flag set, pin change Interrupt PCINT5:0 enabled.
        -   INT0    -   -   -   -   -
               PCIE
-       r   rw  rw  r   r   r   r   r 
+       r   rw  rw  r   r   r   r   r
       --------------------------------
 
 
@@ -688,7 +688,7 @@ clock cycles.  These four/five clock cycles include:
 3. One cycle for clearing the Global interrupt enable (I) bit.
 If an interrupt occurs when the MCU is in sleep mode, the interrupt execution response time is increased
 by five clock cycles. This increase comes in addition to the start-up time from the selected sleep mode.
-This start up time is the time it will take to start the clock source. 
+This start up time is the time it will take to start the clock source.
 
 =====================================================================================================
 ARDUINO CPU BESTIARY
@@ -856,7 +856,7 @@ Calling the function pointers referred to in an array, using while loop:
 
   while (1) {
     if (interruptMask & 0x01) {
-     8c8:       c0 ff           sbrs    r28, 0		1 if it's not set, 2 if skip 
+     8c8:       c0 ff           sbrs    r28, 0		1 if it's not set, 2 if skip
      8ca:       0a c0           rjmp    .+20            2 (move on to try next bit at 0x8e0)
       (*functionPointerArray[i])();
      8cc:       ed 2f           mov     r30, r29	1 (it's set, execute the function)
@@ -926,4 +926,3 @@ Program:    4674 bytes (1.8% Full)
 
 Data:        806 bytes (9.8% Full)
 (.data + .bss + .noinit)
-
