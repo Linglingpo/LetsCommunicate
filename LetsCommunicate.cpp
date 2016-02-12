@@ -17,6 +17,8 @@ void LetsCommunicate::configureInterrupts(uint8_t _action) {
 
   if((*this).comm_type == HARDSERIAL) {
     (*this).size = (_action == DIG) ? DIGSIZE : (DIGSIZE + DXTSIZE);
+    (*this).interruptArray = (new uint8_t [(*this).size - OFFSET]) ;
+    (*this).interruptArray = {0};
     for(int i = OFFSET; i <= (*this).size; i++) {
       pinMode(i, INPUT_PULLUP);
       enableInterrupt(i, interruptHandler, CHANGE);
@@ -119,7 +121,7 @@ void LetsCommunicate::run() {
 
     Serial.println(interrupt_id);
       // need to debounce
-      delay(125);
+      delay(500);
       interrupted = false;
       previousInterrupt_id = interrupt_id;
       interrupt_id = -1;
@@ -140,8 +142,8 @@ void LetsCommunicate::run() {
 
   if((*this).action) {
     for(int i = 0; i < 6; i++) {
-      Serial.print("Analog "); Serial.print(i); Serial.print(" ");
-      Serial.print(analogRead(i)); Serial.println(" ");
+      //Serial.print("Analog "); Serial.print(i); Serial.print(" ");
+      //Serial.print(analogRead(i)); Serial.println(" ");
     }
   }
 }

@@ -114,6 +114,7 @@ private:
   uint8_t size;
   uint8_t flag;
   uint8_t * digStateArray;
+  uint8_t * interruptArray;
 
   /* INTERRUPT PRIVATE VARIABLES */
   void configureInterrupts(uint8_t);
