@@ -17,8 +17,18 @@ void LetsCommunicate::configureInterrupts(uint8_t _action) {
 
   if((*this).comm_type == HARDSERIAL) {
     (*this).size = (_action == DIG) ? DIGSIZE : (DIGSIZE + DXTSIZE);
-    (*this).interruptArray = (new uint8_t [(*this).size - OFFSET]) ;
-    (*this).interruptArray = {0};
+    //?
+    (*this).interruptStateArray = (new uint8_t [(*this).size - OFFSET]) ;
+    //(*this).interruptStateArray = {0};
+
+    Serial.print("Pin State: ");
+    //for (int i = 0; i < sizeof((*this).interruptStateArray); i++){
+    for (int i = 0; i <= (*this).size; i++){
+      (*this).interruptStateArray[i] = 0;
+      Serial.print((*this).interruptStateArray[i]);
+    }
+    Serial.println();
+
     for(int i = OFFSET; i <= (*this).size; i++) {
       pinMode(i, INPUT_PULLUP);
       enableInterrupt(i, interruptHandler, CHANGE);
@@ -111,15 +121,23 @@ void LetsCommunicate::initialiseInputAs(uint8_t _action) {
 
 
 void LetsCommunicate::run() {
-  if(interrupted) {
 
+  if(interrupted) {
+    delay(25);
     if(digitalRead(interrupt_id) == LOW) {
+      (*this).interruptStateArray[interrupt_id] = 1;
       Serial.print("Actived: ");
-    } else {
+    } else if(digitalRead(interrupt_id) == HIGH){
+      (*this).interruptStateArray[interrupt_id] = 0;
       Serial.print("Deactived: ");
     }
 
-    Serial.println(interrupt_id);
+    for (int i = OFFSET; i <= (*this).size; i++){
+      Serial.print((*this).interruptStateArray[i]);
+    }
+
+    Serial.println();
+      Serial.println(interrupt_id);
       // need to debounce
       delay(500);
       interrupted = false;
@@ -139,6 +157,7 @@ void LetsCommunicate::run() {
 //      interrupt_id = -1;
 //    }
   }
+
 
   if((*this).action) {
     for(int i = 0; i < 6; i++) {
