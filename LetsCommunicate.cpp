@@ -17,12 +17,10 @@ void LetsCommunicate::configureInterrupts(uint8_t _action) {
 
   if((*this).comm_type == HARDSERIAL) {
     (*this).size = (_action == DIG) ? DIGSIZE : (DIGSIZE + DXTSIZE);
-    //?
+    //interruptStateArray(pointer to memeory) points to the new created dynamic array
     (*this).interruptStateArray = (new uint8_t [(*this).size - OFFSET]) ;
-    //(*this).interruptStateArray = {0};
-
+    //Assign the value in the interruptStateArray as 0
     Serial.print("Pin State: ");
-    //for (int i = 0; i < sizeof((*this).interruptStateArray); i++){
     for (int i = 0; i <= (*this).size; i++){
       (*this).interruptStateArray[i] = 0;
       Serial.print((*this).interruptStateArray[i]);
@@ -40,6 +38,12 @@ void LetsCommunicate::configureInterrupts(uint8_t _action) {
   }
 }
 
+/* ASSUMES INITIALISE WITH DIG & ANA */
+void LetsCommunicate::initialiseInputWith(uint8_t _a, uint8_t _b) {
+  initialiseInputAs(_a);
+  initialiseInputAs(_b);
+}
+
 /* ASSUMES INITIALISE AS DIG */
 void LetsCommunicate::initialiseInputAs(uint8_t _action) {
 
@@ -53,9 +57,6 @@ void LetsCommunicate::initialiseInputAs(uint8_t _action) {
     case ANA:
       // USE (*this).ANA TO DETERMINE HOW TO READ FROM ANALOG PINS.
       (*this).action = 1;
-    break;
-    case ALL:
-      // HMMM. May not make sense here ?
     break;
   }
 }
@@ -125,6 +126,7 @@ void LetsCommunicate::run() {
   if(interrupted) {
     delay(25);
     if(digitalRead(interrupt_id) == LOW) {
+      //if it is low, the value of the interrupt State Array is 1
       (*this).interruptStateArray[interrupt_id] = 1;
       Serial.print("Actived: ");
     } else if(digitalRead(interrupt_id) == HIGH){
@@ -132,12 +134,14 @@ void LetsCommunicate::run() {
       Serial.print("Deactived: ");
     }
 
+    Serial.print(interrupt_id);
+    Serial.print(" = ");
+    
     for (int i = OFFSET; i <= (*this).size; i++){
       Serial.print((*this).interruptStateArray[i]);
     }
 
     Serial.println();
-      Serial.println(interrupt_id);
       // need to debounce
       delay(500);
       interrupted = false;
@@ -161,9 +165,19 @@ void LetsCommunicate::run() {
 
   if((*this).action) {
     for(int i = 0; i < 6; i++) {
-      //Serial.print("Analog "); Serial.print(i); Serial.print(" ");
-      //Serial.print(analogRead(i)); Serial.println(" ");
+
+      Serial.print("Analog "); Serial.print(i); Serial.print(" ");
+      Serial.print(analogRead(i)); Serial.println(" ");
+      uint8_t number_1 = analogRead(i) << 8;
+      uint8_t number_2 = analogRead(i);
+      Serial.print("number 1 "); Serial.print(number_1); Serial.println(" ");
+      Serial.print("number 2 "); Serial.print(number_2); Serial.println(" ");
+      uint16_t together = number_1 << 8;
+      together += number_2;
+      Serial.print(together); Serial.println(" ");
+
     }
+    delay(1000);
   }
 }
 

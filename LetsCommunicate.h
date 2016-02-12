@@ -95,6 +95,7 @@ public:
         ANA = ALL ANALOG IO AS INPUT (NO INTERRUPTS)
   */
   void initialiseInputAs(uint8_t);
+  void initialiseInputWith(uint8_t, uint8_t);
   void status();
   //void initConfiguration(uint8_t);
   void run();
@@ -115,6 +116,8 @@ private:
   uint8_t flag;
   uint8_t * digStateArray;
   uint8_t * interruptStateArray;
+  //array to store the value for analog input
+  uint8_t * interruptStateArrayANA;
 
   /* INTERRUPT PRIVATE VARIABLES */
   void configureInterrupts(uint8_t);

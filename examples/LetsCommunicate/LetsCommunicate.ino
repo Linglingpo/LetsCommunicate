@@ -10,9 +10,10 @@ void setup() {
   //first = LetsCommunicate();
   first = LetsCommunicate(0, 2, 3);
   /* TEST THESE CONFIGS - ONE AT A TIME */
-  first.initialiseInputAs(DIG);
+  //first.initialiseInputAs(DIG);
   //first.initialiseInputAs(DXT);
   //first.initialiseInputAs(ANA);
+  first.initialiseInputWith(DIG, ANA);
 }
 
 void loop() {
