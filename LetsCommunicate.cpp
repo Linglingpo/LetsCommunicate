@@ -136,7 +136,7 @@ void LetsCommunicate::run() {
 
     Serial.print(interrupt_id);
     Serial.print(" = ");
-    
+
     for (int i = OFFSET; i <= (*this).size; i++){
       Serial.print((*this).interruptStateArray[i]);
     }
@@ -164,17 +164,19 @@ void LetsCommunicate::run() {
 
 
   if((*this).action) {
-    for(int i = 0; i < 6; i++) {
+    for(int i = 0; i < ANASIZE; i++) {
 
-      Serial.print("Analog "); Serial.print(i); Serial.print(" ");
+      Serial.print("Analog "); Serial.print(i); Serial.print(" Read ");
       Serial.print(analogRead(i)); Serial.println(" ");
-      uint8_t number_1 = analogRead(i) << 8;
-      uint8_t number_2 = analogRead(i);
+      anaReadTempNumber = analogRead(i);
+      uint8_t number_1 = anaReadTempNumber >> 8;
+      uint8_t number_2 = anaReadTempNumber;
+      Serial.print("anaReadTempNumber "); Serial.print(anaReadTempNumber); Serial.println(" ");
       Serial.print("number 1 "); Serial.print(number_1); Serial.println(" ");
       Serial.print("number 2 "); Serial.print(number_2); Serial.println(" ");
       uint16_t together = number_1 << 8;
       together += number_2;
-      Serial.print(together); Serial.println(" ");
+      Serial.print("Together "); Serial.print(together); Serial.println(" ");
 
     }
     delay(1000);

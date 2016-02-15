@@ -32,7 +32,8 @@
 
 #define OFFSET 2 // DIG OFFSET
 #define DIGSIZE 13 //13 Digital Pins
-#define DXTSIZE 6
+#define DXTSIZE 6 //6 Analog to Digital Pins
+#define ANASIZE 6 //6 Analog Pins
 /* SYN RESET CONTROL */
 #define MAXMSGS 255
 /* COMMUNICATIONS TYPE */
@@ -118,6 +119,7 @@ private:
   uint8_t * interruptStateArray;
   //array to store the value for analog input
   uint8_t * interruptStateArrayANA;
+  uint16_t anaReadTempNumber;
 
   /* INTERRUPT PRIVATE VARIABLES */
   void configureInterrupts(uint8_t);
