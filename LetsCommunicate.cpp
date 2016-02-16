@@ -20,33 +20,31 @@ void LetsCommunicate::configureInterrupts(uint8_t _action) {
     /* The ternary operator: condition ? expression1 : expression2
       if the condition is true, then the expression evaluates to the result of expression1;
       otherwise it evaluates to the result of expresssion2. */
-    (*this).size = (_action == DIG) ? DIGSIZE : (DIGSIZE + DXTSIZE);
-<<<<<<< HEAD
+    (*this).size = (_action == DIG) ? DIGSIZE - OFFSET : (DIGSIZE + DXTSIZE) - OFFSET;
     //interruptStateArray(pointer to memeory) points to the new created dynamic array
-    (*this).interruptStateArray = (new uint8_t [(*this).size - OFFSET]) ;
+    (*this).interruptStateArray = (new uint8_t [(*this).size]) ;
     //Assign the value in the interruptStateArray as 0
-    Serial.print("Pin State: ");
-    for (int i = 0; i <= (*this).size; i++){
-      (*this).interruptStateArray[i] = 0;
-      Serial.print((*this).interruptStateArray[i]);
-    }
-    Serial.println();
+    // Serial.print("Pin State: ");
+    // for (int i = 0; i < (*this).size; i++){
+    //   (*this).interruptStateArray[i] = 0;
+    //   Serial.print((*this).interruptStateArray[i]);
+    // }
+    // Serial.println();
 
-=======
+
     //offset for the RX/TX pins
->>>>>>> master
-    for(int i = OFFSET; i <= (*this).size; i++) {
-      pinMode(i, INPUT_PULLUP);
+    for(int i = 0; i < (*this).size; i++) {
+      pinMode(OFFSET + i, INPUT_PULLUP);
       //setup the boolean array for interruptState
-      (*this).interruptState[i] = false ;
+      (*this).interruptState[i] = false;
       /* 1st parameter: pin
       * 2nd para: user Function
       * 3rd para: mode - CHANGE(SWITCH) / RISING (HIGH)/ FALLING(LOW) */
-      enableInterrupt(i, interruptHandler, CHANGE);
-      Serial.print("Pin ");
-      Serial.print(i);
-      Serial.print(" = input");
-      Serial.println();
+      enableInterrupt(OFFSET + i, interruptHandler, CHANGE);
+      // Serial.print("Pin ");
+      // Serial.print(OFFSET + i);
+      // Serial.print(" = input");
+      // Serial.println();
     }
   }
 }
@@ -71,12 +69,9 @@ void LetsCommunicate::initialiseInputAs(uint8_t _action) {
       // USE (*this).ANA TO DETERMINE HOW TO READ FROM ANALOG PINS.
       (*this).action = 1;
     break;
-<<<<<<< HEAD
-=======
     case ALL:
       // HMMM. May not make sense here ? why ?
     break;
->>>>>>> master
   }
 }
 
@@ -146,27 +141,27 @@ void LetsCommunicate::run() {
     delay(25);
     if(digitalRead(interrupt_id) == LOW) {
       //if it is low, the value of the interrupt State Array is 1
-      (*this).interruptStateArray[interrupt_id] = 1;
+      (*this).interruptStateArray[interrupt_id - OFFSET] = 1;
       Serial.print("Actived: ");
     } else if(digitalRead(interrupt_id) == HIGH){
-      (*this).interruptStateArray[interrupt_id] = 0;
+      (*this).interruptStateArray[interrupt_id - OFFSET] = 0;
       Serial.print("Deactived: ");
       }
 
-<<<<<<< HEAD
+
     Serial.print(interrupt_id);
     Serial.print(" = ");
 
-    for (int i = OFFSET; i <= (*this).size; i++){
+    for (int i = 0; i < (*this).size; i++){
       Serial.print((*this).interruptStateArray[i]);
     }
 
     Serial.println();
-=======
+
       Serial.println(interrupt_id);
->>>>>>> master
+
       // need to debounce
-      delay(500);
+      //delay(500);
       interrupted = false;
       previousInterrupt_id = interrupt_id;
       interrupt_id = -1;
@@ -174,7 +169,6 @@ void LetsCommunicate::run() {
 
 
   if((*this).action) {
-<<<<<<< HEAD
     for(int i = 0; i < ANASIZE; i++) {
 
       Serial.print("Analog "); Serial.print(i); Serial.print(" Read ");
@@ -189,14 +183,9 @@ void LetsCommunicate::run() {
       together += number_2;
       Serial.print("Together "); Serial.print(together); Serial.println(" ");
 
-=======
-    for(int i = 0; i < 6; i++) {
-      //Serial.print("Analog "); Serial.print(i); Serial.print(" ");
-      //Serial.print(analogRead(i)); Serial.println(" ");
->>>>>>> master
-    }
     delay(1000);
   }
+}
 }
 
 void LetsCommunicate::pinState(){

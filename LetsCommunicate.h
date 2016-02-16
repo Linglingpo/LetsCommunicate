@@ -31,7 +31,7 @@
 #define ALL   255 // ALL = DIGITAL + ANALOG
 
 #define OFFSET 2 // DIG OFFSET
-#define DIGSIZE 13 //13 Digital Pins
+#define DIGSIZE 14 //14 Digital Pins
 #define DXTSIZE 6 //6 Analog to Digital Pins
 #define ANASIZE 6 //6 Analog Pins
 /* SYN RESET CONTROL */
@@ -116,14 +116,11 @@ private:
   uint8_t size;
   uint8_t flag;
   uint8_t * digStateArray;
-<<<<<<< HEAD
   uint8_t * interruptStateArray;
   //array to store the value for analog input
   uint8_t * interruptStateArrayANA;
   uint16_t anaReadTempNumber;
-=======
   uint8_t * interruptState;
->>>>>>> master
 
   /* INTERRUPT PRIVATE VARIABLES */
   void configureInterrupts(uint8_t);
