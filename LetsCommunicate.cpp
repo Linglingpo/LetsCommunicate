@@ -40,6 +40,7 @@ void LetsCommunicate::configureInterrupts(uint8_t _action) {
       /* 1st parameter: pin
       * 2nd para: user Function
       * 3rd para: mode - CHANGE(SWITCH) / RISING (HIGH)/ FALLING(LOW) */
+      // FLAG
       enableInterrupt(OFFSET + i, interruptHandler, CHANGE);
       // Serial.print("Pin ");
       // Serial.print(OFFSET + i);
@@ -56,11 +57,11 @@ void LetsCommunicate::initialiseInputWith(uint8_t _a, uint8_t _b) {
 }
 
 /* ASSUMES INITIALISE AS DIG */
-void LetsCommunicate::initialiseInputAs(uint8_t _action) {
+void LetsCommunicate::initialiseInputAs(uint8_t _action, bool flag) {
 
   switch(_action) {
     case DIG:
-      (*this).configureInterrupts(_action);
+      (*this).configureInterrupts(_action, flag);
     break;
     case DXT:
       (*this).configureInterrupts(_action);
