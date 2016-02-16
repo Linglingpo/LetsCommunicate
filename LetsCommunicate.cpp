@@ -3,6 +3,7 @@
 void LetsCommunicate::status() {}
 
 /* INTERRUPT GLOBALLY SCOPED VARIABLES */
+// For interrupt pin numbers
 volatile uint8_t interrupt_id = -1;
 volatile uint8_t previousInterrupt_id = -1;
 volatile uint8_t interrupted = false;
@@ -14,9 +15,13 @@ void interruptHandler() {
 }
 
 void LetsCommunicate::configureInterrupts(uint8_t _action) {
-
+  // HARDSERIAL (RX/TX)+ DIG / DXT
   if((*this).comm_type == HARDSERIAL) {
+    /* The ternary operator: condition ? expression1 : expression2
+      if the condition is true, then the expression evaluates to the result of expression1;
+      otherwise it evaluates to the result of expresssion2. */
     (*this).size = (_action == DIG) ? DIGSIZE : (DIGSIZE + DXTSIZE);
+<<<<<<< HEAD
     //interruptStateArray(pointer to memeory) points to the new created dynamic array
     (*this).interruptStateArray = (new uint8_t [(*this).size - OFFSET]) ;
     //Assign the value in the interruptStateArray as 0
@@ -27,8 +32,16 @@ void LetsCommunicate::configureInterrupts(uint8_t _action) {
     }
     Serial.println();
 
+=======
+    //offset for the RX/TX pins
+>>>>>>> master
     for(int i = OFFSET; i <= (*this).size; i++) {
       pinMode(i, INPUT_PULLUP);
+      //setup the boolean array for interruptState
+      (*this).interruptState[i] = false ;
+      /* 1st parameter: pin
+      * 2nd para: user Function
+      * 3rd para: mode - CHANGE(SWITCH) / RISING (HIGH)/ FALLING(LOW) */
       enableInterrupt(i, interruptHandler, CHANGE);
       Serial.print("Pin ");
       Serial.print(i);
@@ -58,6 +71,12 @@ void LetsCommunicate::initialiseInputAs(uint8_t _action) {
       // USE (*this).ANA TO DETERMINE HOW TO READ FROM ANALOG PINS.
       (*this).action = 1;
     break;
+<<<<<<< HEAD
+=======
+    case ALL:
+      // HMMM. May not make sense here ? why ?
+    break;
+>>>>>>> master
   }
 }
 
@@ -132,8 +151,9 @@ void LetsCommunicate::run() {
     } else if(digitalRead(interrupt_id) == HIGH){
       (*this).interruptStateArray[interrupt_id] = 0;
       Serial.print("Deactived: ");
-    }
+      }
 
+<<<<<<< HEAD
     Serial.print(interrupt_id);
     Serial.print(" = ");
 
@@ -142,28 +162,19 @@ void LetsCommunicate::run() {
     }
 
     Serial.println();
+=======
+      Serial.println(interrupt_id);
+>>>>>>> master
       // need to debounce
       delay(500);
       interrupted = false;
       previousInterrupt_id = interrupt_id;
       interrupt_id = -1;
-//    if((previousInterrupt_id != interrupt_id) || (previousInterrupt_id == interrupt_id && digitalRead(interrupt_id) == LOW)) {
-//      if(previousInterrupt_id != interrupt_id) {
-//      Serial.print("Actived A: ");
-//      } else {
-//        Serial.print("Actived B: ");
-//      }
-//      Serial.println(interrupt_id);
-//      // need to debounce
-//      delay(250);
-//      interrupted = false;
-//      previousInterrupt_id = interrupt_id;
-//      interrupt_id = -1;
-//    }
   }
 
 
   if((*this).action) {
+<<<<<<< HEAD
     for(int i = 0; i < ANASIZE; i++) {
 
       Serial.print("Analog "); Serial.print(i); Serial.print(" Read ");
@@ -178,6 +189,11 @@ void LetsCommunicate::run() {
       together += number_2;
       Serial.print("Together "); Serial.print(together); Serial.println(" ");
 
+=======
+    for(int i = 0; i < 6; i++) {
+      //Serial.print("Analog "); Serial.print(i); Serial.print(" ");
+      //Serial.print(analogRead(i)); Serial.println(" ");
+>>>>>>> master
     }
     delay(1000);
   }
