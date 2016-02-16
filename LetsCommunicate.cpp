@@ -14,28 +14,25 @@ void interruptHandler() {
   interrupted = true;
 }
 
-void LetsCommunicate::configureInterrupts(uint8_t _action) {
+void LetsCommunicate::configureDigitalInputOutput(uint8_t _action, uint8_t * _digitalConfigIO = 0, uint8_t _digitalConfigIOSize = 0) {
   // HARDSERIAL (RX/TX)+ DIG / DXT
   if((*this).comm_type == HARDSERIAL) {
     // The ternary operator: condition ? expression1 : expression2
-    (*this).size = (_action == DIG) ? DIGSIZE - OFFSET : (DIGSIZE + DXTSIZE) - OFFSET;
+    (*this).totalPinSize = (_action == DIG) ? DIGSIZE - OFFSET : (DIGSIZE + DXTSIZE) - OFFSET;
     //interruptStateArray(pointer to memeory) points to the new created dynamic array
-    (*this).interruptStateArray = (new uint8_t [(*this).size]) ;
+    (*this).interruptStateArray = (new uint8_t [(*this).totalPinSize]) ;
     //Assign the value in the interruptStateArray as 0
-     for (int i = 0; i < (*this).size; i++){
+     for (int i = 0; i < (*this).totalPinSize; i++){
       (*this).interruptStateArray[i] = 0;
     }
-
-
-    //offset for the RX/TX pins
-    for(int i = 0; i < (*this).size; i++) {
+    for(int i = 0; i < (*this).totalPinSize; i++) {
       pinMode(OFFSET + i, INPUT_PULLUP);
       //setup the boolean array for interruptState
       (*this).interruptState[i] = false;
       /* 1st parameter: pin
       * 2nd para: user Function
       * 3rd para: mode - CHANGE(SWITCH) / RISING (HIGH)/ FALLING(LOW) */
-      enableInterrupt(OFFSET + i, interruptHandler, CHANGE);
+      //enableInterrupt(OFFSET + i, interruptHandler, CHANGE);
     }
   }
 }
@@ -47,14 +44,33 @@ void LetsCommunicate::initialiseInputWith(uint8_t _a, bool _interruptFlagA, uint
 }
 
 /* ASSUMES INITIALISE AS DIG */
+void LetsCommunicate::initialiseInputAs(uint8_t _action, bool _interruptFlag, uint8_t * _digitalConfigIOSet, uint8_t _digitalConfigIOSize) {
+ (*this).digitalConfigIO = _digitalConfigIOSet;
+ (*this).digitalConfigIOSize = _digitalConfigIOSize;
+ (*this).initialiseInputAs(_action, _interruptFlag);
+}
+
+/* ASSUMES INITIALISE AS DIG */
 void LetsCommunicate::initialiseInputAs(uint8_t _action, bool _interruptFlag) {
+  // The ternary operator: condition ? expression1 : expression2
+  //(*this).totalPinSize = (_action == DIG) ? DIGSIZE - OFFSET : (DIGSIZE + DXTSIZE) - OFFSET;
+  //???
+  //(*this).digitalConfigIO = {2,3,4,5,6,7,8,9,10,11,12,13};
+  //(*this).digitalConfigIOSize = (*this).totalPinSize;
+
+checkAction(_action, _interruptFlag);
+}
+
+void LetsCommunicate::checkAction(uint8_t _action, bool _interruptFlag, uint8_t * _digitalConfigIOSet = {0}, uint8_t _digitalConfigIOSize = 0){
+
   switch(_action) {
     case DIG:
-      (*this).configureInterrupts(_action);
+      (*this).configureDigitalInputOutput(_action);
       (*this).interruptFlag = _interruptFlag;
     break;
     case DXT:
-      (*this).configureInterrupts(_action);
+      (*this).configureDigitalInputOutput(_action);
+      (*this).interruptFlag = _interruptFlag;
     break;
     case ANA:
       // USE (*this).ANA TO DETERMINE HOW TO READ FROM ANALOG PINS.
@@ -134,7 +150,7 @@ void LetsCommunicate::digitalInterrupted(){
       }
     Serial.print(interrupt_id);
     Serial.print(" = ");
-    for (int i = 0; i < (*this).size; i++){
+    for (int i = 0; i < (*this).totalPinSize; i++){
       Serial.print((*this).interruptStateArray[i]);
     }
     Serial.println();
@@ -161,8 +177,7 @@ void LetsCommunicate::run() {
       anaReadTempNumber = analogRead(i);
       uint8_t number_1 = anaReadTempNumber >> 8;
       uint8_t number_2 = anaReadTempNumber;
-      //????
-      Serial.print("AnalogReadNumber "); Serial.print(analogRead(i)); Serial.println(" ");
+      //Serial.print("AnalogReadNumber "); Serial.print(analogRead(i)); Serial.println(" ");
       //Serial.print("number 1 "); Serial.print(number_1); Serial.println(" ");
       //Serial.print("number 2 "); Serial.print(number_2); Serial.println(" ");
       uint16_t together = number_1 << 8;
@@ -173,6 +188,7 @@ void LetsCommunicate::run() {
 }
 }
 
+/*
 void LetsCommunicate::pinState(){
   for(int i = OFFSET; i < (*this).size; i++){
     if(digitalRead(i) == HIGH)  {
@@ -184,6 +200,7 @@ void LetsCommunicate::pinState(){
   }// end of for loop
   Serial.println();
 }
+*/
 
 
 void LetsCommunicate::pinActiveProsses(uint8_t _pinNumber) {

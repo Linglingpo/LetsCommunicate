@@ -98,13 +98,17 @@ public:
         ANA = ALL ANALOG IO AS INPUT (NO INTERRUPTS)
   */
   void initialiseInputAs(uint8_t, bool);
+  void initialiseInputAs(uint8_t _action, bool _interruptFlag, uint8_t * _digitalConfigIOSet, uint8_t _digitalConfigIOSize);
   void initialiseInputWith(uint8_t, bool, uint8_t, bool);
   void status();
   //void initConfiguration(uint8_t);
   void run();
-  void pinState();
+  //void pinState();
   void pinActiveProsses(uint8_t);
-  void digitalInterrupted();
+  void configureDigitalInputOutput(uint8_t, uint8_t *, uint8_t);
+
+  //void checkAction(uint8_t, bool);
+  void checkAction(uint8_t _action, bool _interruptFlag, uint8_t * _digitalConfigIOSet = {0}, uint8_t _digitalConfigIOSize = 0);
 
 private:
   preamble * preamble_history[HISTORY_SIZE] = {0};
@@ -115,8 +119,10 @@ private:
   uint8_t action; // DIG, DXT, ANA or DIG + ANA
   uint8_t syn;
   uint8_t ack;
-  uint8_t * configIO;
-  uint8_t size;
+  //size for all pins
+  uint8_t totalPinSize;
+  uint8_t * digitalConfigIO;
+  uint8_t digitalConfigIOSize;
   uint8_t flag;
   uint8_t * digStateArray;
   uint8_t * interruptStateArray;
