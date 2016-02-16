@@ -28,7 +28,7 @@
 #define DIG   252 // DIG = DIGITAL
 #define DXT   253 // DXT = DIGITAL EXTENDED
 #define ANA   254 // ANA = ANALOG
-#define ALL   255 // ALL = DIGITAL + ANALOG
+//#define ALL   255 // ALL = DIGITAL + ANALOG
 
 #define OFFSET 2 // DIG OFFSET
 #define DIGSIZE 14 //14 Digital Pins
@@ -66,7 +66,7 @@ public:
       (*this).comm_type = comm_type;
       (*this).source = source;
       (*this).target = target;
-      //(*this).action = action;
+      (*this).action = 0;
       //initConfiguration(1);
     };
 
@@ -77,6 +77,7 @@ public:
     target = {target}, action = {DIG, DXT, ANA, ALL}, configIO = {0 (OUTPUT),1 (INPUT)} (Index as the pins number),
     size = {How many pins are used}
     */
+    /*
     LetsCommunicate(uint8_t comm_type, uint8_t source, uint8_t target, uint8_t action, uint8_t * configIO, uint8_t size):
       Communicate(comm_type) {
         (*this).comm_type = comm_type;
@@ -88,6 +89,7 @@ public:
         //Serial.println("dig with IO");
         //initConfiguration(2);
       };
+      */
 
   /* Initialise With Methods Describe the Intentions
      initialiseWith(uint8_t); Initialise {DIG, DXT, ANA, ALL}
@@ -95,13 +97,14 @@ public:
         DXT = ALL DIG IO & ANALOG AS DIGITAL INPUT (INTERRUPT ENABLED BY DEFAULT)
         ANA = ALL ANALOG IO AS INPUT (NO INTERRUPTS)
   */
-  void initialiseInputAs(uint8_t);
-  void initialiseInputWith(uint8_t, uint8_t);
+  void initialiseInputAs(uint8_t, bool);
+  void initialiseInputWith(uint8_t, bool, uint8_t, bool);
   void status();
   //void initConfiguration(uint8_t);
   void run();
   void pinState();
   void pinActiveProsses(uint8_t);
+  void digitalInterrupted();
 
 private:
   preamble * preamble_history[HISTORY_SIZE] = {0};
@@ -121,6 +124,7 @@ private:
   uint8_t * interruptStateArrayANA;
   uint16_t anaReadTempNumber;
   uint8_t * interruptState;
+  bool interruptFlag;
 
   /* INTERRUPT PRIVATE VARIABLES */
   void configureInterrupts(uint8_t);
