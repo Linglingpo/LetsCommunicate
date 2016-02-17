@@ -77,6 +77,26 @@ void LetsCommunicate::selectAndInitialiseInputAs(uint8_t _action, bool _interrup
   }
 }
 
+// first.initialiseDigitalInputOutputWithCustomSetsAs(DIG, digitalOutPut, 6, OUTPUT, digitalInput, 6, INPUT_PULLUP);
+void LetsCommunicate::initialiseInputOutputWithCustomSetsAs(uint8_t _action, uint8_t * _outputSet, uint8_t _size1, uint8_t _set1, uint8_t * _inputSet, uint8_t _size2, uint8_t _set2) {
+  (*this).state->customConfigOfInputOut = true;
+
+  (*this).state->digitalCustomInputPins = _inputSet;
+  (*this).state->digitalCustomOutputPins = _outputSet;
+  (*this).state->digitalCustomInputPinsAllocated = _size2;
+  (*this).state->digitalCustomOutputPinsAllocated = _size1;
+
+  for(int i = 0; i < (*this).state->digitalCustomInputPinsAllocated; i++) {
+    Serial.print((*this).state->digitalCustomInputPins[i]); Serial.print(" ");
+    Serial.print((*this).state->digitalCustomOutputPins[i]); Serial.print(" ");
+  }
+Serial.println(" ");
+}
+
+void LetsCommunicate::initialiseInputOutputWithCustomSetsWithInterruptsAs(uint8_t _action, uint8_t * _outputSet, uint8_t _size1, uint8_t _set1, uint8_t * _inputSet, uint8_t _size2, uint8_t _set2) {
+
+}
+
 // /* ASSUMES INITIALISE WITH DIG & ANA */
 // void LetsCommunicate::initialiseInputWith(uint8_t _a, bool _interruptFlagA, uint8_t _b, bool _interruptFlagB) {
 //   initialiseInputAs(_a, _interruptFlagA);
@@ -136,7 +156,7 @@ void LetsCommunicate::stateOfTheUnion() {
   Serial.println((*this).state->digitalPinsAllocatedNonCustom);
 
   Serial.print("Total Number of ANALOG Pins Enabled: ");
-  Serial.println((*this).state->analogPinsAllocatedNonCustom);
+  Serial.println((*this).state->analogPinsAllocatedNonCustom/2);
 
   Serial.print("State of the Interrupt Pins: ");
   Serial.println((*this).state->interruptState, BIN);

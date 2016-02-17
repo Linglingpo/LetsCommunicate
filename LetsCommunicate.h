@@ -65,6 +65,18 @@ struct letscommunicate {
   uint32_t interruptState = 0;
   uint8_t * readAnalogRead = {0};
   uint8_t * readDigitalRead = {0};
+
+  /* CUSTOM IO */
+  uint8_t * digitalCustomInputPins;
+  uint8_t * digitalCustomOutputPins;
+  uint8_t * analogCustomInputPins;
+  uint8_t * analogCustomOutputPins; // PWM SET
+
+  uint8_t digitalCustomInputPinsAllocated;
+  uint8_t digitalCustomOutputPinsAllocated;
+  uint8_t analogCustomInputPinsAllocated;
+  uint8_t analogCustomOutputPinsAllocated;
+
 };
 
 class LetsCommunicate: public Communicate {
@@ -100,7 +112,8 @@ public:
   /* INITIALSE AND ALLOCATE METHODS */
   void initialiseInputAs(uint8_t); // INIT: DIG, DXT, ANA (ALL PINS NO CUSTOM SETS)
   void initialiseInputWithInterruptsAs(uint8_t); // INIT: DIG, DXT (ALL PINS NO CUSTOM SETS)
-
+  void initialiseInputOutputWithCustomSetsAs(uint8_t, uint8_t *, uint8_t, uint8_t, uint8_t *, uint8_t, uint8_t);
+  void initialiseInputOutputWithCustomSetsWithInterruptsAs(uint8_t, uint8_t *, uint8_t, uint8_t, uint8_t *, uint8_t, uint8_t);
 
   //void initialiseInputAs(uint8_t _action, bool _interruptFlag, uint8_t * _digitalConfigIOSet, uint8_t _digitalConfigIOSize);
   //void initialiseInputWith(uint8_t, bool, uint8_t, bool);
