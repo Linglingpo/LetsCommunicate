@@ -25,11 +25,10 @@ void LetsCommunicate::initialiseInputWithInterruptsAs(uint8_t _action) {
 
 void LetsCommunicate::initialiseDIGDXT(uint8_t _action) {
   // The ternary operator: condition ? expression1 : expression2
-  (*this).state->totalPinSize = (_action == DIG) ? DIGSIZE - OFFSET : (DIGSIZE + DXTSIZE) - OFFSET;
-  //interruptStateArray(pointer to memeory) points to the new created dynamic array
-  //(*this).interruptStateArray = (new uint8_t [(*this).totalPinSize]) ;
+  (*this).state->digitalPinsAllocatedNonCustom = (_action == DIG) ? DIGSIZE - OFFSET : (DIGSIZE + DXTSIZE) - OFFSET;
+  (*this).state->readDigitalRead = new uint8_t[(*this).state->digitalPinsAllocatedNonCustom];
 
-  for(int i = 0; i < (*this).state->totalPinSize; i++) {
+  for(int i = 0; i < (*this).state->digitalPinsAllocatedNonCustom; i++) {
     pinMode(OFFSET + i, INPUT_PULLUP);
     /* 1st parameter: pin
     * 2nd para: user Function
@@ -51,19 +50,29 @@ void LetsCommunicate::selectAndInitialiseInputAs(uint8_t _action, bool _interrup
   switch(_action) {
     case DIG:
       (*this).state->action[0] = true;
-      if((*this).state->comm_type == HARDSERIAL) {
+      if((*this).state->mastercomm == HARDSERIAL) {
         (*this).initialiseDIGDXT(_action);
       }
     break;
     case DXT:
       (*this).state->action[1] = true;
-      if((*this).state->comm_type == HARDSERIAL) {
+      if((*this).state->mastercomm == HARDSERIAL) {
         (*this).initialiseDIGDXT(_action);
       }
     break;
     case ANA:
       (*this).state->action[2] = true;
-      (*this).state->readAnalogRead = new uint8_t[ANASIZE * OFFSET];
+      (*this).state->analogPinsAllocatedNonCustom = (ANASIZE * OFFSET);
+      (*this).state->readAnalogRead = new uint8_t[(*this).state->analogPinsAllocatedNonCustom];
+    break;
+    case ALL:
+      (*this).state->action[0] = true;
+      (*this).state->action[2] = true;
+      (*this).state->analogPinsAllocatedNonCustom = (ANASIZE * OFFSET);
+      (*this).state->readAnalogRead = new uint8_t[(*this).state->analogPinsAllocatedNonCustom];
+      if((*this).state->mastercomm == HARDSERIAL) {
+        (*this).initialiseDIGDXT(DIG);
+      }
     break;
   }
 }
@@ -115,7 +124,7 @@ void LetsCommunicate::selectAndInitialiseInputAs(uint8_t _action, bool _interrup
 void LetsCommunicate::stateOfTheUnion() {
   /* PRINT PUT THE CURRENT STATE OF THE SYSTEM - USED FOR QUICK OVERVIEW */
   Serial.println("*--------------------------------------------------------------------------------");
-  Serial.print("* Communication Type: "); Serial.println((*this).state->comm_type);
+  Serial.print("* Communication Type: "); Serial.println((*this).state->mastercomm);
   Serial.print("* Source ID: "); Serial.println((*this).state->source);
   Serial.print("* Target ID: "); Serial.println((*this).state->target);
   Serial.print("* Interrupts Enabled: "); Serial.println((*this).state->interruptsEnabled);
@@ -124,28 +133,64 @@ void LetsCommunicate::stateOfTheUnion() {
   Serial.print("DIG: "); Serial.print((*this).state->action[0]); Serial.print(" DXT: "); Serial.print((*this).state->action[1]);
   Serial.print(" ANA: "); Serial.println((*this).state->action[2]);
   Serial.print("Total Number of Digital Pins Enabled: ");
-  Serial.println((*this).state->totalPinSize);
+  Serial.println((*this).state->digitalPinsAllocatedNonCustom);
+
+  Serial.print("Total Number of ANALOG Pins Enabled: ");
+  Serial.println((*this).state->analogPinsAllocatedNonCustom);
 
   Serial.print("State of the Interrupt Pins: ");
   Serial.println((*this).state->interruptState, BIN);
 
+  if((*this).state->action[2]) {
   Serial.println("Analog Pins Input State: ");
-  for(int i = 0; i < ANASIZE * OFFSET; i+= 2) {
+    for(int i = 0; i < (*this).state->analogPinsAllocatedNonCustom; i+= 2) {
 
-    uint16_t together = (*this).state->readAnalogRead[i] << 8;
-    together += (*this).state->readAnalogRead[i + 1];
-    Serial.print("Together "); Serial.print(together); Serial.println(" ");
+      uint16_t together = (*this).state->readAnalogRead[i] << 8;
+      together += (*this).state->readAnalogRead[i + 1];
+      Serial.print("Together "); Serial.print(together); Serial.println(" ");
+    }
+  }
+
+  if((*this).state->action[0] || (*this).state->action[1]) {
+  Serial.println("Digital Pins Input State: ");
+    for(int i = 0; i < (*this).state->digitalPinsAllocatedNonCustom; i++) {
+      Serial.print((*this).state->readDigitalRead[i]); Serial.print(" ");
+    }
+    Serial.println(" ");
   }
 
   Serial.println("*--------------------------------------------------------------------------------");
 }
 
+
 void LetsCommunicate::run() {
   //when using interrupt (only for digital)
 //(*this).digitalInterrupted();
 
+  if((*this).state->interruptsEnabled) {
+    delay(25);
+    if(digitalRead(interrupt_id) == LOW) {
+      (*this).state->readDigitalRead[interrupt_id - OFFSET] = 1;
+    } else if(digitalRead(interrupt_id) == HIGH){
+      (*this).state->readDigitalRead[interrupt_id - OFFSET] = 0;
+    }
+    interrupted = false;
+    interrupt_id = -1;
+  }
+
+  if(( (*this).state->action[0] || (*this).state->action[1] ) && (*this).state->interruptsEnabled == false) {
+    for(int i = 0; i < (*this).state->digitalPinsAllocatedNonCustom; i++) {
+      uint8_t _digitalPin = digitalRead(i + OFFSET);
+      if(_digitalPin == LOW) {
+        (*this).state->readDigitalRead[i] = 1;
+      } else {
+        (*this).state->readDigitalRead[i] = 0;
+      }
+    }
+  }
+
   if((*this).state->action[2]) {
-    for(int i = 0; i < ANASIZE * OFFSET; i+= 2) {
+    for(int i = 0; i < (*this).state->analogPinsAllocatedNonCustom; i+= 2) {
       uint16_t anaReadTempNumber = analogRead(i);
       //Serial.print("Analog Read: "); Serial.println(anaReadTempNumber);
       (*this).state->readAnalogRead[i] = anaReadTempNumber >> 8;
@@ -153,6 +198,7 @@ void LetsCommunicate::run() {
       delay(5);
     }
   }
+
 }
 
 /*

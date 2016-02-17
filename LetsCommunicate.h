@@ -28,7 +28,7 @@
 #define DIG   252 // DIG = DIGITAL
 #define DXT   253 // DXT = DIGITAL EXTENDED
 #define ANA   254 // ANA = ANALOG
-//#define ALL   255 // ALL = DIGITAL + ANALOG
+#define ALL   255 // ALL = DIGITAL + ANALOG
 
 #define OFFSET 2 // DIG OFFSET
 #define DIGSIZE 14 //14 Digital Pins
@@ -51,35 +51,40 @@ struct payload {
 };
 
 struct letscommunicate {
-  uint8_t comm_type = 0;  // COMMUNICATION TYPE - HARDSERIAL | SOFTSERIAL | ISQUAREDC
+  uint8_t mastercomm = 0;  // COMMUNICATION TYPE - HARDSERIAL | SOFTSERIAL | ISQUAREDC
+  uint8_t intercomm = 0;   // COMMUNICATION TYPE - SOFTSERIAL | ISQUAREDC
   uint8_t source = 0;     // MY_ID
   uint8_t target = 0;     // THEIR_ID
 
   bool interruptsEnabled = false;         // IF FALSE - NO INTERRUPTS ON DIG OR DXT
   bool customConfigOfInputOut = false;    // IF FALSE - THEN USING DIG/DXT or ANA...
-  bool action[3] = {0, 0, 0}; // [0] = DIG [1] = DIG [2] = ANA
+  bool action[3] = {0}; // [0] = DIG [1] = DIG [2] = ANA
 
-  uint8_t totalPinSize = 0;
+  uint8_t digitalPinsAllocatedNonCustom = 0;
+  uint8_t analogPinsAllocatedNonCustom = 0;
   uint32_t interruptState = 0;
-  uint8_t * readAnalogRead;
+  uint8_t * readAnalogRead = {0};
+  uint8_t * readDigitalRead = {0};
 };
 
 class LetsCommunicate: public Communicate {
 public:
-  /* Default CTOR - DOES NOT NOTHING - CONSTRUCTOR 0*/
-  LetsCommunicate() { Serial.println("Hello From LETSCommunicate"); };
+  /* Default CTOR - SETS STATE STUCT - CONSTRUCTOR 0*/
+  /* http://stackoverflow.com/questions/5914422/proper-way-to-initialize-c-structs */
+  LetsCommunicate() { };
 
     /* CUSTOM CONSTRUCTOR 1
     (All Pins (11 pins) will be declare as INPUT)
     PARAMETERS:
     comm_type = {HARDSERIAL, SOFTSERIAL, ISQUAREDC}, source = {CLIENT},
     target = {target}, action = {DIG, DXT, ANA, ALL} */
-  LetsCommunicate(uint8_t comm_type, uint8_t source, uint8_t target):
-    Communicate(comm_type) {
-      // Setup the initial State for LetCommunicate3 Object....
-      (*this).state->comm_type = comm_type;
-      (*this).state->source = source;
-      (*this).state->target = target;
+  LetsCommunicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _computer_id, uint8_t _intercomm):
+    Communicate(_mastercomm) {
+      state = new letscommunicate();
+      (*this).state->mastercomm = _mastercomm;
+      (*this).state->source = _this_id;
+      (*this).state->target = _computer_id;
+      (*this).state->intercomm = _intercomm;
     };
 
   /* Initialise With Methods Describe the Intentions
@@ -91,7 +96,7 @@ public:
 
   /* SERIAL PRINTLNs THE CURRENT STATE OF THE LETCOMMUNICATE */
   void stateOfTheUnion();
-  
+
   /* INITIALSE AND ALLOCATE METHODS */
   void initialiseInputAs(uint8_t); // INIT: DIG, DXT, ANA (ALL PINS NO CUSTOM SETS)
   void initialiseInputWithInterruptsAs(uint8_t); // INIT: DIG, DXT (ALL PINS NO CUSTOM SETS)
