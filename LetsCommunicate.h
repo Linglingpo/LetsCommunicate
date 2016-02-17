@@ -50,6 +50,20 @@ struct payload {
   uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
 };
 
+struct letscommunicate {
+  uint8_t comm_type = 0;  // COMMUNICATION TYPE - HARDSERIAL | SOFTSERIAL | ISQUAREDC
+  uint8_t source = 0;     // MY_ID
+  uint8_t target = 0;     // THEIR_ID
+
+  bool interruptsEnabled = false;         // IF FALSE - NO INTERRUPTS ON DIG OR DXT
+  bool customConfigOfInputOut = false;    // IF FALSE - THEN USING DIG/DXT or ANA...
+  bool action[3] = {0, 0, 0}; // [0] = DIG [1] = DIG [2] = ANA
+
+  uint8_t totalPinSize = 0;
+  uint32_t interruptState = 0;
+  uint8_t * readAnalogRead;
+};
+
 class LetsCommunicate: public Communicate {
 public:
   /* Default CTOR - DOES NOT NOTHING - CONSTRUCTOR 0*/
@@ -63,33 +77,10 @@ public:
   LetsCommunicate(uint8_t comm_type, uint8_t source, uint8_t target):
     Communicate(comm_type) {
       // Setup the initial State for LetCommunicate3 Object....
-      (*this).comm_type = comm_type;
-      (*this).source = source;
-      (*this).target = target;
-      (*this).action = 0;
-      //initConfiguration(1);
+      (*this).state->comm_type = comm_type;
+      (*this).state->source = source;
+      (*this).state->target = target;
     };
-
-    /* DIG OR DXT
-    CUSTOM CONSTRUCTOR 2
-    PARAMETERS:
-    comm_type = {HARDSERIAL, SOFTSERIAL, ISQUAREDC}, source = {CLIENT},
-    target = {target}, action = {DIG, DXT, ANA, ALL}, configIO = {0 (OUTPUT),1 (INPUT)} (Index as the pins number),
-    size = {How many pins are used}
-    */
-    /*
-    LetsCommunicate(uint8_t comm_type, uint8_t source, uint8_t target, uint8_t action, uint8_t * configIO, uint8_t size):
-      Communicate(comm_type) {
-        (*this).comm_type = comm_type;
-        (*this).source = source;
-        (*this).target = target;
-        (*this).action = action;
-        (*this).configIO = configIO;
-        (*this).size = size;
-        //Serial.println("dig with IO");
-        //initConfiguration(2);
-      };
-      */
 
   /* Initialise With Methods Describe the Intentions
      initialiseWith(uint8_t); Initialise {DIG, DXT, ANA, ALL}
@@ -97,26 +88,29 @@ public:
         DXT = ALL DIG IO & ANALOG AS DIGITAL INPUT (INTERRUPT ENABLED BY DEFAULT)
         ANA = ALL ANALOG IO AS INPUT (NO INTERRUPTS)
   */
-  void initialiseInputAs(uint8_t, bool);
-  void initialiseInputAs(uint8_t _action, bool _interruptFlag, uint8_t * _digitalConfigIOSet, uint8_t _digitalConfigIOSize);
-  void initialiseInputWith(uint8_t, bool, uint8_t, bool);
+
+  /* SERIAL PRINTLNs THE CURRENT STATE OF THE LETCOMMUNICATE */
+  void stateOfTheUnion();
+  
+  /* INITIALSE AND ALLOCATE METHODS */
+  void initialiseInputAs(uint8_t); // INIT: DIG, DXT, ANA (ALL PINS NO CUSTOM SETS)
+  void initialiseInputWithInterruptsAs(uint8_t); // INIT: DIG, DXT (ALL PINS NO CUSTOM SETS)
+
+
+  //void initialiseInputAs(uint8_t _action, bool _interruptFlag, uint8_t * _digitalConfigIOSet, uint8_t _digitalConfigIOSize);
+  //void initialiseInputWith(uint8_t, bool, uint8_t, bool);
   void status();
   //void initConfiguration(uint8_t);
   void run();
   //void pinState();
-  void pinActiveProsses(uint8_t);
-  void configureDigitalInputOutput(uint8_t, uint8_t *, uint8_t);
-
-  //void checkAction(uint8_t, bool);
-  void checkAction(uint8_t _action, bool _interruptFlag, uint8_t * _digitalConfigIOSet = {0}, uint8_t _digitalConfigIOSize = 0);
+  //void pinActiveProsses(uint8_t);
+  //void configureDigitalInputOutput(uint8_t, uint8_t *, uint8_t);
 
 private:
   preamble * preamble_history[HISTORY_SIZE] = {0};
   payload * payload_history[HISTORY_SIZE] = {0};
-  uint8_t comm_type;
-  uint8_t source; // MY_ID
-  uint8_t target; // THEIR_ID
-  uint8_t action; // DIG, DXT, ANA or DIG + ANA
+
+  uint8_t action = 0; // DIG, DXT, ANA or DIG + ANA
   uint8_t syn;
   uint8_t ack;
   //size for all pins
@@ -133,8 +127,15 @@ private:
   bool interruptFlag;
 
   /* INTERRUPT PRIVATE VARIABLES */
-  void configureInterrupts(uint8_t);
+  //void configureInterrupts(uint8_t);
   /* FINISH INTERRUPT VARIABLES */
+
+  /* INITIALSE AND ALLOCATE METHODS */
+  void selectAndInitialiseInputAs(uint8_t, bool);
+  void initialiseDIGDXT(uint8_t);
+
+  /* MAINTAINS CURRENT STATE OF LETS COMMUNICATE */
+  letscommunicate * state;
 };
 
 #endif // LETS_COMMUNICATE_H
