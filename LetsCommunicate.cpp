@@ -83,6 +83,17 @@ void LetsCommunicate::selectAndInitialiseInputAs(uint8_t _action, bool _interrup
   }
 }
 
+
+//Set & Get
+uint8_t *LetsCommunicate::getAnalogStateArray(){
+  return (*this).state->readAnalogRead;
+}
+
+uint8_t LetsCommunicate::getAnalogStateArraySize(){
+  return (*this).state->analogPinsAllocatedNonCustom;
+}
+
+
 void LetsCommunicate::stateOfTheUnion() {
   /* PRINT PUT THE CURRENT STATE OF THE SYSTEM - USED FOR QUICK OVERVIEW */
   Serial.println("*--------------------------------------------------------------------------------");

@@ -106,6 +106,12 @@ public:
 
   void run();
 
+  //Set & get
+  uint8_t *getAnalogStateArray();
+  uint8_t getAnalogStateArraySize();
+
+
+
 private:
   preamble * preamble_history[HISTORY_SIZE] = {0};
   payload * payload_history[HISTORY_SIZE] = {0};
