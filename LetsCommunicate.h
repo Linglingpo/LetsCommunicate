@@ -103,46 +103,28 @@ public:
   /* INITIALSE AND ALLOCATE METHODS */
   void initialiseInputAs(uint8_t); // INIT: DIG, DXT, ANA (ALL PINS NO CUSTOM SETS)
   void initialiseInputWithInterruptsAs(uint8_t); // INIT: DIG, DXT (ALL PINS NO CUSTOM SETS)
-
   void run();
 
-  //Set & get
-  uint8_t *getAnalogStateArray();
+  // Set & Get
+  uint8_t * getAnalogStateArray();
   uint8_t getAnalogStateArraySize();
-
+  const letscommunicate * getLetsCommunicateState() const;
 
 
 private:
+  /* MAINTAINS CURRENT STATE OF LETS COMMUNICATE */
+  letscommunicate * state;
+
   preamble * preamble_history[HISTORY_SIZE] = {0};
   payload * payload_history[HISTORY_SIZE] = {0};
 
   uint8_t action = 0; // DIG, DXT, ANA or DIG + ANA
   uint8_t syn;
   uint8_t ack;
-  //size for all pins
-  uint8_t totalPinSize;
-  uint8_t * digitalConfigIO;
-  uint8_t digitalConfigIOSize;
-  uint8_t flag;
-  uint8_t * digStateArray;
-  uint8_t * interruptStateArray;
-  //array to store the value for analog input
-  uint8_t * interruptStateArrayANA;
-  uint16_t anaReadTempNumber;
-  uint8_t * interruptState;
-  bool interruptFlag;
-
-  /* INTERRUPT PRIVATE VARIABLES */
-
-
-  /* FINISH INTERRUPT VARIABLES */
 
   /* INITIALSE AND ALLOCATE METHODS */
   void selectAndInitialiseInputAs(uint8_t, bool);
   void initialiseDIGDXT(uint8_t);
-
-  /* MAINTAINS CURRENT STATE OF LETS COMMUNICATE */
-  letscommunicate * state;
 };
 
 #endif // LETS_COMMUNICATE_H

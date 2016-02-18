@@ -93,6 +93,10 @@ uint8_t LetsCommunicate::getAnalogStateArraySize(){
   return (*this).state->analogPinsAllocatedNonCustom;
 }
 
+const letscommunicate * LetsCommunicate::getLetsCommunicateState() const {
+  return (*this).state;
+};
+
 
 void LetsCommunicate::stateOfTheUnion() {
   /* PRINT PUT THE CURRENT STATE OF THE SYSTEM - USED FOR QUICK OVERVIEW */
