@@ -117,8 +117,7 @@ private:
 
   preamble * preamble_history[HISTORY_SIZE] = {0};
   payload * payload_history[HISTORY_SIZE] = {0};
-
-  uint8_t action = 0; // DIG, DXT, ANA or DIG + ANA
+  
   uint8_t syn;
   uint8_t ack;
 
