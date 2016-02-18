@@ -62,20 +62,9 @@ struct letscommunicate {
 
   uint8_t digitalPinsAllocatedNonCustom = 0;
   uint8_t analogPinsAllocatedNonCustom = 0;
-  uint32_t interruptState = 0;
+  //uint32_t interruptState = 0;
   uint8_t * readAnalogRead = {0};
   uint8_t * readDigitalRead = {0};
-
-  /* CUSTOM IO */
-  uint8_t * digitalCustomInputPins;
-  uint8_t * digitalCustomOutputPins;
-  uint8_t * analogCustomInputPins;
-  uint8_t * analogCustomOutputPins; // PWM SET
-
-  uint8_t digitalCustomInputPinsAllocated;
-  uint8_t digitalCustomOutputPinsAllocated;
-  uint8_t analogCustomInputPinsAllocated;
-  uint8_t analogCustomOutputPinsAllocated;
 
 };
 
@@ -88,8 +77,10 @@ public:
     /* CUSTOM CONSTRUCTOR 1
     (All Pins (11 pins) will be declare as INPUT)
     PARAMETERS:
-    comm_type = {HARDSERIAL, SOFTSERIAL, ISQUAREDC}, source = {CLIENT},
-    target = {target}, action = {DIG, DXT, ANA, ALL} */
+    _mastercomm = USB | BLUETOOTH | WIFI
+    _this_id = source = {CLIENT}
+    _computer_id = target
+    _intercomm = {HARDSERIAL, SOFTSERIAL, ISQUAREDC} */
   LetsCommunicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _computer_id, uint8_t _intercomm):
     Communicate(_mastercomm) {
       state = new letscommunicate();
@@ -112,17 +103,8 @@ public:
   /* INITIALSE AND ALLOCATE METHODS */
   void initialiseInputAs(uint8_t); // INIT: DIG, DXT, ANA (ALL PINS NO CUSTOM SETS)
   void initialiseInputWithInterruptsAs(uint8_t); // INIT: DIG, DXT (ALL PINS NO CUSTOM SETS)
-  void initialiseInputOutputWithCustomSetsAs(uint8_t, uint8_t *, uint8_t, uint8_t, uint8_t *, uint8_t, uint8_t);
-  void initialiseInputOutputWithCustomSetsWithInterruptsAs(uint8_t, uint8_t *, uint8_t, uint8_t, uint8_t *, uint8_t, uint8_t);
 
-  //void initialiseInputAs(uint8_t _action, bool _interruptFlag, uint8_t * _digitalConfigIOSet, uint8_t _digitalConfigIOSize);
-  //void initialiseInputWith(uint8_t, bool, uint8_t, bool);
-  void status();
-  //void initConfiguration(uint8_t);
   void run();
-  //void pinState();
-  //void pinActiveProsses(uint8_t);
-  //void configureDigitalInputOutput(uint8_t, uint8_t *, uint8_t);
 
 private:
   preamble * preamble_history[HISTORY_SIZE] = {0};
@@ -145,7 +127,8 @@ private:
   bool interruptFlag;
 
   /* INTERRUPT PRIVATE VARIABLES */
-  //void configureInterrupts(uint8_t);
+
+
   /* FINISH INTERRUPT VARIABLES */
 
   /* INITIALSE AND ALLOCATE METHODS */

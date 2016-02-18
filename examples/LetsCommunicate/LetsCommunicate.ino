@@ -8,7 +8,7 @@ LetsCommunicate first;
 #define ANOTHERARDUINOID 1 // May be more than 1 other Arduino if using INTERCOM == I2C
 #define COMPUTERID 2
 
-uint8_t configIO[3] {0, 1, 0};
+//uint8_t configIO[3] {0, 1, 0};
 
 void setup() {
   // put your setup code here, to run once:
@@ -18,7 +18,8 @@ void setup() {
   first = LetsCommunicate(MASTERCOMM, THISARDUINOID, COMPUTERID, INTERCOMM);
   /* TEST THESE CONFIGS - ONE AT A TIME */
   //first.initialiseInputAs(DIG);
-  first.initialiseInputWithInterruptsAs(DXT);
+  //first.initialiseInputWithInterruptsAs(DXT);
+  first.initialiseInputAs(ALL);
   //first.initialiseInputAs(DXT);
   //first.initialiseInputAs(ANA);
   first.stateOfTheUnion();
@@ -27,5 +28,5 @@ void setup() {
 void loop() {
   first.run();
   first.stateOfTheUnion();
-  delay(2000);
+  delay(1000);
 }
