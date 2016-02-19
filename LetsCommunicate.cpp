@@ -28,12 +28,14 @@ void LetsCommunicate::initialiseInputWithInterruptsAs(uint8_t _action) {
 void LetsCommunicate::initialiseDIGDXT(uint8_t _action) {
   // The ternary operator: condition ? expression1 : expression2
   (*this).state->digitalPinsAllocatedNonCustom = (_action == DIG) ? DIGSIZE - OFFSET : (DIGSIZE + DXTSIZE) - OFFSET;
+  (*this).state-> digitalPinsSize = (*this).state->digitalPinsAllocatedNonCustom;
   //readDigitalRead = array to keep the state of IO
   (*this).state->readDigitalRead = new uint8_t[(*this).state->digitalPinsAllocatedNonCustom];
 
   for(int i = 0; i < (*this).state->digitalPinsAllocatedNonCustom; i++) {
     //no interrupt
     pinMode(OFFSET + i, INPUT_PULLUP);
+    (*this).state->readDigitalRead[i] = 0;
     //interrupt
     /* 1st parameter: pin
     * 2nd para: user Function
@@ -69,13 +71,21 @@ void LetsCommunicate::selectAndInitialiseInputAs(uint8_t _action, bool _interrup
     case ANA:
       (*this).state->action[2] = true;
       (*this).state->analogPinsAllocatedNonCustom = (ANASIZE * OFFSET);
+      (*this).state-> analogPinsSize = (*this).state->analogPinsAllocatedNonCustom/2;
       (*this).state->readAnalogRead = new uint8_t[(*this).state->analogPinsAllocatedNonCustom];
+      for(int i = 0; i < (*this).state->analogPinsAllocatedNonCustom; i++){
+      (*this).state->readAnalogRead[i] = 0;
+    }
     break;
     case ALL:
       (*this).state->action[0] = true;
       (*this).state->action[2] = true;
       (*this).state->analogPinsAllocatedNonCustom = (ANASIZE * OFFSET);
+      (*this).state-> analogPinsSize = (*this).state->analogPinsAllocatedNonCustom/2;
       (*this).state->readAnalogRead = new uint8_t[(*this).state->analogPinsAllocatedNonCustom];
+      for(int i = 0; i < (*this).state->analogPinsAllocatedNonCustom; i++){
+      (*this).state->readAnalogRead[i] = 0;
+    }
       if((*this).state->mastercomm == HARDSERIAL) {
         (*this).initialiseDIGDXT(DIG);
       }
@@ -84,15 +94,6 @@ void LetsCommunicate::selectAndInitialiseInputAs(uint8_t _action, bool _interrup
 }
 
 //Set & Get
-/*
-uint8_t *LetsCommunicate::getAnalogStateArray(){
-  return (*this).state->readAnalogRead;
-}
-uint8_t LetsCommunicate::getAnalogStateArraySize(){
-  return (*this).state->analogPinsAllocatedNonCustom;
-}
-*/
-
 //Does the copy of letscommunicate struct
 const letscommunicate * LetsCommunicate::getLetsCommunicateState() const {
   return (*this).state;
@@ -134,8 +135,6 @@ void LetsCommunicate::stateOfTheUnion() {
 
 void LetsCommunicate::run() {
 //when using interrupt (only for digital)
-//(*this).digitalInterrupted();
-
   if((*this).state->interruptsEnabled) {
     delay(25);
     if(digitalRead(interrupt_id) == LOW) {

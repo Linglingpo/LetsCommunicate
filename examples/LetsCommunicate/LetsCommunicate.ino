@@ -8,11 +8,12 @@ LetsCommunicate first;
 #define ANOTHERARDUINOID 1 // May be more than 1 other Arduino if using INTERCOM == I2C
 #define COMPUTERID 2
 
-// uint8_t *analogStateArray;
-// uint8_t analogStateSize;
-const letscommunicate * state = new letscommunicate();
+uint8_t *digitalStateArray;
+int pinNum = 2;
+int pinState = 0;
 
-//uint8_t configIO[3] {0, 1, 0};
+//must to be const
+const letscommunicate * state = new letscommunicate();
 
 void setup() {
   // put your setup code here, to run once:
@@ -28,17 +29,24 @@ void setup() {
   first.initialiseInputWithInterruptsAs(DIG);
   //first.initialiseInputWithInterruptsAs(DXT);
   //first.initialiseInputWithInterruptsAs(ALL);
-  first.stateOfTheUnion();
+  //first.stateOfTheUnion();
+
 }
 
 void loop() {
   first.run();
   state = first.getLetsCommunicateState();
-  Serial.println(state->digitalPinsAllocatedNonCustom);
-  //Serial.println(state->anaSize);
-  //Serial.println(state->analogPinsAllocatedNonCustom);
-  // state->digitalPinsAllocatedNonCustom = 0; // MUST GET AN ERROR - COMPILE ERROR !!!!
+  pinState = digitalRead(pinNum);
+  if (pinState == LOW) {
+    //Serial.println(state->digitalPinsSize);
+    for (int i = 0; i < state->digitalPinsSize; i++) {
+      Serial.print(state->readDigitalRead[i]);
+    }
+    Serial.println();
+  }
 
-  first.stateOfTheUnion();
-  delay(100);
+  //state->digitalPinsAllocatedNonCustom = 0; // MUST GET AN ERROR - COMPILE ERROR !!!!
+
+  //first.stateOfTheUnion();
+  //delay(500);
 }

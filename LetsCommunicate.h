@@ -52,21 +52,22 @@ struct payload {
 };
 
 struct letscommunicate {
-  uint8_t mastercomm = 0;  // COMMUNICATION TYPE - HARDSERIAL | SOFTSERIAL | ISQUAREDC
-  uint8_t intercomm = 0;   // COMMUNICATION TYPE - SOFTSERIAL | ISQUAREDC
-  uint8_t source = 0;     // MY_ID
-  uint8_t target = 0;     // THEIR_ID
+  uint8_t mastercomm = -1;  // COMMUNICATION TYPE - HARDSERIAL | SOFTSERIAL | ISQUAREDC
+  uint8_t intercomm = -1;   // COMMUNICATION TYPE - SOFTSERIAL | ISQUAREDC
+  uint8_t source = -1;     // MY_ID
+  uint8_t target = -1;     // THEIR_ID
 
   bool interruptsEnabled = false;         // IF FALSE - NO INTERRUPTS ON DIG OR DXT
   bool customConfigOfInputOut = false;    // IF FALSE - THEN USING DIG/DXT or ANA...
   bool action[3] = {0}; // [0] = DIG [1] = DIG [2] = ANA
 
-  uint8_t digitalPinsAllocatedNonCustom = 0;
-  uint8_t analogPinsAllocatedNonCustom = 0;
+  uint8_t digitalPinsAllocatedNonCustom = -1;
+  uint8_t analogPinsAllocatedNonCustom = -1;
   //uint32_t interruptState = 0;
-  uint8_t * readAnalogRead = {0};
-  uint8_t * readDigitalRead = {0};
-  static const int anaSize= ANASIZE;
+  uint8_t * readAnalogRead;
+  uint8_t * readDigitalRead;
+  uint8_t digitalPinsSize = -1;
+  uint8_t analogPinsSize = -1;
 };
 
 class LetsCommunicate: public Communicate {
@@ -108,8 +109,6 @@ public:
   void run();
 
   // Set & Get
-  //uint8_t * getAnalogStateArray();
-  //uint8_t getAnalogStateArraySize();
   /* The pointer that points to the constant struct (so that ppl can only read)
     1st const the return type that is not able to change,
     2nd const the function annot change the value in struct */
