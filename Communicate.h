@@ -29,6 +29,9 @@ struct payload {
 
 struct transmit {
   bool discovered = false;
+  preamble startPacket;
+  payload endPacket;
+
   uint8_t syn = 0;
   uint8_t ack = 0;
 };
