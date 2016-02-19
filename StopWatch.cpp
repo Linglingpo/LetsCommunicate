@@ -1,6 +1,6 @@
 #include "StopWatch.h"
 
-StopWatch::StopWatch() { Serial.println("Hello From StopWatch"); }
+StopWatch::StopWatch() { }
 uint32_t StopWatch::elapsed() { return stopWatchValue(); }
 
 void StopWatch::stopWatchStart() {

@@ -11,18 +11,6 @@
 #include "EnableInterrupt.h"
 #include "Communicate.h"
 
-#define HISTORY_SIZE 3
-#define PREAMBLE_SIZE 7
-#define PAYLOAD_DIGITAL_SIZE 3
-#define PAYLOAD_ANALOG_SIZE 12
-
-#define HELLO 126 // ~
-/* PREAMBLE TYPES */
-#define SYN   0 // SYN = SYNCHRONISE
-#define URG   1 // URG = ACT NOW
-#define RST   2 // RST = CLEAR?
-#define CNT   3 // CNT = MORE THAN ONE MESSAGE - CHECK FOR FIN
-#define FIN   4 // FIN = COMMUNICATIONS FINISHED
 /* PAYLOAD MESSAGE TYPE */
 #define PWM   251 // PWM = PWM OUTPUT
 #define DIG   252 // DIG = DIGITAL
@@ -41,15 +29,6 @@
 #define HARDSERIAL  0
 #define SOFTSERIAL  1
 #define ISQUAREDC   2
-
-struct preamble {
-  uint8_t preamble[PREAMBLE_SIZE];
-};
-
-struct payload {
-  uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
-  uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
-};
 
 struct letscommunicate {
   uint8_t mastercomm = -1;  // COMMUNICATION TYPE - HARDSERIAL | SOFTSERIAL | ISQUAREDC
@@ -85,7 +64,7 @@ public:
     _computer_id = target
     _intercomm = {HARDSERIAL, SOFTSERIAL, ISQUAREDC} */
   LetsCommunicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _computer_id, uint8_t _intercomm):
-    Communicate(_mastercomm) {
+    Communicate(_mastercomm, _this_id, _computer_id, _intercomm) {
       state = new letscommunicate();
       (*this).state->mastercomm = _mastercomm;
       (*this).state->source = _this_id;
@@ -113,6 +92,11 @@ public:
     1st const the return type that is not able to change,
     2nd const the function annot change the value in struct */
   const letscommunicate * getLetsCommunicateState() const;
+
+  uint8_t sendto(uint8_t _comm) {
+    Serial.println("Inside Letscommunicate::send");
+    return (*this).send(_comm);
+  }
 
 
 private:
