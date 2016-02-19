@@ -25,9 +25,9 @@ void setup() {
   //first.initialiseInputAs(DXT);
   //first.initialiseInputAs(ANA);
   //first.initialiseInputAs(ALL);
-  //first.initialiseInputWithInterruptsAs(DIG);
+  first.initialiseInputWithInterruptsAs(DIG);
   //first.initialiseInputWithInterruptsAs(DXT);
-  first.initialiseInputWithInterruptsAs(ALL);
+  //first.initialiseInputWithInterruptsAs(ALL);
   first.stateOfTheUnion();
 }
 
@@ -35,24 +35,10 @@ void loop() {
   first.run();
   state = first.getLetsCommunicateState();
   Serial.println(state->digitalPinsAllocatedNonCustom);
-  Serial.println(state->analogPinsAllocatedNonCustom);
+  //Serial.println(state->anaSize);
+  //Serial.println(state->analogPinsAllocatedNonCustom);
   // state->digitalPinsAllocatedNonCustom = 0; // MUST GET AN ERROR - COMPILE ERROR !!!!
-  //pointer
-//  analogStateArray = first.getAnalogStateArray();
-//  analogStateSize = first.getAnalogStateArraySize();
-//  state = first.getLetsCommunicateState();
-//
-//      uint8_t count = 0;
-//    for(int i = 0; i <analogStateSize; i+= 2) {
-//      uint16_t together = analogStateArray[i] << 8;
-//      together += analogStateArray[i + 1];
-//      Serial.print("Ana #"); Serial.print(count++); Serial.println();
-//      Serial.print("Together "); Serial.print(together); Serial.println(" ");
-//    }
-//
-//  Serial.print("Array Size in Arduino:");
-//  Serial.print(analogStateSize);
-//  Serial.println();
+
   first.stateOfTheUnion();
   delay(100);
 }

@@ -34,6 +34,7 @@
 #define DIGSIZE 14 //14 Digital Pins
 #define DXTSIZE 6 //6 Analog to Digital Pins
 #define ANASIZE 6 //6 Analog Pins
+
 /* SYN RESET CONTROL */
 #define MAXMSGS 255
 /* COMMUNICATIONS TYPE */
@@ -65,11 +66,12 @@ struct letscommunicate {
   //uint32_t interruptState = 0;
   uint8_t * readAnalogRead = {0};
   uint8_t * readDigitalRead = {0};
-
+  static const int anaSize= ANASIZE;
 };
 
 class LetsCommunicate: public Communicate {
 public:
+
   /* Default CTOR - SETS STATE STUCT - CONSTRUCTOR 0*/
   /* http://stackoverflow.com/questions/5914422/proper-way-to-initialize-c-structs */
   LetsCommunicate() { };
@@ -106,8 +108,11 @@ public:
   void run();
 
   // Set & Get
-  uint8_t * getAnalogStateArray();
-  uint8_t getAnalogStateArraySize();
+  //uint8_t * getAnalogStateArray();
+  //uint8_t getAnalogStateArraySize();
+  /* The pointer that points to the constant struct (so that ppl can only read)
+    1st const the return type that is not able to change,
+    2nd const the function annot change the value in struct */
   const letscommunicate * getLetsCommunicateState() const;
 
 
@@ -117,7 +122,7 @@ private:
 
   preamble * preamble_history[HISTORY_SIZE] = {0};
   payload * payload_history[HISTORY_SIZE] = {0};
-  
+
   uint8_t syn;
   uint8_t ack;
 

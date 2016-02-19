@@ -83,16 +83,17 @@ void LetsCommunicate::selectAndInitialiseInputAs(uint8_t _action, bool _interrup
   }
 }
 
-
 //Set & Get
+/*
 uint8_t *LetsCommunicate::getAnalogStateArray(){
   return (*this).state->readAnalogRead;
 }
-
 uint8_t LetsCommunicate::getAnalogStateArraySize(){
   return (*this).state->analogPinsAllocatedNonCustom;
 }
+*/
 
+//Does the copy of letscommunicate struct
 const letscommunicate * LetsCommunicate::getLetsCommunicateState() const {
   return (*this).state;
 };
