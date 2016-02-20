@@ -34,9 +34,7 @@ uint8_t Communicate::send(uint8_t _comm) {
 
         //Serial.println((*this).transmitState->master.startPacket.preamble);
         for(int i = 0; i < 7; i++)
-        {
           Serial.write((*this).transmitState->master.startPacket.preamble[i]);
-        }
         Serial.println("");
 
         // Wating for Computer to Repond....
