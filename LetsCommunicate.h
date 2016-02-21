@@ -23,18 +23,10 @@
 #define DXTSIZE 6 //6 Analog to Digital Pins
 #define ANASIZE 6 //6 Analog Pins
 
-/* SYN RESET CONTROL */
-#define MAXMSGS 255
-/* COMMUNICATIONS TYPE */
-#define HARDSERIAL  0
-#define SOFTSERIAL  1
-#define ISQUAREDC   2
-
 struct letscommunicate {
   uint8_t mastercomm = -1;  // COMMUNICATION TYPE - HARDSERIAL | SOFTSERIAL | ISQUAREDC
   uint8_t intercomm = -1;   // COMMUNICATION TYPE - SOFTSERIAL | ISQUAREDC
   uint8_t source = -1;     // MY_ID
-  uint8_t target = -1;     // THEIR_ID
 
   bool interruptsEnabled = false;         // IF FALSE - NO INTERRUPTS ON DIG OR DXT
   bool customConfigOfInputOut = false;    // IF FALSE - THEN USING DIG/DXT or ANA...
@@ -63,21 +55,18 @@ public:
     _this_id = source = {CLIENT}
     _computer_id = target
     _intercomm = {HARDSERIAL, SOFTSERIAL, ISQUAREDC} */
-  LetsCommunicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _computer_id, uint8_t _intercomm):
-    Communicate(_mastercomm, _this_id, _computer_id, _intercomm) {
+  LetsCommunicate(uint8_t _mastercomm, uint8_t _this_id):
+    Communicate(_mastercomm, _this_id) {
       state = new letscommunicate();
       (*this).state->mastercomm = _mastercomm;
       (*this).state->source = _this_id;
-      (*this).state->target = _computer_id;
-      (*this).state->intercomm = _intercomm;
     };
 
-  /* Initialise With Methods Describe the Intentions
-     initialiseWith(uint8_t); Initialise {DIG, DXT, ANA, ALL}
-        DIG = ALL DIG IO AS INPUT (INTERRUPT ENABLED BY DEFAULT)
-        DXT = ALL DIG IO & ANALOG AS DIGITAL INPUT (INTERRUPT ENABLED BY DEFAULT)
-        ANA = ALL ANALOG IO AS INPUT (NO INTERRUPTS)
-  */
+    LetsCommunicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _intercomm):
+      Communicate(_mastercomm, _this_id, _intercomm) {
+        new LetsCommunicate(_mastercomm, _this_id);
+        (*this).state->intercomm = _intercomm;
+      };
 
   /* SERIAL PRINTLNs THE CURRENT STATE OF THE LETCOMMUNICATE */
   void stateOfTheUnion();
@@ -93,22 +82,9 @@ public:
     2nd const the function annot change the value in struct */
   const letscommunicate * getLetsCommunicateState() const;
 
-  uint8_t sendto(uint8_t _comm) {
-    Serial.println("Inside Letscommunicate::send");
-    return (*this).send(_comm);
-  }
-
-
 private:
   /* MAINTAINS CURRENT STATE OF LETS COMMUNICATE */
   letscommunicate * state;
-
-  preamble * preamble_history[HISTORY_SIZE] = {0};
-  payload * payload_history[HISTORY_SIZE] = {0};
-
-  uint8_t syn;
-  uint8_t ack;
-
   /* INITIALSE AND ALLOCATE METHODS */
   void selectAndInitialiseInputAs(uint8_t, bool);
   void initialiseDIGDXT(uint8_t);

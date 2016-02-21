@@ -2,13 +2,38 @@
 
 Communicate::Communicate() { }
 
-Communicate::Communicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _computer_id, uint8_t _intercomm) {
+Communicate::Communicate(uint8_t _mastercomm, uint8_t _this_id) {
   //need "new" when it is pointer
   transmitState = new transmission();
   (*this).transmitState->mastercomm = _mastercomm;
   (*this).transmitState->source = _this_id;
-  (*this).transmitState->target = _computer_id;
+}
+
+Communicate::Communicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _intercomm) {
+  new Communicate(_mastercomm, _this_id);
   (*this).transmitState->intercomm = _intercomm;
+}
+
+void serialEvent() {
+
+}
+
+uint8_t Communicate::discover(uint8_t _comm) {
+
+  uint8_t _return = -1;
+  switch(_comm) {
+    case HARDSERIAL:
+      //constructPreamble
+      return 0;
+    break;
+    case SOFTSERIAL:
+      return 0;
+    break;
+    case ISQUAREDC:
+      return 0;
+    break;
+  }
+  return 0;
 }
 
 uint8_t Communicate::send(uint8_t _comm) {

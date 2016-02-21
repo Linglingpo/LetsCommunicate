@@ -105,7 +105,6 @@ void LetsCommunicate::stateOfTheUnion() {
   Serial.println("*--------------------------------------------------------------------------------");
   Serial.print("* Communication Type: "); Serial.println((*this).state->mastercomm);
   Serial.print("* Source ID: "); Serial.println((*this).state->source);
-  Serial.print("* Target ID: "); Serial.println((*this).state->target);
   Serial.print("* Interrupts Enabled: "); Serial.println((*this).state->interruptsEnabled);
   Serial.println("* Initialised Inputs: ");
   Serial.print("DIG: "); Serial.print((*this).state->action[0]); Serial.print(" DXT: "); Serial.print((*this).state->action[1]);

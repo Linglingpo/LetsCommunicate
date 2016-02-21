@@ -37,12 +37,12 @@ void discover(Serial p){
     preamble = new short[PREAMBLE_SIZE - OFFSET];
     for(int i = 0; i < PREAMBLE_SIZE - OFFSET; i++){
       preamble[i] = (short)p.read();
-      System.out.print(preamble[i]); System.out.print(" ");
+      //System.out.print(preamble[i]); System.out.print(" ");
     }
     /* RESPONSE FROM PROCESSING */
     short[] _preamble = buildResponsePreamble(preamble);
     for(int i = 0; i < PREAMBLE_SIZE; i++){
-      System.out.print(_preamble[i]); System.out.print(" ");
+      //System.out.print(_preamble[i]); System.out.print(" ");
       port.write(_preamble[i]);
     }
     println();

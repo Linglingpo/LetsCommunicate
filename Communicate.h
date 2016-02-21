@@ -17,6 +17,12 @@
 #define CNT   3 // CNT = MORE THAN ONE MESSAGE - CHECK FOR FIN
 #define FIN   4 // FIN = COMMUNICATIONS FINISHED
 
+/* SYN RESET CONTROL */
+#define MAXMSGS 255
+/* COMMUNICATIONS TYPE */
+#define HARDSERIAL  0
+#define SOFTSERIAL  1
+#define ISQUAREDC   2
 
 struct preamble {
   uint8_t preamble[PREAMBLE_SIZE];
@@ -54,8 +60,12 @@ struct transmission {
 class Communicate: public StopWatch {
 public:
   Communicate();
-  Communicate(uint8_t , uint8_t , uint8_t , uint8_t);
+  Communicate(uint8_t , uint8_t);
+  Communicate(uint8_t , uint8_t , uint8_t);
   uint8_t send(uint8_t);
+  uint8_t receive(uint8_t);
+  uint8_t discover(uint8_t);
+  void serialEvent();
 
 private:
   transmission * transmitState;
