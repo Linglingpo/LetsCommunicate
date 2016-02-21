@@ -24,6 +24,18 @@
 #define SOFTSERIAL  1
 #define ISQUAREDC   2
 
+/* PAYLOAD MESSAGE TYPE */
+#define PWM   251 // PWM = PWM OUTPUT
+#define DIG   252 // DIG = DIGITAL
+#define DXT   253 // DXT = DIGITAL EXTENDED
+#define ANA   254 // ANA = ANALOG
+#define ALL   255 // ALL = DIGITAL + ANALOG
+
+#define OFFSET 2 // DIG OFFSET
+#define DIGSIZE 14 //14 Digital Pins
+#define DXTSIZE 6 //6 Analog to Digital Pins
+#define ANASIZE 6 //6 Analog Pins
+
 struct preamble {
   uint8_t preamble[PREAMBLE_SIZE];
 };

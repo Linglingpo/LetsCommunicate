@@ -11,18 +11,6 @@
 #include "EnableInterrupt.h"
 #include "Communicate.h"
 
-/* PAYLOAD MESSAGE TYPE */
-#define PWM   251 // PWM = PWM OUTPUT
-#define DIG   252 // DIG = DIGITAL
-#define DXT   253 // DXT = DIGITAL EXTENDED
-#define ANA   254 // ANA = ANALOG
-#define ALL   255 // ALL = DIGITAL + ANALOG
-
-#define OFFSET 2 // DIG OFFSET
-#define DIGSIZE 14 //14 Digital Pins
-#define DXTSIZE 6 //6 Analog to Digital Pins
-#define ANASIZE 6 //6 Analog Pins
-
 struct letscommunicate {
   uint8_t mastercomm = -1;  // COMMUNICATION TYPE - HARDSERIAL | SOFTSERIAL | ISQUAREDC
   uint8_t intercomm = -1;   // COMMUNICATION TYPE - SOFTSERIAL | ISQUAREDC
