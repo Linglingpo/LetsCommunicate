@@ -77,13 +77,14 @@ public:
   Communicate();
   Communicate(uint8_t , uint8_t);
   Communicate(uint8_t , uint8_t , uint8_t);
-  uint8_t send(uint8_t, const transmit &);
-  uint8_t receive(uint8_t, uint8_t, const transmit &);
+  uint8_t send(uint8_t, transmit &);
   uint8_t discover(uint8_t);
   void serialEvent();
 
 private:
   transmission * transmitState;
   uint8_t constructPreamble(uint8_t, uint8_t, uint8_t, transmit &);
+  uint8_t receive(uint8_t, uint8_t, transmit &);
+  uint8_t peek(uint8_t, transmit & channel);
 };
 #endif // COMMUNICATE_H

@@ -26,7 +26,7 @@ uint8_t Communicate::discover(uint8_t _comm) {
     case HARDSERIAL:
         if( (*this).constructPreamble(_comm, (*this).transmitState->source, SYN, (*this).transmitState->master) ) {
           ///send
-          send(_comm, (*this).transmitState->master);
+          return send(_comm, (*this).transmitState->master);
         }
       //return 0;
     break;
@@ -53,9 +53,8 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
   return 1;
 }
 
-uint8_t Communicate::send(uint8_t _comm, const transmit & channel) {
+uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
   uint8_t _return = 0;
-
 
   switch(_comm) {
     case HARDSERIAL:
@@ -77,8 +76,11 @@ uint8_t Communicate::send(uint8_t _comm, const transmit & channel) {
           (*this).stopWatchReset();
     } while (counter != MAX_ATTEMPTS && receive != 1);
 
-      if(counter >= MAX_ATTEMPTS || receive != 1) { return 0; }
-
+      /* IF THIS IS TRUE - THEN COMMUICATION FAILED - ERROR - receive has several error codes */
+      if(counter >= MAX_ATTEMPTS || receive != 1) { return receive; } else { return receive; }
+      if(channel.preamble[6] == CNT || channel.preamble[6] == FIN) {
+        (*this).send(_comm, channel);
+      }
 
       break;
   }
@@ -88,7 +90,7 @@ uint8_t Communicate::send(uint8_t _comm, const transmit & channel) {
 }
 
 
-uint8_t Communicate::receive(uint8_t _comm, uint8_t _counter, const transmit & channel) {
+uint8_t Communicate::receive(uint8_t _comm, uint8_t _counter, transmit & channel) {
   uint8_t _return = 0;
 
   switch(_comm) {
@@ -102,14 +104,53 @@ uint8_t Communicate::receive(uint8_t _comm, uint8_t _counter, const transmit & c
           _permittedTime = (*this).elapsed();
       } while( _permittedTime < ( DEFAULTPERIOD + (DEFAULTPERIOD * _counter) ) && _response != HELLO);
 
+      /* IF THIS IS TRUE - THEN COMMUICATION FAILED - ERROR */
       if(_response != HELLO || _counter >= MAX_ATTEMPTS) { return 0; }
 
+      /* IF THIS IS TRUE - THEN COMMUICATION SUCCEEDED - LETS PEEK INSIDE */
+      return (*this).peek(_comm, channel);
+      break;
+  }
+  return _return;
+}
 
+uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
+  /* CHECK THE REPONSE */
+  uint8_t _response = Serial.read(); // PREAMBLE SIZE - ASSUME 7
+  /* STORE THE RESPONSE */
+  uint8_t * received = new uint8_t[_response - 2];
+  for(int i = 0; i < _response - 2; i++)
+    received[i] = Serial.read();
+
+  /* SWITCH TO THE RECEIVED CASE */
+  switch(received[4]) {
+    case SYN:
+      /* IS ARDUINO ORIGINAL SYN == RECEIVED ACK */
+      if(received[3] == channel.syn) {
+        channel.target = received[0];
+        channel.syn = ++received[2];
+        channel.ack = received[3];
+      }
+      /* SEND FINISH MESSAGE - WE HAVE DISCOVERED AND SYNCHED */
+      if(!channel.discovered) {
+        channel.discovered = true;
+        (*this).constructPreamble(_comm, (*this).transmitState->source, FIN, channel);
+      } else {
+        /* HAVE A PAYLOAD TO DELIVER NOW */
+        (*this).constructPreamble(_comm, (*this).transmitState->source, CNT, channel);
+      }
+      return 1;
+      break;
+    case URG:
+      break;
+    case RST:
+      break;
+    case CNT:
+      break;
+    case FIN:
       break;
   }
 
-
-  return _return;
 }
 
 // uint8_t Communicate::send(uint8_t _comm, const transmit & channel) {
@@ -118,32 +159,11 @@ uint8_t Communicate::receive(uint8_t _comm, uint8_t _counter, const transmit & c
 //   // determine where to send?????
 //   switch(_comm) {
 //     case 0: // HARDSERIAL
-//     // A sequence of events to successfully send or not send....
-//
-//         (*this).discover(_comm);
-//         //Serial.println((*this).transmitState->master.startPacket.preamble);
-//         for(int i = 0; i < PREAMBLE_SIZE; i++) {
-//           Serial.write(channel.preamble[i]);
-//         }
-//         Serial.write("\n");
+
 //
 //         // Wating for Computer to Repond....
 //         uint8_t _response = Serial.read();
 //         while(_response != HELLO ) { Serial.println("Wating for Discovery ... "); _response = Serial.read(); delay(250); }
-//
-//         /* IF WE ARE HERE - THEN PROCESSING RESPONDED ;) - NOW TO CHECK THE REPONSE */
-//         _response = Serial.read(); // PREAMBLE SIZE
-//         uint8_t * received = new uint8_t[_response - 2];
-//
-//         for(int i = 0; i < _response - 2; i++) {
-//           received[i] = Serial.read();
-//         }
-//
-//         /* IS ARDUINO ORIGINAL SYN == RECEIVED ACK */
-//         if(received[3] == (*this).transmitState->master.syn) {
-//           (*this).transmitState->master.target = received[0];
-//           (*this).transmitState->master.syn = ++received[2];
-//         }
 //
 //         /* SEND FINISH MESSAGE - WE HAVE DISCOVERED AND SYNCHED */
 //         (*this).transmitState->master.preamble[0] = HELLO;
