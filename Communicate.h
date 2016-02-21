@@ -36,6 +36,8 @@
 #define DXTSIZE 6 //6 Analog to Digital Pins
 #define ANASIZE 6 //6 Analog Pins
 
+#define MAX_ATTEMPTS 3
+
 struct preamble {
   uint8_t preamble[PREAMBLE_SIZE];
 };
@@ -47,18 +49,19 @@ struct payload {
 
 struct transmit {
   bool discovered = false;
-  preamble startPacket;
-  payload endPacket;
+  uint8_t preamble[PREAMBLE_SIZE];
+  uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
+  uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
 
   uint8_t syn = 0;
   uint8_t ack = 0;
+  uint8_t target = 0;     // THEIR_ID
 };
 
 struct transmission {
   uint8_t mastercomm = 0;  // COMMUNICATION TYPE - HARDSERIAL | SOFTSERIAL | ISQUAREDC
   uint8_t intercomm = 0;   // COMMUNICATION TYPE - SOFTSERIAL | ISQUAREDC
   uint8_t source = 0;     // MY_ID
-  uint8_t target = 0;     // THEIR_ID
 
   //Arduino to computer (object)
   transmit master = transmit();
@@ -74,12 +77,13 @@ public:
   Communicate();
   Communicate(uint8_t , uint8_t);
   Communicate(uint8_t , uint8_t , uint8_t);
-  uint8_t send(uint8_t);
-  uint8_t receive(uint8_t);
+  uint8_t send(uint8_t, const transmit &);
+  uint8_t receive(uint8_t, uint8_t, const transmit &);
   uint8_t discover(uint8_t);
   void serialEvent();
 
 private:
   transmission * transmitState;
+  uint8_t constructPreamble(uint8_t, uint8_t, uint8_t, transmit &);
 };
 #endif // COMMUNICATE_H

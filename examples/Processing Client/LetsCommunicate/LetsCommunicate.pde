@@ -37,12 +37,12 @@ void discover(Serial p){
     preamble = new short[PREAMBLE_SIZE - OFFSET];
     for(int i = 0; i < PREAMBLE_SIZE - OFFSET; i++){
       preamble[i] = (short)p.read();
-      //System.out.print(preamble[i]); System.out.print(" ");
+      System.out.print(preamble[i]); System.out.print(" ");
     }
     /* RESPONSE FROM PROCESSING */
     short[] _preamble = buildResponsePreamble(preamble);
     for(int i = 0; i < PREAMBLE_SIZE; i++){
-      //System.out.print(_preamble[i]); System.out.print(" ");
+      System.out.print(_preamble[i]); System.out.print(" ");
       port.write(_preamble[i]);
     }
     println();
@@ -70,7 +70,7 @@ short[] buildResponsePreamble(short[] type){
   short _temp[] = new short[PREAMBLE_SIZE];
   _temp[0] = HELLO;
   _temp[1] = PREAMBLE_SIZE;
-  _temp[2] = type[1];
+  _temp[2] = MYID;
   _temp[3] = type[0];
 
     switch(type[4]) {
@@ -108,7 +108,7 @@ short[] buildResponsePreamble(short[] type){
 /********************************************************************************/
 /* Variables used for the Communication between Processing and Arduino          */
 /********************************************************************************/
-
+  final short MYID = 0x10; // MY_ID
   /* HISTORY & PAYLOAD SIZES */
   final short HISTORY_SIZE = 3; 
   final short PREAMBLE_SIZE = 7;
@@ -143,7 +143,6 @@ short[] buildResponsePreamble(short[] type){
   static short syn = 0;    // SYN_ID
   static short ack = 0;    // ACK_ID
   static short source = 0; // SENDER_ID
-  static short target = 0; // MY_ID
   static short msg = 0;
   static short preamble[];
   static short payload_digital[];
