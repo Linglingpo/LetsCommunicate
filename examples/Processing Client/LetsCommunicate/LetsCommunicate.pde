@@ -58,7 +58,7 @@ void discover(Serial p){
     if(!discovered) {
       System.out.println("COME ON ARDUINO");
     } else {
-      System.out.println("DICOVERED");
+      System.out.println("DISCOVERED");
     }   
 }
 
