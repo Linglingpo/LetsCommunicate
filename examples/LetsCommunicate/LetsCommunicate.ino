@@ -36,14 +36,7 @@ void setup() {
 void loop() {
   first.run();
   state = first.getLetsCommunicateState();
-  pinState = digitalRead(pinNum);
-  if (pinState == LOW) {
-    //Serial.println(state->digitalPinsSize);
-    for (int i = 0; i < state->digitalPinsSize; i++) {
-      Serial.print(state->readDigitalRead[i]);
-    }
-    Serial.println();
-  }
+  first.send(MASTERCOMM);
 
   //state->digitalPinsAllocatedNonCustom = 0; // MUST GET AN ERROR - COMPILE ERROR !!!!
 
