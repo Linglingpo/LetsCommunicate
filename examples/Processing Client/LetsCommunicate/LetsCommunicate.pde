@@ -6,7 +6,7 @@ void setup() {
   size(200, 200);
   String portName = Serial.list()[3];
   println(Serial.list()[3]);
-  port = new Serial(this, portName, 115200);
+  port = new Serial(this, portName, 9600);
   port.bufferUntil('\n');
 }
 
@@ -32,12 +32,13 @@ void serialEvent(Serial p) {
 }
 
 void discover(Serial p){ 
-
+    short _temp = (short)p.read();
     preamble = new short[PREAMBLE_SIZE - OFFSET];
     for(int i = 0; i < PREAMBLE_SIZE - OFFSET; i++){
       preamble[i] = (short)p.read();
       System.out.print(preamble[i]); System.out.print(" ");
     }
+    
     /* RESPONSE FROM PROCESSING */
     short[] _preamble = buildResponsePreamble(preamble);
     for(int i = 0; i < PREAMBLE_SIZE; i++){
@@ -48,11 +49,11 @@ void discover(Serial p){
     
     /* DO NOT REMOVE - LEAVE THIS HERE - PROCESSING NEEDS IT !!!!! */
     //while(p.available() < 0) {
-    //  _temp = (short)p.read();
-    //  while(_temp != HELLO) {
-    //    System.out.println("Wating for Confirmation from Arduino"); 
-    //    _temp = (short)p.read(); delay(1000);
-    //  }
+    // _temp = (short)p.read();
+    // while(_temp != HELLO) {
+    //   System.out.println("Wating for Confirmation from Arduino"); 
+    //   _temp = (short)p.read(); delay(1000);
+    // }
     //}
     if(!discovered) {
       System.out.println("COME ON ARDUINO");
