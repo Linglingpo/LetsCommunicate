@@ -48,8 +48,11 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
   channel.preamble[3] = 0;
   channel.preamble[4] = (!channel.discovered && _type == SYN) ? channel.syn = random(0, 255) : channel.syn;
   channel.preamble[5] = (!channel.discovered && _type == SYN) ? channel.ack = 0 : channel.ack;
-  channel.preamble[6] = _type;
+  channel.preamble[6] = FIN;
 
+  for(int i = 0; i < PREAMBLE_SIZE; i++)
+    Serial.print(channel.preamble[i]);
+  Serial.println("");
   return 1;
 }
 
@@ -64,11 +67,12 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
       do {
           for(int i = 0; i < PREAMBLE_SIZE; i++)
             Serial.write(channel.preamble[i]);
-
-          if(channel.preamble[6] == CNT)
+          Serial.write("\n");
+          
+          if(channel.preamble[6] == CNT) { }
             //for(int i = 0; i < 14; i++)
               //Serial.write(channel.payload[i]);
-          Serial.write("\n");
+
 
           Serial.print("ATTEMPT NUMBER: "); Serial.print(counter + 1); Serial.println(" OF THREE ATTEMPTS!");
           receive = (*this).receive(_comm, counter++, channel);
@@ -108,7 +112,7 @@ uint8_t Communicate::receive(uint8_t _comm, uint8_t _counter, transmit & channel
       if(_response != HELLO || _counter >= MAX_ATTEMPTS) { return 0; }
 
       /* IF THIS IS TRUE - THEN COMMUICATION SUCCEEDED - LETS PEEK INSIDE */
-      return (*this).peek(_comm, channel);
+      //return (*this).peek(_comm, channel);
       break;
   }
   return _return;

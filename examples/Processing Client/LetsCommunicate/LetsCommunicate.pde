@@ -32,8 +32,7 @@ void serialEvent(Serial p) {
 }
 
 void discover(Serial p){ 
-    short _temp = (short)p.read();
-    
+
     preamble = new short[PREAMBLE_SIZE - OFFSET];
     for(int i = 0; i < PREAMBLE_SIZE - OFFSET; i++){
       preamble[i] = (short)p.read();
