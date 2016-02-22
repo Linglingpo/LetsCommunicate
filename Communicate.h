@@ -4,39 +4,39 @@
 #include <Arduino.h>
 #include "StopWatch.h"
 
-#define HISTORY_SIZE 3
-#define PREAMBLE_SIZE 7
-#define PAYLOAD_DIGITAL_SIZE 3
-#define PAYLOAD_ANALOG_SIZE 12
+#define HISTORY_SIZE         0x03
+#define PREAMBLE_SIZE        0x07
+#define PAYLOAD_DIGITAL_SIZE 0x03
+#define PAYLOAD_ANALOG_SIZE  0x0C
 
-#define HELLO 126 // ~
+#define HELLO 0x7E // ~
 /* PREAMBLE TYPES */
-#define SYN   0 // SYN = SYNCHRONISE
-#define URG   1 // URG = ACT NOW
-#define RST   2 // RST = CLEAR?
-#define CNT   3 // CNT = MORE THAN ONE MESSAGE - CHECK FOR FIN
-#define FIN   4 // FIN = COMMUNICATIONS FINISHED
+#define SYN   0x00 // SYN = SYNCHRONISE
+#define URG   0x01 // URG = ACT NOW
+#define RST   0x02 // RST = CLEAR?
+#define CNT   0x03 // CNT = MORE THAN ONE MESSAGE - CHECK FOR FIN
+#define FIN   0x04 // FIN = COMMUNICATIONS FINISHED
 
 /* SYN RESET CONTROL */
-#define MAXMSGS 255
+#define MAXMSGS 0xFF
 /* COMMUNICATIONS TYPE */
-#define HARDSERIAL  0
-#define SOFTSERIAL  1
-#define ISQUAREDC   2
+#define HARDSERIAL  0x00
+#define SOFTSERIAL  0x01
+#define ISQUAREDC   0x02
 
 /* PAYLOAD MESSAGE TYPE */
-#define PWM   251 // PWM = PWM OUTPUT
-#define DIG   252 // DIG = DIGITAL
-#define DXT   253 // DXT = DIGITAL EXTENDED
-#define ANA   254 // ANA = ANALOG
-#define ALL   255 // ALL = DIGITAL + ANALOG
+#define PWM   0xFB // PWM = PWM OUTPUT
+#define DIG   0xFC // DIG = DIGITAL
+#define DXT   0xFD // DXT = DIGITAL EXTENDED
+#define ANA   0xFE // ANA = ANALOG
+#define ALL   0xFF // ALL = DIGITAL + ANALOG
 
-#define OFFSET 2 // DIG OFFSET
-#define DIGSIZE 14 //14 Digital Pins
-#define DXTSIZE 6 //6 Analog to Digital Pins
-#define ANASIZE 6 //6 Analog Pins
+#define OFFSET  0x02 // DIG OFFSET
+#define DIGSIZE 0x0E //14 Digital Pins
+#define DXTSIZE 0x06 //6 Analog to Digital Pins
+#define ANASIZE 0x06 //6 Analog Pins
 
-#define MAX_ATTEMPTS 3
+#define MAX_ATTEMPTS 0x03
 
 struct preamble {
   uint8_t preamble[PREAMBLE_SIZE];

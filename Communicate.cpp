@@ -15,14 +15,15 @@ Communicate::Communicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _interco
 }
 
 void serialEvent() {
-  while(Serial.available() > 0) {
-    uint8_t _response = Serial.read();
-    if(_response == HELLO) {
-      Serial.write(_response);
-      Serial.write(Serial.read());
-      Serial.write("\n");
-    }
 
+      while(_response != HELLO) { }
+      
+      Serial.print("IN SERIAL EVENT!!!!!!");
+      Serial.print(Serial.read(), DEC);
+      delay(5);
+      Serial.print("\n");
+    }
+    }
   }
 }
 
@@ -33,12 +34,9 @@ uint8_t Communicate::discover(uint8_t _comm) {
   switch(_comm) {
     case HARDSERIAL:
         (*this).constructPreamble(_comm, (*this).transmitState->source, SYN, (*this).transmitState->master);
-          if( send(_comm, (*this).transmitState->master) ) {
-            (*this).constructPreamble(_comm, (*this).transmitState->source, FIN, (*this).transmitState->master);
-            if( send(_comm, (*this).transmitState->master) ) {
+        if( send(_comm, (*this).transmitState->master) )
               return 1;
-            }
-          }
+
       return 0;
     break;
     case SOFTSERIAL:
@@ -69,7 +67,6 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
       channel.preamble[6] = _type;
     break;
   }
-
   return 1;
 }
 
@@ -93,6 +90,7 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
           //receive = (*this).receive(_comm, counter++, channel);
           (*this).stopWatchStop();
           (*this).stopWatchReset();
+          counter++;
     } while (counter != MAX_ATTEMPTS && receive != 1);
 
       /* IF THIS IS TRUE - THEN COMMUICATION FAILED - ERROR - receive has several error codes */
@@ -113,17 +111,25 @@ uint8_t Communicate::receive(uint8_t _comm, uint8_t _counter, transmit & channel
   switch(_comm) {
     case HARDSERIAL:
       uint8_t _response;
+      uint8_t * _response_;
       uint32_t _permittedTime = 0UL;
 
       (*this).stopWatchStart();
+      Serial.flush();
       do {
           _response = Serial.read();
-          uint8_t * received = new uint8_t[6];
           if(_response == HELLO) {
-            Serial.write('~');
-          for(int i = 0; i < 6; i++)
-            Serial.write(received[i]);
-            Serial.write("\n");
+            Serial.read();
+            _response_ = new uint8_t[PREAMBLE_SIZE - 2];
+            for(int i = 0; i < PREAMBLE_SIZE - 2; i++)
+            {
+              delay(15);
+              Serial.print(Serial.read()); Serial.print(" ");
+            }
+            Serial.println("");
+
+            break;
+
           }
           _permittedTime = (*this).elapsed();
       } while( _permittedTime < ( DEFAULTPERIOD + (DEFAULTPERIOD * _counter) ) && _response != HELLO);
@@ -131,45 +137,42 @@ uint8_t Communicate::receive(uint8_t _comm, uint8_t _counter, transmit & channel
       /* IF THIS IS TRUE - THEN COMMUICATION FAILED - ERROR */
       if(_response != HELLO || _counter >= MAX_ATTEMPTS) { return 0; }
 
+
       /* IF THIS IS TRUE - THEN COMMUICATION SUCCEEDED - LETS PEEK INSIDE */
       //return (*this).peek(_comm, channel);
       break;
   }
   return _return;
 }
-
-uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
-  /* CHECK THE REPONSE */
-  uint8_t _response = Serial.read(); // PREAMBLE SIZE - ASSUME 7
-  /* STORE THE RESPONSE */
-  uint8_t * received = new uint8_t[_response];
-  for(int i = 2; i < _response - 2; i++)
-    received[i] = Serial.read();
-
-  /* SWITCH TO THE RECEIVED CASE */
-  switch(received[4]) {
-    case SYN:
-      /* IS ARDUINO ORIGINAL SYN == RECEIVED ACK */
-      if(received[3] == channel.syn) {
-        channel.target = received[0];
-        channel.syn = ++received[2];
-        channel.ack = received[3];
-        channel.discovered = true;
-      }
-      /* SEND FINISH MESSAGE - WE HAVE DISCOVERED AND SYNCHED */
-      return 1;
-      break;
-    case URG:
-      break;
-    case RST:
-      break;
-    case CNT:
-      break;
-    case FIN:
-      break;
-  }
-
-}
+//
+// uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
+//
+//
+//
+//   /* SWITCH TO THE RECEIVED CASE */
+//   switch(received[4]) {
+//     case SYN:
+//       /* IS ARDUINO ORIGINAL SYN == RECEIVED ACK */
+//       if(received[3] == channel.syn) {
+//         channel.target = received[0];
+//         channel.syn = ++received[2];
+//         channel.ack = received[3];
+//         channel.discovered = true;
+//       }
+//       /* SEND FINISH MESSAGE - WE HAVE DISCOVERED AND SYNCHED */
+//       return 1;
+//       break;
+//     case URG:
+//       break;
+//     case RST:
+//       break;
+//     case CNT:
+//       break;
+//     case FIN:
+//       break;
+//   }
+//
+// }
 
 // uint8_t Communicate::send(uint8_t _comm, const transmit & channel) {
 //

@@ -4,9 +4,9 @@ Serial port;
 
 void setup() {
   size(200, 200);
-  String portName = Serial.list()[3];
-  println(Serial.list()[3]);
-  port = new Serial(this, portName, 9600);
+  String portName = Serial.list()[4];
+  println(Serial.list());
+  port = new Serial(this, portName, 115200);
   port.bufferUntil('\n');
 }
 
@@ -14,8 +14,6 @@ void draw() { }
 
 /********************************************************************************/
 /*  THE METHODS BELOW HANDLE ALL COMMUNICATIONS STATE WITH A CONNECTED ARDUINO  */
-/********************************************************************************/
-/*  DO NOT ALTER THESE METHODS UNLESS YOU UNDERSTAND HOW THE COMMUNICATION WORK */
 /********************************************************************************/
 
 void serialEvent(Serial p) { 
