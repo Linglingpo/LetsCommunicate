@@ -16,15 +16,14 @@ Communicate::Communicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _interco
 
 void serialEvent() {
 
-      while(_response != HELLO) { }
-      
+uint8_t _response = Serial.read();
+      while(_response != HELLO) {
+
       Serial.print("IN SERIAL EVENT!!!!!!");
       Serial.print(Serial.read(), DEC);
       delay(5);
       Serial.print("\n");
     }
-    }
-  }
 }
 
 uint8_t Communicate::discover(uint8_t _comm) {
