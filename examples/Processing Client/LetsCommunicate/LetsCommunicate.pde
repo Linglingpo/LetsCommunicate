@@ -86,12 +86,11 @@ short[] peek(short[] type){
         /* FINISH */
         //System.out.println("SYN IS: " + syn);
         //System.out.println("MSGID IS: " + type[2]);
-        if(syn == type[2]) {
-          _temp[4] = syn++;
+        if(++syn == type[2]) {
+          _temp[4] = ++syn;
           if(!discovered) { discovered = true; }
         }
-        ack = type[2];
-        _temp[5] = ack;
+        _temp[5] = (ack = type[2]);
         _temp[6] = FIN;
         
       break;
