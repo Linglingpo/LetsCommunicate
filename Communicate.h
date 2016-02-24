@@ -56,6 +56,7 @@ struct transmit {
   uint8_t syn = 0;
   uint8_t ack = 0;
   uint8_t target = 0;     // THEIR_ID
+
 };
 
 struct transmission {
@@ -79,12 +80,13 @@ public:
   Communicate(uint8_t , uint8_t , uint8_t);
   uint8_t send(uint8_t, transmit &);
   uint8_t discover(uint8_t);
-  //void serialEvent();
+  void serialEvent();
 
 private:
   transmission * transmitState;
   uint8_t constructPreamble(uint8_t, uint8_t, uint8_t, transmit &);
   uint8_t receive(uint8_t, uint8_t, transmit &);
   uint8_t peek(uint8_t, uint8_t * , transmit & channel);
+  uint8_t reConstructPreamble(uint8_t, uint8_t, uint8_t, transmit &, uint8_t *);
 };
 #endif // COMMUNICATE_H

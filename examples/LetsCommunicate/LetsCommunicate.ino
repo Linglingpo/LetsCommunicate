@@ -35,7 +35,7 @@ void setup() {
   //first.initialiseInputWithInterruptsAs(ALL);
   first.stateOfTheUnion();
   /* DISCOVER MASTER TARGET */
-  //if(!first.discover(MASTERCOMM)) { Serial.println("Check Connections to TARGET Device | Program - Currently Not Available! "); }
+  if(!first.discover(MASTERCOMM)) { Serial.println("Check Connections to TARGET Device | Program - Currently Not Available! "); }
   /* DISCOVER INTER TARGET(s) */
   //if(!first.discover(INTERCOMM)) { Serial.println("Check Connections to TARGET Device | Program - Currently Not Available! "); }
 }
@@ -43,7 +43,7 @@ void setup() {
 void loop() {
   first.run();
   state = first.getLetsCommunicateState();
-  first.stateOfTheUnion();
+  //first.stateOfTheUnion();
   //first.send(MASTERCOMM);
 
   //state->digitalPinsAllocatedNonCustom = 0; // MUST GET AN ERROR - COMPILE ERROR !!!!
