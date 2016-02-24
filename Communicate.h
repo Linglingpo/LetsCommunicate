@@ -80,7 +80,6 @@ public:
   Communicate(uint8_t , uint8_t , uint8_t);
   uint8_t send(uint8_t, transmit &);
   uint8_t discover(uint8_t);
-  void serialEvent();
 
 private:
   transmission * transmitState;

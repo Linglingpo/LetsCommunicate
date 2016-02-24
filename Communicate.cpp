@@ -1,4 +1,5 @@
 #include "Communicate.h"
+
 uint8_t * msgFromProcessing;
 bool updatePreamble = false;
 
@@ -17,84 +18,32 @@ Communicate::Communicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _interco
 }
 
 // void serialEvent() {
-//
-//       while(_response != HELLO) { }
-//
-//       Serial.print("IN SERIAL EVENT!!!!!!");
-//       Serial.print(Serial.read(), DEC);
-//       delay(5);
-//       Serial.print("\n");
-//     }
-//     }
+//   Serial.available();
+//   Serial.print("Msg From Processing: ");
+//   uint8_t temp = Serial.read();
+//   if(temp == 126){
+//   updatePreamble = true;
+//   msgFromProcessing = new uint8_t [PREAMBLE_SIZE];
+//   // no ~
+//   for(int i = 0; i < PREAMBLE_SIZE - 1; i++){
+//   msgFromProcessing[i] = Serial.read();
+//   Serial.print(msgFromProcessing[i]);
 //   }
+//   Serial.println();
+//   delay(50);
+//   /*
+//   Serial.print("updatePreamble: ");
+//   Serial.print(updatePreamble);
+//   Serial.println();
+//   */
+//   //(*this).reConstructPreamble(SYN, msgFromProcessing);
+//   //(*this).transmitState->master->preamble[3] = msgFromProcessing[2];
+//   //(*this).transmitState->master->preamble[5] = msgFromProcessing[4]+1;
+// //update preamble ??
+// }else {
+//   Serial.print("Error");
 // }
-
-void serialEvent() {
-  Serial.available();
-  Serial.print("Msg From Processing: ");
-  uint8_t temp = Serial.read();
-  if(temp == 126){
-  updatePreamble = true;
-  msgFromProcessing = new uint8_t [PREAMBLE_SIZE];
-  // no ~
-  for(int i = 0; i < PREAMBLE_SIZE - 1; i++){
-  msgFromProcessing[i] = Serial.read();
-  Serial.print(msgFromProcessing[i]);
-  }
-  Serial.println();
-  delay(50);
-  /*
-  Serial.print("updatePreamble: ");
-  Serial.print(updatePreamble);
-  Serial.println();
-  */
-  //(*this).reConstructPreamble(SYN, msgFromProcessing);
-  //(*this).transmitState->master->preamble[3] = msgFromProcessing[2];
-  //(*this).transmitState->master->preamble[5] = msgFromProcessing[4]+1;
-//update preamble ??
-}else {
-  Serial.print("Error");
-}
-}
-
-
-uint8_t Communicate::discover(uint8_t _comm) {
-  uint8_t _return = 0;
-  switch(_comm) {
-    case HARDSERIAL:
-        (*this).constructPreamble(_comm, (*this).transmitState->source, SYN, (*this).transmitState->master);
-        if(send(_comm, (*this).transmitState->master) ) {
-          (*this).constructPreamble(_comm, (*this).transmitState->source, FIN, (*this).transmitState->master);
-          if(send(_comm, (*this).transmitState->master) )
-            return 1;
-        }
-      return 0;
-    break;
-    case SOFTSERIAL:
-      //return 0;
-    break;
-    case ISQUAREDC:
-      //return 0;
-    break;
-  }
-  return _return;
-}
-
-uint8_t Communicate::reConstructPreamble(uint8_t _comm, uint8_t _source, uint8_t _type, transmit & channel, uint8_t * _msgFromProcessing){
-  channel.preamble[0] = HELLO;
-  channel.preamble[1] = PREAMBLE_SIZE;
-  channel.preamble[2] = _source;
-  channel.preamble[3] = (!channel.discovered && _type == SYN) ? channel.target = _msgFromProcessing[2] : channel.target;
-  channel.preamble[4] = (!channel.discovered && _type == SYN) ? channel.syn = random(0, 255) : channel.syn;
-  channel.preamble[5] = (!channel.discovered && _type == SYN) ? channel.ack = _msgFromProcessing[4]+1 : channel.ack;
-
-  Serial.print("NEW PREAMBLE: ");
-  for(int i = 0; i < PREAMBLE_SIZE; i++) {
-    Serial.print(channel.preamble[i]); Serial.print("");
-  }
-  Serial.println("");
-}
-
+// }
 uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _type, transmit & channel) {
 
   channel.preamble[0] = HELLO;
@@ -122,6 +71,53 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
   return 1;
 }
 
+uint8_t Communicate::discover(uint8_t _comm) {
+  uint8_t _return = 0;
+  uint8_t seq;
+  uint8_t * sequence = new uint8_t[2];
+  sequence[0] = SYN;
+  sequence[1] = FIN;
+
+  switch(_comm) {
+    case HARDSERIAL:
+
+      uint8_t response;
+      do {
+        (*this).constructPreamble(_comm, (*this).transmitState->source, sequence[seq++], (*this).transmitState->master);
+        response = send(_comm, (*this).transmitState->master);
+
+        if(response == 0) { Serial.println("FUCK UP"); return 0; }
+        delay(1000);
+      } while(seq < 2 && response != 1);
+      return 1;
+    break;
+
+    case SOFTSERIAL:
+      //return 0;
+    break;
+    case ISQUAREDC:
+      //return 0;
+    break;
+  }
+  return _return;
+}
+
+// uint8_t Communicate::reConstructPreamble(uint8_t _comm, uint8_t _source, uint8_t _type, transmit & channel, uint8_t * _msgFromProcessing){
+//   channel.preamble[0] = HELLO;
+//   channel.preamble[1] = PREAMBLE_SIZE;
+//   channel.preamble[2] = _source;
+//   channel.preamble[3] = (!channel.discovered && _type == SYN) ? channel.target = _msgFromProcessing[2] : channel.target;
+//   channel.preamble[4] = (!channel.discovered && _type == SYN) ? channel.syn = random(0, 255) : channel.syn;
+//   channel.preamble[5] = (!channel.discovered && _type == SYN) ? channel.ack = _msgFromProcessing[4]+1 : channel.ack;
+//
+//   Serial.print("NEW PREAMBLE: ");
+//   for(int i = 0; i < PREAMBLE_SIZE; i++) {
+//     Serial.print(channel.preamble[i]); Serial.print("");
+//   }
+//   Serial.println("");
+// }
+
+
 uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
   uint8_t _return = 0;
 
@@ -140,12 +136,13 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
           Serial.write("\n");
           //Serial.print("ATTEMPT NUMBER: "); Serial.print(counter + 1); Serial.println(" OF THREE ATTEMPTS!");
           receive = (*this).receive(_comm, counter++, channel);
-          (*this).stopWatchStop();
-          (*this).stopWatchReset();
-    } while (counter != MAX_ATTEMPTS && receive != 1);
+          Serial.println(counter);
+          /* IF THIS IS TRUE - THEN COMMUICATION FAILED - ERROR - receive has several error codes */
 
-      /* IF THIS IS TRUE - THEN COMMUICATION FAILED - ERROR - receive has several error codes */
-      if(counter >= MAX_ATTEMPTS || receive != 1) { return receive; }
+          if(counter == MAX_ATTEMPTS /*|| receive != 1*/) { return 0; }
+    } while (counter != MAX_ATTEMPTS /*&& receive != 1*/);
+
+
       return 1;
       break;
   }
@@ -158,15 +155,17 @@ uint8_t Communicate::receive(uint8_t _comm, uint8_t _counter, transmit & channel
 
   switch(_comm) {
     case HARDSERIAL:
-
-      uint32_t _permittedTime = 0UL;
+      (*this).stopWatchStop();
+      (*this).stopWatchReset();
       (*this).stopWatchStart();
-
-      while( _permittedTime < ( DEFAULTPERIOD + (DEFAULTPERIOD * _counter) ) && !Serial.available())
-          _permittedTime = (*this).elapsed();
-
-      /* IF THIS IS TRUE - THEN COMMUICATION FAILED - ERROR */
-      if(_counter >= MAX_ATTEMPTS) { return 0; }
+      uint32_t _permittedTime = 0UL;
+      uint16_t timer = ( DEFAULTPERIOD + (DEFAULTPERIOD * _counter) );
+      
+      do {
+        _permittedTime = (*this).elapsed();
+        /* IF THIS IS TRUE - THEN COMMUICATION ATTEMPT TIMED OUT */
+        if(_permittedTime >= timer) { return 0; }
+      } while( _permittedTime < timer && !Serial.available());
 
       Serial.println("WE HAVE A MESSAGE TO PEEK AT AND VERIFY");
       uint8_t * _response = new uint8_t[PREAMBLE_SIZE];
