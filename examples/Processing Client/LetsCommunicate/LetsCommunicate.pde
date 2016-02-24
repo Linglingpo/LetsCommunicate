@@ -4,7 +4,7 @@ Serial port;
 
 void setup() {
   size(200, 200);
-  String portName = Serial.list()[7];
+  String portName = Serial.list()[3];
   println(Serial.list());
   port = new Serial(this, portName, 115200);
   port.bufferUntil('\n');
@@ -45,6 +45,7 @@ void discover(Serial p){
     }
     println();
 
+
     if(!discovered) {
       System.out.println("COME ON ARDUINO");
     } else {
@@ -68,6 +69,7 @@ short[] peek(short[] type){
       case SYN:
         /* SYNCHRONISE */
         _temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn;
+        //System.out.println("SYN IS: " + syn);
         _temp[5] = ( ack = type[2] );
         _temp[6] = SYN;
       break;
@@ -82,12 +84,16 @@ short[] peek(short[] type){
       break;
       case FIN:
         /* FINISH */
-        if(syn == type[2])
+        //System.out.println("SYN IS: " + syn);
+        //System.out.println("MSGID IS: " + type[2]);
+        if(syn == type[2]) {
           _temp[4] = syn++;
+          if(!discovered) { discovered = true; }
+        }
         ack = type[2];
         _temp[5] = ack;
         _temp[6] = FIN;
-        if(!discovered) { discovered = true; }
+        
       break;
     }
   return _temp;
@@ -129,13 +135,12 @@ short[] peek(short[] type){
   final short ISQUAREDC  = 0x02;
 
   static boolean discovered = false;
-  static short syn = 0;    // SYN_ID
-  static short ack = 0;    // ACK_ID
-  static short source = 0; // SENDER_ID
-  static short msg = 0;
-  static short preamble[];
-  static short payload_digital[];
-  static short payload_analog[];
+  short syn = 0;    // SYN_ID
+  short ack = 0;    // ACK_ID
+  short source = 0; // SENDER_ID
+  short preamble[];
+  short payload_digital[];
+  short payload_analog[];
 
 /********************************************************************************/
 /* Variables used for the Communication between Processing and Arduino          */
