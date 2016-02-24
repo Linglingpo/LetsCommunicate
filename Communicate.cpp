@@ -65,7 +65,7 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
 
   Serial.print("PREAMBLE: ");
   for(int i = 0; i < PREAMBLE_SIZE; i++) {
-    Serial.print(channel.preamble[i]); Serial.print("");
+    Serial.print(channel.preamble[i]); Serial.print(" ");
   }
   Serial.println("");
   return 1;
@@ -73,7 +73,7 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
 
 uint8_t Communicate::discover(uint8_t _comm) {
   uint8_t _return = 0;
-  uint8_t seq;
+  uint8_t seq = 0;
   uint8_t * sequence = new uint8_t[2];
   sequence[0] = SYN;
   sequence[1] = FIN;
@@ -81,14 +81,13 @@ uint8_t Communicate::discover(uint8_t _comm) {
   switch(_comm) {
     case HARDSERIAL:
 
-      uint8_t response;
+      uint8_t receive;
       do {
         (*this).constructPreamble(_comm, (*this).transmitState->source, sequence[seq++], (*this).transmitState->master);
-        response = send(_comm, (*this).transmitState->master);
-
-        if(response == 0) { Serial.println("FUCK UP"); return 0; }
-        delay(1000);
-      } while(seq < 2 && response != 1);
+        receive = send(_comm, (*this).transmitState->master);
+        Serial.print("What is receive in DISCOVERY? "); Serial.println(receive);
+        if(receive == 0) { Serial.println("FUCK UP"); return 0; }
+      } while(seq < 2);
       return 1;
     break;
 
@@ -134,13 +133,11 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
             //for(int i = 0; i < 14; i++)
               //Serial.write(channel.payload[i]);
           Serial.write("\n");
-          //Serial.print("ATTEMPT NUMBER: "); Serial.print(counter + 1); Serial.println(" OF THREE ATTEMPTS!");
           receive = (*this).receive(_comm, counter++, channel);
-          Serial.println(counter);
-          /* IF THIS IS TRUE - THEN COMMUICATION FAILED - ERROR - receive has several error codes */
 
-          if(counter == MAX_ATTEMPTS /*|| receive != 1*/) { return 0; }
-    } while (counter != MAX_ATTEMPTS /*&& receive != 1*/);
+          /* IF THIS IS TRUE - THEN COMMUICATION FAILED - ERROR - receive has several error codes */
+          if( counter == MAX_ATTEMPTS ) { return 0; }
+    } while ( counter != MAX_ATTEMPTS && receive != 1);
 
 
       return 1;
@@ -160,46 +157,44 @@ uint8_t Communicate::receive(uint8_t _comm, uint8_t _counter, transmit & channel
       (*this).stopWatchStart();
       uint32_t _permittedTime = 0UL;
       uint16_t timer = ( DEFAULTPERIOD + (DEFAULTPERIOD * _counter) );
-      
+
       do {
         _permittedTime = (*this).elapsed();
         /* IF THIS IS TRUE - THEN COMMUICATION ATTEMPT TIMED OUT */
         if(_permittedTime >= timer) { return 0; }
       } while( _permittedTime < timer && !Serial.available());
 
-      Serial.println("WE HAVE A MESSAGE TO PEEK AT AND VERIFY");
-      uint8_t * _response = new uint8_t[PREAMBLE_SIZE];
-
-      for(int i = 0; i < PREAMBLE_SIZE; i++) {
-        _response[i] = Serial.read();
-      }
-
       /* IF THIS IS TRUE - THEN COMMUICATION SUCCEEDED - LETS PEEK INSIDE */
-      //return (*this).peek(_comm, _response, channel);
+      return (*this).peek(_comm, channel);
       break;
   }
   return _return;
 }
 
-uint8_t Communicate::peek(uint8_t _comm, uint8_t * response, transmit & channel) {
-  Serial.print("PEEK: ");
+uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
+
+  Serial.println("WE HAVE A MESSAGE TO PEEK AT AND VERIFY");
+  uint8_t * response = new uint8_t[PREAMBLE_SIZE];
   for(int i = 0; i < PREAMBLE_SIZE; i++) {
-    Serial.print(response[i]); Serial.print("");
+    response[i] = Serial.read();
+    Serial.print(response[i]); Serial.print(" ");
   }
-  Serial.println("");
+  Serial.println(" ");
 
+  if(response[0] != HELLO) { Serial.println("HELLO"); return 0; }
+  if(response[1] != PREAMBLE_SIZE) { Serial.println("PREAMBLE"); return 0; }
+  if(response[3] != (*this).transmitState->source) { Serial.println("SOURCE");return 0; }
+  if(response[5] != channel.syn) { Serial.println("SYN #"); return 0; }
+  if(response[6] != channel.preamble[6]) { Serial.println("SYN TYPE"); return 0; }
 
-  /* SWITCH TO THE RECEIVED CASE */
+  /* SWITCH TO THE RECEIVED TYPE MESSAGE */
   switch(response[6]) {
     case SYN:
-      /* IS ARDUINO ORIGINAL SYN == RECEIVED ACK */
-      if(response[5] == channel.syn) {
-        Serial.println("UPDATE STRUCT: ");
+      /* WE NEED TO CHECK EVERY FIELD IN THE RECEIVED MESSAGE */
         channel.target = response[2];
-        channel.syn = ++response[4];
+        channel.syn = response[4] + 1;
         channel.ack = response[4];
         channel.discovered = true;
-      }
       /* SEND FINISH MESSAGE - WE HAVE DISCOVERED AND SYNCHED */
       return 1;
       break;
