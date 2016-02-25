@@ -4,7 +4,7 @@ Serial port;
 
 void setup() {
   size(200, 200);
-  String portName = Serial.list()[4];
+  String portName = Serial.list()[6];
   println(Serial.list());
   port = new Serial(this, portName, 115200);
   port.bufferUntil('\n');
@@ -32,24 +32,26 @@ void serialEvent(Serial p) {
 void discover(Serial p){
     short _temp = (short)p.read();
     preamble = new short[PREAMBLE_SIZE - OFFSET];
+    System.out.print("ARDUINO MSG: ");
     for(int i = 0; i < PREAMBLE_SIZE - OFFSET; i++){
       preamble[i] = (short)p.read();
       System.out.print(preamble[i]); System.out.print(" ");
     }
+    println();
 
     /* RESPONSE FROM PROCESSING */
     short[] _preamble = peek(preamble);
+    System.out.print("PROCESSING MSG: ");
     for(int i = 0; i < PREAMBLE_SIZE; i++){
       System.out.print(_preamble[i]); System.out.print(" ");
       port.write(_preamble[i]);
     }
     println();
 
-
     if(!discovered) {
-      System.out.println("COME ON ARDUINO");
+      System.out.println("COME ON ARDUINO ------------------------------------");
     } else {
-      System.out.println("DISCOVERED");
+      System.out.println("DISCOVERED ------------------------------------");
     }
 }
 
@@ -86,13 +88,15 @@ short[] peek(short[] type){
         /* FINISH */
         //System.out.println("SYN IS: " + syn);
         //System.out.println("MSGID IS: " + type[2]);
+        //checking the Syn form arduino
         if(++syn == type[2]) {
+          //processing Syn update
           _temp[4] = ++syn;
           if(!discovered) { discovered = true; }
         }
         _temp[5] = (ack = type[2]);
         _temp[6] = FIN;
-        
+
       break;
     }
   return _temp;

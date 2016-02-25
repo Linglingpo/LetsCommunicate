@@ -43,7 +43,8 @@ void setup() {
 void loop() {
   first.run();
   state = first.getLetsCommunicateState();
-  //first.stateOfTheUnion();
+  first.stateOfTheUnion();
+  first.transission(MASTERCOMM, DIG);
   //first.send(MASTERCOMM);
 
   //state->digitalPinsAllocatedNonCustom = 0; // MUST GET AN ERROR - COMPILE ERROR !!!!

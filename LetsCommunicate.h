@@ -69,6 +69,7 @@ public:
     1st const the return type that is not able to change,
     2nd const the function annot change the value in struct */
   const letscommunicate * getLetsCommunicateState() const;
+  // transmit function should be here (mastercomm, payload type);
 
 private:
   /* MAINTAINS CURRENT STATE OF LETS COMMUNICATE */

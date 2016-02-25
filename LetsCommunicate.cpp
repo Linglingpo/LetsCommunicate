@@ -129,7 +129,19 @@ void LetsCommunicate::stateOfTheUnion() {
     }
     Serial.println(" ");
   }
+
+/*
+  // Send preamble MSG
+Serial.print("This is the preamble from send in Union: ");
+  for(int i = 0; i < PREAMBLE_SIZE; i++) {
+    Serial.print((*this).preambleFromCommunicate[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+  */
+
   Serial.println("*--------------------------------------------------------------------------------");
+
 }
 
 void LetsCommunicate::run() {

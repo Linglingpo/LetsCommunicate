@@ -14,6 +14,13 @@ Communicate::Communicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _interco
   (*this).transmitState->intercomm = _intercomm;
 }
 
+/*
+uint8_t Communicate::getPreambleMsg(uint8_t * _preambleToSend) {
+  preambleFromCommunicate = _preambleToSend;
+  return* preambleFromCommunicate;
+}
+*/
+
 uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _type, transmit & channel) {
 
   channel.preamble[0] = HELLO;
@@ -38,8 +45,84 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
     Serial.print(channel.preamble[i]); Serial.print(" ");
   }
   Serial.println("");
+
+  //(*this).getPreambleMsg(channel.preamble);
+
   return 1;
 }
+
+
+uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t* _payloadState, transmit & channel) {
+
+  /*
+  uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
+  uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
+  channel.preamble[0] = HELLO;
+  channel.preamble[1] = PREAMBLE_SIZE;
+  channel.preamble[2] = _source;
+  channel.preamble[3] = (!channel.discovered && _type == SYN) ? channel.target = 0 : channel.target;
+  channel.preamble[4] = (!channel.discovered && _type == SYN) ? channel.syn = random(0, 255) : channel.syn;
+  channel.preamble[5] = (!channel.discovered && _type == SYN) ? channel.ack = 0 : channel.ack;
+  */
+
+  switch(_payloadType) {
+    case DIG:
+    for(int i = 0; i < PAYLOAD_DIGITAL_SIZE; i++){
+      channel.payload_digital[i] = _digitalPinsSates[i];
+    }
+    break;
+    case DXT:
+    //???
+    break;
+    case ANA:
+    //??
+    break;
+    case ALL:
+    //??
+    break;
+  }
+}
+
+
+uint8_t Comunicate::transmission(uint8_t _comm, uint8_t _payloadType, uint8_t* _payloadState){
+// HAVE WE BEEN DISCOVERED...
+uint8_t _return = 0;
+uint8_t seq = 0;
+uint8_t * sequence = new uint8_t[3];
+sequence[0] = SYN;
+sequence[1] = CNT;
+sequence[2] = FIN;
+
+switch(_comm) {
+  case HARDSERIAL:
+  if (!(*this).transmitState->master.discovered){
+    (*this).discover(_comm);
+  }
+    uint8_t receive;
+    do {
+      (*this).constructPreamble(_comm, (*this).transmitState->source, sequence[seq++], (*this).transmitState->master);
+      //constructData ?? not work yet
+      (*this).constructData(_payloadType, _payloadState);
+      //send the preamble + data msg
+      receive = send(_comm, (*this).transmitState->master);
+      //to control SYN & FIN in discover
+      if(receive == 0) { return 0; }
+    } while(seq < 3);
+    return 1;
+  break;
+
+  case SOFTSERIAL:
+    //return 0;
+  break;
+  case ISQUAREDC:
+    //return 0;
+  break;
+    }
+return _return;
+  } // end of else
+}
+
+
 
 uint8_t Communicate::discover(uint8_t _comm) {
   uint8_t _return = 0;
@@ -55,6 +138,7 @@ uint8_t Communicate::discover(uint8_t _comm) {
       do {
         (*this).constructPreamble(_comm, (*this).transmitState->source, sequence[seq++], (*this).transmitState->master);
         receive = send(_comm, (*this).transmitState->master);
+        //to control SYN & FIN in discover
         if(receive == 0) { return 0; }
       } while(seq < 2);
       return 1;
@@ -66,7 +150,7 @@ uint8_t Communicate::discover(uint8_t _comm) {
     case ISQUAREDC:
       //return 0;
     break;
-  }
+    }
   return _return;
 }
 
@@ -106,14 +190,14 @@ uint8_t Communicate::receive(uint8_t _comm, uint8_t _counter, transmit & channel
       (*this).stopWatchStop();
       (*this).stopWatchReset();
       (*this).stopWatchStart();
-      uint32_t _permittedTime = 0UL;
-      uint16_t timer = ( DEFAULTPERIOD + (DEFAULTPERIOD * _counter) );
+      uint32_t timer = 0UL;
+      uint16_t _permittedTime = ( DEFAULTPERIOD + (DEFAULTPERIOD * _counter) );
 
       do {
-        _permittedTime = (*this).elapsed();
+        timer = (*this).elapsed();
         /* IF THIS IS TRUE - THEN COMMUICATION ATTEMPT TIMED OUT */
-        if(_permittedTime >= timer) { return 0; }
-      } while( _permittedTime < timer && !Serial.available());
+        if(timer >= _permittedTime) { return 0; }
+      } while( timer < _permittedTime && !Serial.available());
 
       /* IF THIS IS TRUE - THEN COMMUICATION SUCCEEDED - LETS PEEK INSIDE */
       return (*this).peek(_comm, channel);
