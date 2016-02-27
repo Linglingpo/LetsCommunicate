@@ -147,15 +147,15 @@ Serial.print("This is the preamble from send in Union: ");
 /* FUNTION TO CONSTRUCT PREABLE + DATA MSG AND TRANSMIT (SEND) */
 void LetsCommunicate::transmit(uint8_t _comm, uint8_t _payloadType){
     // call transmission function from Communicate.cpp
-    switch(_action) {
+    switch(_payloadType) {
       case DIG:
-      (*this).transmission(_comm, _payloadType, digitalPinsSize, (*this).state->readDigitalRead);
+      (*this).transmission(_comm, _payloadType, (*this).state-> digitalPinsSize, (*this).state->readDigitalRead);
       break;
       case DXT:
-      (*this).transmission(_comm, _payloadType, digitalPinsSize, (*this).state->readDigitalRead);
+      (*this).transmission(_comm, _payloadType, (*this).state-> digitalPinsSize, (*this).state->readDigitalRead);
       break;
       case ANA:
-      (*this).transmission(_comm, _payloadType, analogPinsSize, (*this).state->readAnalogRead);
+      (*this).transmission(_comm, _payloadType, (*this).state-> analogPinsSize, (*this).state->readAnalogRead);
       break;
       case ALL:
       //???
