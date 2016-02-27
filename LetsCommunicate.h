@@ -69,7 +69,9 @@ public:
     1st const the return type that is not able to change,
     2nd const the function annot change the value in struct */
   const letscommunicate * getLetsCommunicateState() const;
-  // transmit function should be here (mastercomm, payload type);
+
+  /* FUNTION TO CONSTRUCT PREABLE + DATA MSG AND TRANSMIT (SEND) */
+  void transmit(uint8_t, uint8_t);//COMMUNICATION TYPE / PAYLOAD TYPE
 
 private:
   /* MAINTAINS CURRENT STATE OF LETS COMMUNICATE */

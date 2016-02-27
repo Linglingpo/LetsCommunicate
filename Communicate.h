@@ -38,10 +38,12 @@
 
 #define MAX_ATTEMPTS 0x03
 
+//not using yet
 struct preamble {
   uint8_t preamble[PREAMBLE_SIZE];
 };
 
+//not using yet
 struct payload {
   uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
   uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
@@ -81,7 +83,9 @@ public:
   Communicate(uint8_t , uint8_t , uint8_t);
   uint8_t send(uint8_t, transmit &);
   uint8_t discover(uint8_t);
-  // transmission function that will be call in LetsCommunicate.cpp (mastercomm, payload type, *payload stats);
+  // transmission function that will be call in LetsCommunicate.cpp
+  //(mastercomm, payload type, payload size,  *payload stats);
+  uint8_t transmission(uint8_t , uint8_t, uint8_t , uint8_t*);
   //uint8_t getPreambleMsg(uint8_t *);
   //uint8_t* preambleFromCommunicate;
 

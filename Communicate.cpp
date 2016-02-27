@@ -52,8 +52,9 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
 }
 
 
-uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t* _payloadState, transmit & channel) {
+uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState, transmit & channel) {
 
+  Serial.print("In Data Construct: ");
   /*
   uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
   uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
@@ -67,9 +68,13 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t* _payloadState,
 
   switch(_payloadType) {
     case DIG:
-    for(int i = 0; i < PAYLOAD_DIGITAL_SIZE; i++){
-      channel.payload_digital[i] = _digitalPinsSates[i];
+    for(int i = 0; i < _payloadSize; i++){
+      channel.payload_digital[i] = _payloadState[i];
+      Serial.print(channel.payload_digital[i]);
+      Serial.print(" ");
     }
+    Serial.println();
+
     break;
     case DXT:
     //???
@@ -83,8 +88,8 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t* _payloadState,
   }
 }
 
-
-uint8_t Comunicate::transmission(uint8_t _comm, uint8_t _payloadType, uint8_t* _payloadState){
+//  (*this).transmission(_comm, _payloadType, digitalPinsSize, (*this).state->readDigitalRead);
+uint8_t Comunicate::transmission(uint8_t _comm, uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState){
 // HAVE WE BEEN DISCOVERED...
 uint8_t _return = 0;
 uint8_t seq = 0;
@@ -93,6 +98,7 @@ sequence[0] = SYN;
 sequence[1] = CNT;
 sequence[2] = FIN;
 
+// Need to know which communication type first
 switch(_comm) {
   case HARDSERIAL:
   if (!(*this).transmitState->master.discovered){
@@ -101,8 +107,8 @@ switch(_comm) {
     uint8_t receive;
     do {
       (*this).constructPreamble(_comm, (*this).transmitState->source, sequence[seq++], (*this).transmitState->master);
-      //constructData ?? not work yet
-      (*this).constructData(_payloadType, _payloadState);
+      //constructData ?? not work...
+      (*this).constructData(_payloadType, _payloadState, _payloadSize, (*this).transmitState->master);
       //send the preamble + data msg
       receive = send(_comm, (*this).transmitState->master);
       //to control SYN & FIN in discover
