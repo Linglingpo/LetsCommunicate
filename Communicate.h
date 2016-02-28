@@ -56,6 +56,9 @@ struct transmit {
   uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
   uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
 
+  //preamble + data
+  uint8_t * masterMsg;
+
   uint8_t syn = 0;
   uint8_t ack = 0;
   uint8_t target = 0;     // THEIR_ID
@@ -91,6 +94,8 @@ private:
   transmission * transmitState;
   uint8_t constructPreamble(uint8_t, uint8_t, uint8_t, transmit &);
   uint8_t constructData(uint8_t, uint8_t, uint8_t*, transmit &);
+
+  uint8_t constructMaster(uint8_t ,uint8_t , transmit &);
 
   uint8_t receive(uint8_t, uint8_t, transmit &);
   uint8_t peek(uint8_t, transmit & channel);

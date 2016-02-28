@@ -70,6 +70,44 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, u
   }
 }
 
+uint8_t Communicate::constructMaster(uint8_t _payloadType, uint8_t _payloadSize, transmit & channel){
+  uint8_t totalMsgSize = PREAMBLE_SIZE + _payloadSize;
+  channel.masterMsg = new uint8_t[totalMsgSize];
+  //channel.masterMsg = {0};
+
+  Serial.print("In Master Construct: ");
+
+  switch(_payloadType) {
+    case DIG:
+
+    for(int i = 0 ; i < PREAMBLE_SIZE; i++){
+      channel.masterMsg[i] = channel.preamble[i];
+    }
+
+    for(int j = PREAMBLE_SIZE ; j < totalMsgSize; j++){
+      channel.masterMsg[j] = channel.payload_digital[j - PREAMBLE_SIZE];
+    }
+
+    for (int k = 0; k < totalMsgSize; k++){
+      Serial.print(channel.masterMsg[k]);
+      Serial.print(" ");
+    }
+
+    Serial.println();
+
+    break;
+    case DXT:
+    //???
+    break;
+    case ANA:
+    //??
+    break;
+    case ALL:
+    //??
+    break;
+  }
+}
+
 uint8_t Communicate::transmissionMsg(uint8_t _comm, uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState){
 // HAVE WE BEEN DISCOVERED...
 uint8_t _return = 0;
@@ -87,10 +125,14 @@ switch(_comm) {
   }
     uint8_t receive;
     do {
+
       (*this).constructPreamble(_comm, (*this).transmitState->source, sequence[seq++], (*this).transmitState->master);
       //constructData
       (*this).constructData(_payloadType, _payloadSize, _payloadState, (*this).transmitState->master);
+
       //send the preamble + data msg
+      (*this).constructMaster(_payloadType, _payloadSize, (*this).transmitState->master);
+
       receive = send(_comm, (*this).transmitState->master);
       //to control SYN & FIN in discover
       if(receive == 0) { return 0; }
