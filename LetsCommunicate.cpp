@@ -16,18 +16,18 @@ void interruptHandler() {
 
 /* INIT: DIG, DXT, ANA - ALLOCATE ALL PINS AS INPUT PINS (NO CUSTOM SETS) */
 //Not Interrupts
-void LetsCommunicate::initialiseInputAs(uint8_t _action) {
-  (*this).selectAndInitialiseInputAs(_action, false);
+void LetsCommunicate::initialiseInputAs(uint8_t _payloadType) {
+  (*this).selectAndInitialiseInputAs(_payloadType, false);
 }
 
 //Interrupts
-void LetsCommunicate::initialiseInputWithInterruptsAs(uint8_t _action) {
-  (*this).selectAndInitialiseInputAs(_action, true);
+void LetsCommunicate::initialiseInputWithInterruptsAs(uint8_t _payloadType) {
+  (*this).selectAndInitialiseInputAs(_payloadType, true);
 }
 
-void LetsCommunicate::initialiseDIGDXT(uint8_t _action) {
+void LetsCommunicate::initialiseDIGDXT(uint8_t _payloadType) {
   // The ternary operator: condition ? expression1 : expression2
-  (*this).state->digitalPinsAllocatedNonCustom = (_action == DIG) ? DIGSIZE - OFFSET : (DIGSIZE + DXTSIZE) - OFFSET;
+  (*this).state->digitalPinsAllocatedNonCustom = (_payloadType == DIG) ? DIGSIZE - OFFSET : (DIGSIZE + DXTSIZE) - OFFSET;
   (*this).state-> digitalPinsSize = (*this).state->digitalPinsAllocatedNonCustom;
   //readDigitalRead = array to keep the state of IO
   (*this).state->readDigitalRead = new uint8_t[(*this).state->digitalPinsAllocatedNonCustom];
@@ -49,27 +49,27 @@ void LetsCommunicate::initialiseDIGDXT(uint8_t _action) {
 }
 
 /* action [] = {DIG, DXT, ANA} */
-void LetsCommunicate::selectAndInitialiseInputAs(uint8_t _action, bool _interruptFlag) {
+void LetsCommunicate::selectAndInitialiseInputAs(uint8_t _payloadType, bool _interruptFlag) {
 
   /* SET STATE FOR THE LETS COMMUNICATE SYSTEM */
   (*this).state->interruptsEnabled = _interruptFlag;
   (*this).state->customConfigOfInputOut = false;
 
-  switch(_action) {
+  switch(_payloadType) {
     case DIG:
-      (*this).state->action[0] = true;
+      (*this).state->payloadType[0] = true;
       if((*this).state->mastercomm == HARDSERIAL) {
-        (*this).initialiseDIGDXT(_action);
+        (*this).initialiseDIGDXT(_payloadType);
       }
     break;
     case DXT:
-      (*this).state->action[1] = true;
+      (*this).state->payloadType[1] = true;
       if((*this).state->mastercomm == HARDSERIAL) {
-        (*this).initialiseDIGDXT(_action);
+        (*this).initialiseDIGDXT(_payloadType);
       }
     break;
     case ANA:
-      (*this).state->action[2] = true;
+      (*this).state->payloadType[2] = true;
       (*this).state->analogPinsAllocatedNonCustom = (ANASIZE * OFFSET);
       (*this).state-> analogPinsSize = (*this).state->analogPinsAllocatedNonCustom/2;
       (*this).state->readAnalogRead = new uint8_t[(*this).state->analogPinsAllocatedNonCustom];
@@ -78,8 +78,8 @@ void LetsCommunicate::selectAndInitialiseInputAs(uint8_t _action, bool _interrup
     }
     break;
     case ALL:
-      (*this).state->action[0] = true;
-      (*this).state->action[2] = true;
+      (*this).state->payloadType[0] = true;
+      (*this).state->payloadType[2] = true;
       (*this).state->analogPinsAllocatedNonCustom = (ANASIZE * OFFSET);
       (*this).state-> analogPinsSize = (*this).state->analogPinsAllocatedNonCustom/2;
       (*this).state->readAnalogRead = new uint8_t[(*this).state->analogPinsAllocatedNonCustom];
@@ -94,7 +94,7 @@ void LetsCommunicate::selectAndInitialiseInputAs(uint8_t _action, bool _interrup
 }
 
 //Set & Get
-//Does the copy of letscommunicate struct
+//Does the copy of letsCommunicate struct
 const letscommunicate * LetsCommunicate::getLetsCommunicateState() const {
   return (*this).state;
 };
@@ -107,11 +107,11 @@ void LetsCommunicate::stateOfTheUnion() {
   Serial.print("* Source ID: "); Serial.println((*this).state->source);
   Serial.print("* Interrupts Enabled: "); Serial.println((*this).state->interruptsEnabled);
   Serial.println("* Initialised Inputs: ");
-  Serial.print("DIG: "); Serial.print((*this).state->action[0]); Serial.print(" DXT: "); Serial.print((*this).state->action[1]);
-  Serial.print(" ANA: "); Serial.println((*this).state->action[2]);
+  Serial.print("DIG: "); Serial.print((*this).state->payloadType[0]); Serial.print(" DXT: "); Serial.print((*this).state->payloadType[1]);
+  Serial.print(" ANA: "); Serial.println((*this).state->payloadType[2]);
 
   // ANA
-  if((*this).state->action[2]) {
+  if((*this).state->payloadType[2]) {
   Serial.println("Analog Pins Input State: ");
   uint8_t count = 0;
     for(int i = 0; i < (*this).state->analogPinsAllocatedNonCustom; i+= 2) {
@@ -122,7 +122,7 @@ void LetsCommunicate::stateOfTheUnion() {
     }
   }
   //DIG or DXT
-  if((*this).state->action[0] || (*this).state->action[1]) {
+  if((*this).state->payloadType[0] || (*this).state->payloadType[1]) {
   Serial.println("Digital Pins Input State: ");
     for(int i = 0; i < (*this).state->digitalPinsAllocatedNonCustom; i++) {
       Serial.print((*this).state->readDigitalRead[i]); Serial.print(" ");
@@ -177,7 +177,7 @@ void LetsCommunicate::run() {
     interrupt_id = -1;
   }
 
-  if(( (*this).state->action[0] || (*this).state->action[1] ) && !(*this).state->interruptsEnabled) {
+  if(( (*this).state->payloadType[0] || (*this).state->payloadType[1] ) && !(*this).state->interruptsEnabled) {
     for(int i = 0; i < (*this).state->digitalPinsAllocatedNonCustom; i++) {
       uint8_t _digitalPin = digitalRead(i + OFFSET);
       if(_digitalPin == LOW) {
@@ -188,7 +188,7 @@ void LetsCommunicate::run() {
     }
   }
 
-  if((*this).state->action[2]) {
+  if((*this).state->payloadType[2]) {
     uint8_t count = 0;
     for(int i = 0; i < (*this).state->analogPinsAllocatedNonCustom; i+= 2) {
       uint16_t anaReadTempNumber = analogRead(count);

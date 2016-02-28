@@ -14,12 +14,6 @@ Communicate::Communicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _interco
   (*this).transmitState->intercomm = _intercomm;
 }
 
-/*
-uint8_t Communicate::getPreambleMsg(uint8_t * _preambleToSend) {
-  preambleFromCommunicate = _preambleToSend;
-  return* preambleFromCommunicate;
-}
-*/
 
 uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _type, transmit & channel) {
 
@@ -46,8 +40,6 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
   }
   Serial.println("");
 
-  //(*this).getPreambleMsg(channel.preamble);
-
   return 1;
 }
 
@@ -55,16 +47,6 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
 uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState, transmit & channel) {
 
   Serial.print("In Data Construct: ");
-  /*
-  uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
-  uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
-  channel.preamble[0] = HELLO;
-  channel.preamble[1] = PREAMBLE_SIZE;
-  channel.preamble[2] = _source;
-  channel.preamble[3] = (!channel.discovered && _type == SYN) ? channel.target = 0 : channel.target;
-  channel.preamble[4] = (!channel.discovered && _type == SYN) ? channel.syn = random(0, 255) : channel.syn;
-  channel.preamble[5] = (!channel.discovered && _type == SYN) ? channel.ack = 0 : channel.ack;
-  */
 
   switch(_payloadType) {
     case DIG:
@@ -88,7 +70,6 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, u
   }
 }
 
-//  (*this).transmission(_comm, _payloadType, digitalPinsSize, (*this).state->readDigitalRead);
 uint8_t Communicate::transmissionMsg(uint8_t _comm, uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState){
 // HAVE WE BEEN DISCOVERED...
 uint8_t _return = 0;
@@ -107,7 +88,7 @@ switch(_comm) {
     uint8_t receive;
     do {
       (*this).constructPreamble(_comm, (*this).transmitState->source, sequence[seq++], (*this).transmitState->master);
-      //constructData ?? not work...
+      //constructData
       (*this).constructData(_payloadType, _payloadSize, _payloadState, (*this).transmitState->master);
       //send the preamble + data msg
       receive = send(_comm, (*this).transmitState->master);
@@ -126,7 +107,6 @@ switch(_comm) {
     }
 return _return;
 }
-
 
 
 uint8_t Communicate::discover(uint8_t _comm) {

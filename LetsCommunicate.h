@@ -18,7 +18,7 @@ struct letscommunicate {
 
   bool interruptsEnabled = false;         // IF FALSE - NO INTERRUPTS ON DIG OR DXT
   bool customConfigOfInputOut = false;    // IF FALSE - THEN USING DIG/DXT or ANA...
-  bool action[3] = {0}; // [0] = DIG [1] = DIG [2] = ANA
+  bool payloadType[3] = {0}; // [0] = DIG [1] = DIG [2] = ANA
 
   uint8_t digitalPinsAllocatedNonCustom = -1;
   uint8_t analogPinsAllocatedNonCustom = -1;
