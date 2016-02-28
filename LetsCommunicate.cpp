@@ -149,13 +149,13 @@ void LetsCommunicate::transmit(uint8_t _comm, uint8_t _payloadType){
     // call transmission function from Communicate.cpp
     switch(_payloadType) {
       case DIG:
-      (*this).transmission(_comm, _payloadType, (*this).state-> digitalPinsSize, (*this).state->readDigitalRead);
+      (*this).transmissionMsg(_comm, _payloadType, (*this).state-> digitalPinsSize, (*this).state->readDigitalRead);
       break;
       case DXT:
-      (*this).transmission(_comm, _payloadType, (*this).state-> digitalPinsSize, (*this).state->readDigitalRead);
+      (*this).transmissionMsg(_comm, _payloadType, (*this).state-> digitalPinsSize, (*this).state->readDigitalRead);
       break;
       case ANA:
-      (*this).transmission(_comm, _payloadType, (*this).state-> analogPinsSize, (*this).state->readAnalogRead);
+      (*this).transmissionMsg(_comm, _payloadType, (*this).state-> analogPinsSize, (*this).state->readAnalogRead);
       break;
       case ALL:
       //???

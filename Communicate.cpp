@@ -89,7 +89,7 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, u
 }
 
 //  (*this).transmission(_comm, _payloadType, digitalPinsSize, (*this).state->readDigitalRead);
-uint8_t Comunicate::transmission(uint8_t _comm, uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState){
+uint8_t Communicate::transmissionMsg(uint8_t _comm, uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState){
 // HAVE WE BEEN DISCOVERED...
 uint8_t _return = 0;
 uint8_t seq = 0;
@@ -108,7 +108,7 @@ switch(_comm) {
     do {
       (*this).constructPreamble(_comm, (*this).transmitState->source, sequence[seq++], (*this).transmitState->master);
       //constructData ?? not work...
-      (*this).constructData(_payloadType, _payloadState, _payloadSize, (*this).transmitState->master);
+      (*this).constructData(_payloadType, _payloadSize, _payloadState, (*this).transmitState->master);
       //send the preamble + data msg
       receive = send(_comm, (*this).transmitState->master);
       //to control SYN & FIN in discover
@@ -125,7 +125,6 @@ switch(_comm) {
   break;
     }
 return _return;
-  } // end of else
 }
 
 

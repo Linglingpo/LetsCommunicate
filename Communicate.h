@@ -85,7 +85,7 @@ public:
   uint8_t discover(uint8_t);
   // transmission function that will be call in LetsCommunicate.cpp
   //(mastercomm, payload type, payload size,  *payload stats);
-  uint8_t transmission(uint8_t , uint8_t, uint8_t , uint8_t*);
+  uint8_t transmissionMsg(uint8_t , uint8_t, uint8_t , uint8_t*);
   //uint8_t getPreambleMsg(uint8_t *);
   //uint8_t* preambleFromCommunicate;
 
@@ -94,6 +94,8 @@ public:
 private:
   transmission * transmitState;
   uint8_t constructPreamble(uint8_t, uint8_t, uint8_t, transmit &);
+  uint8_t constructData(uint8_t, uint8_t, uint8_t*, transmit &);
+
   uint8_t receive(uint8_t, uint8_t, transmit &);
   uint8_t peek(uint8_t, transmit & channel);
   uint8_t reConstructPreamble(uint8_t, uint8_t, uint8_t, transmit &, uint8_t *);

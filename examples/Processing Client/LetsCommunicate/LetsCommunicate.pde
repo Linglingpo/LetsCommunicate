@@ -4,7 +4,7 @@ Serial port;
 
 void setup() {
   size(200, 200);
-  String portName = Serial.list()[6];
+  String portName = Serial.list()[5];
   println(Serial.list());
   port = new Serial(this, portName, 115200);
   port.bufferUntil('\n');
