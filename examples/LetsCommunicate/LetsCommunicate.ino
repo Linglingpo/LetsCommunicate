@@ -45,6 +45,9 @@ void loop() {
   state = first.getLetsCommunicateState();
   first.stateOfTheUnion();
   first.transmit(MASTERCOMM, DIG);
+  //first.transmit(MASTERCOMM, DXT);
+  //first.transmit(MASTERCOMM, ANA);
+
   //first.send(MASTERCOMM);
 
   //state->digitalPinsAllocatedNonCustom = 0; // MUST GET AN ERROR - COMPILE ERROR !!!!

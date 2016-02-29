@@ -29,6 +29,11 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
       channel.preamble[6] = _type;
     break;
 
+    //???
+    case CNT:
+      channel.preamble[6] = _type;
+    break;
+
     case FIN:
       channel.preamble[6] = _type;
     break;
@@ -56,13 +61,25 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, u
       Serial.print(" ");
     }
     Serial.println();
+    break;
 
-    break;
     case DXT:
-    //???
+    for(int i = 0; i < _payloadSize; i++){
+      channel.payload_digital[i] = _payloadState[i];
+      Serial.print(channel.payload_digital[i]);
+      Serial.print(" ");
+    }
+    Serial.println();
     break;
+
     case ANA:
-    //??
+    /* ???
+    for(int i = 0; i < _payloadSize; i++){
+      channel.payload_analog[i] = _payloadState[i];
+      Serial.print(channel.payload_analog[i]);
+      Serial.print(" ");
+    }
+    */
     break;
     case ALL:
     //??
@@ -72,45 +89,60 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, u
 
 uint8_t Communicate::constructMaster(uint8_t _payloadType, uint8_t _payloadSize, transmit & channel){
   (*this).transmitTotalMsgSize = PREAMBLE_SIZE + _payloadSize;
-  channel.masterMsg = new uint8_t[(*this).transmitTotalMsgSize];
-  //channel.masterMsg = {0};
-
-  Serial.print("In Master Construct: ");
-  Serial.println();
-  Serial.print("_payloadSize: ");
-  Serial.print(_payloadSize);
-  Serial.print("_totalSize: ");
-  Serial.print((*this).transmitTotalMsgSize);
+  (*this).masterMsg = new uint8_t[(*this).transmitTotalMsgSize];
+  //Store preamble
+  for(int i = 0 ; i < PREAMBLE_SIZE; i++){
+    (*this).masterMsg[i] = channel.preamble[i];
+  }
 
   switch(_payloadType) {
     case DIG:
-
-    for(int i = 0 ; i < PREAMBLE_SIZE; i++){
-      channel.masterMsg[i] = channel.preamble[i];
-    }
-
+    //Store pinStates
     for(int j = PREAMBLE_SIZE ; j < (*this).transmitTotalMsgSize; j++){
-      channel.masterMsg[j] = channel.payload_digital[j - PREAMBLE_SIZE];
+      (*this).masterMsg[j] = channel.payload_digital[j - PREAMBLE_SIZE];
     }
-
-    for (int k = 0; k < (*this).transmitTotalMsgSize; k++){
-      Serial.print(channel.masterMsg[k]);
-      Serial.print(" ");
-    }
-
-    Serial.println();
-
     break;
+
     case DXT:
-    //???
+    //Store pinStates ??? Not work...
+    for(int j = PREAMBLE_SIZE ; j < (*this).transmitTotalMsgSize; j++){
+      (*this).masterMsg[j] = channel.payload_digital[j - PREAMBLE_SIZE];
+    }
     break;
     case ANA:
-    //??
+    /* ???
+    for(int j = PREAMBLE_SIZE ; j < (*this).transmitTotalMsgSize; j++){
+      (*this).masterMsg[j] = channel.payload_analog[j - PREAMBLE_SIZE];
+    }
+    */
     break;
     case ALL:
     //??
     break;
   }
+
+  /* DEBUG */
+  Serial.print("In Master Construct: ");
+  Serial.println();
+  Serial.print("Payload Size: ");
+  Serial.print(_payloadSize);
+  Serial.print(" ");
+  Serial.print("Total Size: ");
+  Serial.print((*this).transmitTotalMsgSize);
+  Serial.print(" ");
+  Serial.print("Payload Type In PREAMBLE: ");
+  Serial.print(channel.preamble[6]);
+  Serial.print(" ");
+  Serial.print("Payload Type in MASTER MSG: ");
+  Serial.print((*this).masterMsg[6]);
+  Serial.print(" ");
+  Serial.println();
+  for (int k = 0; k < (*this).transmitTotalMsgSize; k++){
+    Serial.print((*this).masterMsg[k]);
+    Serial.print(" ");
+  }
+  Serial.println();
+
 }
 
 uint8_t Communicate::transmissionMsg(uint8_t _comm, uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState){
@@ -198,9 +230,10 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
           for(int i = 0; i < PREAMBLE_SIZE; i++)
             Serial.write(channel.preamble[i]);
 
+          // not working ... ???
           if(channel.preamble[6] == CNT) {
-            for(int i = 0; i < transmitTotalMsgSize; i++){
-              Serial.write(channel.masterMsg[i]);
+            for(int i = 0; i < (*this).transmitTotalMsgSize; i++){
+              Serial.write((*this).masterMsg[i]);
             }
           }
 
@@ -273,6 +306,11 @@ uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
     case RST:
       break;
     case CNT:
+    //???
+    channel.target = response[2];
+    channel.syn = response[4] + 1;
+    channel.ack = response[4];
+    channel.preamble[6] = response[6];
       break;
     case FIN:
       channel.syn = response[4] + 1;

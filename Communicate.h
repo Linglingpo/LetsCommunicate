@@ -6,8 +6,8 @@
 
 #define HISTORY_SIZE         0x03
 #define PREAMBLE_SIZE        0x07
-#define PAYLOAD_DIGITAL_SIZE 0x03
-#define PAYLOAD_ANALOG_SIZE  0x0C
+#define PAYLOAD_DIGITAL_SIZE 0x03 //3 ???
+#define PAYLOAD_ANALOG_SIZE  0x0C //12
 
 #define HELLO 0x7E // ~
 /* PREAMBLE TYPES */
@@ -56,9 +56,6 @@ struct transmit {
   uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
   uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
 
-  //preamble + data
-  uint8_t * masterMsg;
-
   uint8_t syn = 0;
   uint8_t ack = 0;
   uint8_t target = 0;     // THEIR_ID
@@ -89,6 +86,8 @@ public:
   // transmissionMsg function that will be call in LetsCommunicate.cpp (communication type, payload type, payload size, *payload stats);
   uint8_t transmissionMsg(uint8_t , uint8_t, uint8_t , uint8_t*);
   uint8_t transmitTotalMsgSize = -1;
+  //preamble + data
+  uint8_t * masterMsg;
 
 
 

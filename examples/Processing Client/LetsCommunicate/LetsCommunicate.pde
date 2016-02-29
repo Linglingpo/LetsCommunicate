@@ -82,7 +82,8 @@ short[] peek(short[] type){
        /* RESET */
       break;
       case CNT:
-        /* CONTINUE */
+       /* CONTINUE */
+      System.out.println("IN CNT ------------------------------------");
       break;
       case FIN:
         /* FINISH */
@@ -127,7 +128,7 @@ short[] peek(short[] type){
   final short ALL = 0xFF;
   /* PAYLOAD MESSAGE LENGTHS */
   final short OFFSET  = 0x02;
-  final short DIGSIZE = 0x0D;
+  final short DIGSIZE = 0x0E;
   final short DXTSIZE = 0x06;
   final short ANASIZE = 0x06;
   /* SYN RESET CONTROL */

@@ -130,16 +130,23 @@ void LetsCommunicate::stateOfTheUnion() {
     Serial.println(" ");
   }
 
-/*
-  // Send preamble MSG
-Serial.print("This is the preamble from send in Union: ");
-  for(int i = 0; i < PREAMBLE_SIZE; i++) {
-    Serial.print((*this).preambleFromCommunicate[i]);
-    Serial.print(" ");
+  //------  MSG to transmit -------//
+  Serial.println("Transmit Massage: ");
+  //ANA
+  if((*this).state->payloadType[2]){
+    //???
   }
-  Serial.println();
-  */
+  //DIG or DXT
+  if((*this).state->payloadType[0] || (*this).state->payloadType[1]){
+  for(int i = 0; i < (*this).transmitTotalMsgSize; i++){
+    Serial.print(masterMsg[i]);
+    Serial.print(" ");
+    }
+  }
 
+
+
+  Serial.println();
   Serial.println("*--------------------------------------------------------------------------------");
 
 }
@@ -155,7 +162,7 @@ void LetsCommunicate::transmit(uint8_t _comm, uint8_t _payloadType){
       (*this).transmissionMsg(_comm, _payloadType, (*this).state-> digitalPinsSize, (*this).state->readDigitalRead);
       break;
       case ANA:
-      (*this).transmissionMsg(_comm, _payloadType, (*this).state-> analogPinsSize, (*this).state->readAnalogRead);
+      (*this).transmissionMsg(_comm, _payloadType, (*this).state-> analogPinsAllocatedNonCustom, (*this).state->readAnalogRead);
       break;
       case ALL:
       //???
