@@ -71,11 +71,16 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, u
 }
 
 uint8_t Communicate::constructMaster(uint8_t _payloadType, uint8_t _payloadSize, transmit & channel){
-  uint8_t totalMsgSize = PREAMBLE_SIZE + _payloadSize;
-  channel.masterMsg = new uint8_t[totalMsgSize];
+  (*this).transmitTotalMsgSize = PREAMBLE_SIZE + _payloadSize;
+  channel.masterMsg = new uint8_t[(*this).transmitTotalMsgSize];
   //channel.masterMsg = {0};
 
   Serial.print("In Master Construct: ");
+  Serial.println();
+  Serial.print("_payloadSize: ");
+  Serial.print(_payloadSize);
+  Serial.print("_totalSize: ");
+  Serial.print((*this).transmitTotalMsgSize);
 
   switch(_payloadType) {
     case DIG:
@@ -84,11 +89,11 @@ uint8_t Communicate::constructMaster(uint8_t _payloadType, uint8_t _payloadSize,
       channel.masterMsg[i] = channel.preamble[i];
     }
 
-    for(int j = PREAMBLE_SIZE ; j < totalMsgSize; j++){
+    for(int j = PREAMBLE_SIZE ; j < (*this).transmitTotalMsgSize; j++){
       channel.masterMsg[j] = channel.payload_digital[j - PREAMBLE_SIZE];
     }
 
-    for (int k = 0; k < totalMsgSize; k++){
+    for (int k = 0; k < (*this).transmitTotalMsgSize; k++){
       Serial.print(channel.masterMsg[k]);
       Serial.print(" ");
     }
@@ -193,9 +198,12 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
           for(int i = 0; i < PREAMBLE_SIZE; i++)
             Serial.write(channel.preamble[i]);
 
-          if(channel.preamble[6] == CNT) { }
-            //for(int i = 0; i < 14; i++)
-              //Serial.write(channel.payload[i]);
+          if(channel.preamble[6] == CNT) {
+            for(int i = 0; i < transmitTotalMsgSize; i++){
+              Serial.write(channel.masterMsg[i]);
+            }
+          }
+
           Serial.write("\n");
           receive = (*this).receive(_comm, counter++, channel);
           /* IF THIS IS TRUE - THEN COMMUICATION FAILED - ERROR - receive has several error codes */

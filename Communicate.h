@@ -32,7 +32,7 @@
 #define ALL   0xFF // ALL = DIGITAL + ANALOG
 
 #define OFFSET  0x02 // DIG OFFSET
-#define DIGSIZE 0x0D //14 Digital Pins
+#define DIGSIZE 0x0E //14 Digital Pins
 #define DXTSIZE 0x06 //6 Analog to Digital Pins
 #define ANASIZE 0x06 //6 Analog Pins
 
@@ -88,6 +88,8 @@ public:
   uint8_t discover(uint8_t);
   // transmissionMsg function that will be call in LetsCommunicate.cpp (communication type, payload type, payload size, *payload stats);
   uint8_t transmissionMsg(uint8_t , uint8_t, uint8_t , uint8_t*);
+  uint8_t transmitTotalMsgSize = -1;
+
 
 
 private:
