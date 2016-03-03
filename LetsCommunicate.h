@@ -20,13 +20,12 @@ struct letscommunicate {
   bool customConfigOfInputOut = false;    // IF FALSE - THEN USING DIG/DXT or ANA...
   bool payloadType[3] = {0}; // [0] = DIG [1] = DIG [2] = ANA
 
-  uint8_t digitalPinsAllocatedNonCustom = -1;
-  uint8_t analogPinsAllocatedNonCustom = -1;
+  uint8_t digitalPinCount = -1; // How many digital pins is used (need to read the state)
+  uint8_t analogPinCount = -1; // How many analog pins is used (need to read the state)
+  uint8_t analogDataSize = -1; // Each Analog pin need to have 2 bytes to store its value
   //uint32_t interruptState = 0;
-  uint8_t * readAnalogRead;
-  uint8_t * readDigitalRead;
-  uint8_t digitalPinsSize = -1;
-  uint8_t analogPinsSize = -1;
+  uint8_t * currentAnalogState;
+  uint8_t * currentDigitalState;
 };
 
 class LetsCommunicate: public Communicate {
@@ -36,27 +35,33 @@ public:
   /* http://stackoverflow.com/questions/5914422/proper-way-to-initialize-c-structs */
   LetsCommunicate() { };
 
-    /* CUSTOM CONSTRUCTOR 1
-    (All Pins (11 pins) will be declare as INPUT)
+    /* CUSTOM CONSTRUCTORS 1 - COMPUTER + ARDUINO / ARDUINO + ARDUINO
+    (All Pins (12 pins) will be declare as INPUT)
     PARAMETERS:
-    _mastercomm = USB | BLUETOOTH | WIFI
+    _mastercomm = HARDSERIAL (RX/TX), SOFTSERIAL(DEVICES - Any other than RX/TX), ISQUAREDC (I2C - SDA/SCL)
     _this_id = source = {CLIENT}
-    _computer_id = target
-    _intercomm = {HARDSERIAL, SOFTSERIAL, ISQUAREDC} */
-  LetsCommunicate(uint8_t _mastercomm, uint8_t _this_id):
+    _computer_id = target */
+    LetsCommunicate(uint8_t _mastercomm, uint8_t _this_id):
     Communicate(_mastercomm, _this_id) {
       state = new letscommunicate();
       (*this).state->mastercomm = _mastercomm;
       (*this).state->source = _this_id;
     };
 
+    /* CUSTOM CONSTRUCTORS 2 - COMPUTER + ARDUINO + ARDUINO
+    (All Pins (12 pins) will be declare as INPUT)
+    PARAMETERS:
+    _mastercomm = HARDSERIAL, SOFTSERIAL, ISQUAREDC
+    _this_id = source = {CLIENT}
+    _computer_id = target
+    _intercomm = HARDSERIAL, SOFTSERIAL, ISQUAREDC */
     LetsCommunicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _intercomm):
       Communicate(_mastercomm, _this_id, _intercomm) {
         new LetsCommunicate(_mastercomm, _this_id);
         (*this).state->intercomm = _intercomm;
       };
 
-  /* SERIAL PRINTLNs THE CURRENT STATE OF THE LETCOMMUNICATE */
+  /* SERIAL PRINTLNS THE CURRENT STATE OF THE LETCOMMUNICATE */
   void stateOfTheUnion();
 
   /* INITIALSE AND ALLOCATE METHODS */
@@ -71,14 +76,15 @@ public:
   const letscommunicate * getLetsCommunicateState() const;
 
   /* FUNTION TO CONSTRUCT PREABLE + DATA MSG AND TRANSMIT (SEND) */
+  //SOME WORK NEEDS TO DO - OVERRIDE TO COMMUNICATE BY LETSCOMMUNICATE...
   void transmit(uint8_t, uint8_t);//COMMUNICATION TYPE / PAYLOAD TYPE
 
 private:
   /* MAINTAINS CURRENT STATE OF LETS COMMUNICATE */
   letscommunicate * state;
   /* INITIALSE AND ALLOCATE METHODS */
-  void selectAndInitialiseInputAs(uint8_t, bool);
-  void initialiseDIGDXT(uint8_t);
+  void initializeInputTypeAndReadPinsState(uint8_t, bool); //PAYLOAD TYPE / INTERRUPT
+  void initialiseDIGDXT(uint8_t); //PAYLOAD TYPE
 };
 
 #endif // LETS_COMMUNICATE_H

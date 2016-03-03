@@ -4,14 +4,14 @@ Communicate::Communicate() { }
 
 Communicate::Communicate(uint8_t _mastercomm, uint8_t _this_id) {
   //need "new" when it is pointer
-  transmitState = new transmission();
-  (*this).transmitState->mastercomm = _mastercomm;
-  (*this).transmitState->source = _this_id;
+  communicationState = new communicationType();
+  (*this).communicationState->mastercomm = _mastercomm;
+  (*this).communicationState->source = _this_id;
 }
 
 Communicate::Communicate(uint8_t _mastercomm, uint8_t _this_id, uint8_t _intercomm) {
   new Communicate(_mastercomm, _this_id);
-  (*this).transmitState->intercomm = _intercomm;
+  (*this).communicationState->intercomm = _intercomm;
 }
 
 
@@ -157,21 +157,21 @@ sequence[2] = FIN;
 // Need to know which communication type first
 switch(_comm) {
   case HARDSERIAL:
-  if (!(*this).transmitState->master.discovered){
+  if (!(*this).communicationState->master.discovered){
     (*this).discover(_comm);
   }
     uint8_t receive;
     do {
-        (*this).constructPreamble(_comm, (*this).transmitState->source, sequence[seq++], (*this).transmitState->master);
+        (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
 
       if(seq == 1){
       //constructData
-      (*this).constructData(_payloadType, _payloadSize, _payloadState, (*this).transmitState->master);
+      (*this).constructData(_payloadType, _payloadSize, _payloadState, (*this).communicationState->master);
       //send the preamble + data msg
-      (*this).constructMaster(_payloadType, _payloadSize, (*this).transmitState->master);
+      (*this).constructMaster(_payloadType, _payloadSize, (*this).communicationState->master);
     }
 
-      receive = send(_comm, (*this).transmitState->master);
+      receive = send(_comm, (*this).communicationState->master);
       //to control SYN & FIN in discover
       if(receive == 0) { return 0; }
     } while(seq < 3);
@@ -201,8 +201,8 @@ uint8_t Communicate::discover(uint8_t _comm) {
 
       uint8_t receive;
       do {
-        (*this).constructPreamble(_comm, (*this).transmitState->source, sequence[seq++], (*this).transmitState->master);
-        receive = send(_comm, (*this).transmitState->master);
+        (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
+        receive = send(_comm, (*this).communicationState->master);
         //to control SYN & FIN in discover
         if(receive == 0) { return 0; }
       } while(seq < 2);
@@ -288,7 +288,7 @@ uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
 
   if(response[0] != HELLO) { return 0; }
   if(response[1] != PREAMBLE_SIZE) { return 0; }
-  if(response[3] != (*this).transmitState->source) { return 0; }
+  if(response[3] != (*this).communicationState->source) { return 0; }
   if(response[5] != channel.syn) { return 0; }
   if(response[6] != channel.preamble[6]) { return 0; }
 

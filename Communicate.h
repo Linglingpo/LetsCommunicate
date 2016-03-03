@@ -32,22 +32,13 @@
 #define ALL   0xFF // ALL = DIGITAL + ANALOG
 
 #define OFFSET  0x02 // DIG OFFSET
+#define ANALOG_OFFSET 0x02 //ANALOG OFFSET
 #define DIGSIZE 0x0E //14 Digital Pins
 #define DXTSIZE 0x06 //6 Analog to Digital Pins
 #define ANASIZE 0x06 //6 Analog Pins
 
 #define MAX_ATTEMPTS 0x03
 
-//not using yet
-struct preamble {
-  uint8_t preamble[PREAMBLE_SIZE];
-};
-
-//not using yet
-struct payload {
-  uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
-  uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
-};
 
 //using this one
 struct transmit {
@@ -62,7 +53,7 @@ struct transmit {
 
 };
 
-struct transmission {
+struct communicationType {
   uint8_t mastercomm = 0;  // COMMUNICATION TYPE - HARDSERIAL | SOFTSERIAL | ISQUAREDC
   uint8_t intercomm = 0;   // COMMUNICATION TYPE - SOFTSERIAL | ISQUAREDC
   uint8_t source = 0;     // MY_ID
@@ -81,9 +72,13 @@ public:
   Communicate();
   Communicate(uint8_t , uint8_t);
   Communicate(uint8_t , uint8_t , uint8_t);
+  //virtual???
   uint8_t send(uint8_t, transmit &);
+  //virtual???
   uint8_t discover(uint8_t);
-  // transmissionMsg function that will be call in LetsCommunicate.cpp (communication type, payload type, payload size, *payload stats);
+  /* virtual??? - Change function name to "transmit"
+  transmissionMsg function that will be override in LetsCommunicate.cpp
+  (communication type, payload type, payload size, *payload stats); */
   uint8_t transmissionMsg(uint8_t , uint8_t, uint8_t , uint8_t*);
   uint8_t transmitTotalMsgSize = -1;
   //preamble + data
@@ -92,7 +87,7 @@ public:
 
 
 private:
-  transmission * transmitState;
+  communicationType * communicationState;
   uint8_t constructPreamble(uint8_t, uint8_t, uint8_t, transmit &);
   uint8_t constructData(uint8_t, uint8_t, uint8_t*, transmit &);
 
