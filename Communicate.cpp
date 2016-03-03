@@ -162,13 +162,14 @@ switch(_comm) {
   }
     uint8_t receive;
     do {
+        (*this).constructPreamble(_comm, (*this).transmitState->source, sequence[seq++], (*this).transmitState->master);
 
-      (*this).constructPreamble(_comm, (*this).transmitState->source, sequence[seq++], (*this).transmitState->master);
+      if(seq == 1){
       //constructData
       (*this).constructData(_payloadType, _payloadSize, _payloadState, (*this).transmitState->master);
-
       //send the preamble + data msg
       (*this).constructMaster(_payloadType, _payloadSize, (*this).transmitState->master);
+    }
 
       receive = send(_comm, (*this).transmitState->master);
       //to control SYN & FIN in discover
