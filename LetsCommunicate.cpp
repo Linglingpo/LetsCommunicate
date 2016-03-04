@@ -57,28 +57,33 @@ void LetsCommunicate::initializeInputTypeAndReadPinsState(uint8_t _payloadType, 
   switch(_payloadType) {
     case DIG:
       (*this).state->payloadType[0] = true;
+      //HARDSERIAL
       if((*this).state->mastercomm == HARDSERIAL) {
         (*this).initialiseDIGDXT(_payloadType);
-      }
+      }// end of HARDSERIAL
     break;
     case DXT:
       (*this).state->payloadType[1] = true;
+      //HARDSERIAL
       if((*this).state->mastercomm == HARDSERIAL) {
         (*this).initialiseDIGDXT(_payloadType);
-      }
+      }// end of HARDSERIAL
     break;
     case ANA:
-      //add a if stament ? => if it is HARDSERIAL? cause if it is i2c, the number of the analogPinCount will be diff...
+    //HARDSERIAL
+      if((*this).state->mastercomm == HARDSERIAL) {
       (*this).state->payloadType[2] = true;
       (*this).state->analogPinCount = ANASIZE;
       (*this).state->analogDataSize = ((*this).state->analogPinCount * ANALOG_OFFSET);
       (*this).state->currentAnalogState = new uint8_t[(*this).state->analogDataSize];
       for(int i = 0; i < (*this).state->analogDataSize; i++){
       (*this).state->currentAnalogState[i] = 0;
-    }
+        }
+      }// end of HARDSERIAL
     break;
     case ALL:
-      //add a if stament ? => if it is HARDSERIAL? cause if it is i2c, the number of the analogPinCount will be diff...
+    //HARDSERIAL
+      if((*this).state->mastercomm == HARDSERIAL) {
       (*this).state->payloadType[0] = true;
       (*this).state->payloadType[2] = true;
       (*this).state->analogPinCount = ANASIZE;
@@ -86,10 +91,9 @@ void LetsCommunicate::initializeInputTypeAndReadPinsState(uint8_t _payloadType, 
       (*this).state->currentAnalogState = new uint8_t[(*this).state->analogDataSize];
       for(int i = 0; i < (*this).state->analogDataSize; i++){
       (*this).state->currentAnalogState[i] = 0;
-    }
-      if((*this).state->mastercomm == HARDSERIAL) {
-        (*this).initialiseDIGDXT(DIG);
-      }
+        }
+      (*this).initialiseDIGDXT(DIG);
+      }// end of HARDSERIAL
     break;
   }
 }

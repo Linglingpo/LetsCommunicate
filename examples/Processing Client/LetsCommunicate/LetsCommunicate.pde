@@ -24,7 +24,7 @@ void serialEvent(Serial p) {
     if( (_temp == HELLO) && ((!discovered)) ) {
       discover(p);
     } else if( (_temp == HELLO) && ((discovered)) ) {
-      //handle();
+      handle();
     }
   }
 }
@@ -56,7 +56,7 @@ void discover(Serial p){
 }
 
 void handle(){
-
+      System.out.println("HANDLE ------------------------------------");
 }
 
 short[] peek(short[] type){
