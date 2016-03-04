@@ -53,9 +53,13 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, u
 
   Serial.print("In Data Construct: ");
 
+  channel.payload_digital[0] = _payloadType;
+  channel.payload_digital[1] = _payloadSize;
+
+
   switch(_payloadType) {
     case DIG:
-    for(int i = 0; i < _payloadSize; i++){
+    for(int i = DATASIZE_OFFSET; i < _payloadSize + DATASIZE_OFFSET; i++){
       channel.payload_digital[i] = _payloadState[i];
       Serial.print(channel.payload_digital[i]);
       Serial.print(" ");
@@ -64,22 +68,9 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, u
     break;
 
     case DXT:
-    for(int i = 0; i < _payloadSize; i++){
-      channel.payload_digital[i] = _payloadState[i];
-      Serial.print(channel.payload_digital[i]);
-      Serial.print(" ");
-    }
-    Serial.println();
     break;
 
     case ANA:
-    /* ???
-    for(int i = 0; i < _payloadSize; i++){
-      channel.payload_analog[i] = _payloadState[i];
-      Serial.print(channel.payload_analog[i]);
-      Serial.print(" ");
-    }
-    */
     break;
     case ALL:
     //??
@@ -88,7 +79,7 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, u
 }
 
 uint8_t Communicate::constructMaster(uint8_t _payloadType, uint8_t _payloadSize, transmit & channel){
-  (*this).transmitTotalMsgSize = PREAMBLE_SIZE + _payloadSize;
+  (*this).transmitTotalMsgSize = PREAMBLE_SIZE + DATASIZE_OFFSET + _payloadSize;
   (*this).masterMsg = new uint8_t[(*this).transmitTotalMsgSize];
   //Store preamble
   for(int i = 0 ; i < PREAMBLE_SIZE; i++){
@@ -104,20 +95,12 @@ uint8_t Communicate::constructMaster(uint8_t _payloadType, uint8_t _payloadSize,
     break;
 
     case DXT:
-    //Store pinStates ??? Not work...
-    for(int j = PREAMBLE_SIZE ; j < (*this).transmitTotalMsgSize; j++){
-      (*this).masterMsg[j] = channel.payload_digital[j - PREAMBLE_SIZE];
-    }
     break;
+
     case ANA:
-    /* ???
-    for(int j = PREAMBLE_SIZE ; j < (*this).transmitTotalMsgSize; j++){
-      (*this).masterMsg[j] = channel.payload_analog[j - PREAMBLE_SIZE];
-    }
-    */
     break;
+
     case ALL:
-    //??
     break;
   }
 

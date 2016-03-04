@@ -156,6 +156,7 @@ void LetsCommunicate::stateOfTheUnion() {
 
 /* FUNTION TO CONSTRUCT PREABLE + DATA MSG AND TRANSMIT (SEND) */
 // NEED TO WORK ON IT - OVERRIDE transmit with diff parameters from the one in communicate calss
+// CHECK THE FLAG THAT IF THERE IS DATA READY TO TRANSMIT
 void LetsCommunicate::transmit(uint8_t _comm, uint8_t _payloadType){
     // call transmission function from Communicate.cpp
     switch(_payloadType) {
@@ -175,6 +176,7 @@ void LetsCommunicate::transmit(uint8_t _comm, uint8_t _payloadType){
 
 void LetsCommunicate::run() {
 //when using interrupt (only for digital)
+// check current state and pre state ...
   if((*this).state->interruptsEnabled) {
     delay(25);
     if(digitalRead(interrupt_id) == LOW) {

@@ -24,8 +24,11 @@ struct letscommunicate {
   uint8_t analogPinCount = -1; // How many analog pins is used (need to read the state)
   uint8_t analogDataSize = -1; // Each Analog pin need to have 2 bytes to store its value
   //uint32_t interruptState = 0;
+  // about to transmit
+    uint8_t * currentDigitalState;
+  // just receive
+  uint8_t * presentDigitalState;
   uint8_t * currentAnalogState;
-  uint8_t * currentDigitalState;
 };
 
 class LetsCommunicate: public Communicate {

@@ -25,14 +25,15 @@
 #define ISQUAREDC   0x02
 
 /* PAYLOAD MESSAGE TYPE */
-#define PWM   0xFB // PWM = PWM OUTPUT
-#define DIG   0xFC // DIG = DIGITAL
-#define DXT   0xFD // DXT = DIGITAL EXTENDED
-#define ANA   0xFE // ANA = ANALOG
-#define ALL   0xFF // ALL = DIGITAL + ANALOG
+#define PWM   0xFB // PWM = PWM OUTPUT ?
+#define DIG   0xFC // 252 - DIG = DIGITAL
+#define DXT   0xFD // 253 - DXT = DIGITAL EXTENDED
+#define ANA   0xFE // 254 - ANA = ANALOG
+#define ALL   0xFF // 255 - ALL = DIGITAL + ANALOG
 
 #define OFFSET  0x02 // DIG OFFSET
 #define ANALOG_OFFSET 0x02 //ANALOG OFFSET
+#define DATASIZE_OFFSET 0x02 // FOR PAYLOADTYPE & DATA SIZES
 #define DIGSIZE 0x0E //14 Digital Pins
 #define DXTSIZE 0x06 //6 Analog to Digital Pins
 #define ANASIZE 0x06 //6 Analog Pins
