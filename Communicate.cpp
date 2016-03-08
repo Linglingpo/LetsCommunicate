@@ -214,7 +214,6 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
           for(int i = 0; i < PREAMBLE_SIZE; i++)
             Serial.write(channel.preamble[i]);
 
-          // not working ... ???
           if(channel.preamble[6] == CNT) {
             for(int i = 0; i < (*this).transmitTotalMsgSize; i++){
               Serial.write((*this).masterMsg[i]);
@@ -224,7 +223,9 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
           Serial.write("\n");
           receive = (*this).receive(_comm, counter++, channel);
           /* IF THIS IS TRUE - THEN COMMUICATION FAILED - ERROR - receive has several error codes */
-          if( counter == MAX_ATTEMPTS ) { return 0; }
+          if( counter == MAX_ATTEMPTS ) {
+            return 0;
+          }
     } while ( counter != MAX_ATTEMPTS && receive != 1);
 
       return 1;

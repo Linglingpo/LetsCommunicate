@@ -16,19 +16,20 @@ struct letscommunicate {
   uint8_t intercomm = -1;   // COMMUNICATION TYPE - SOFTSERIAL | ISQUAREDC
   uint8_t source = -1;     // MY_ID
 
-  bool interruptsEnabled = false;         // IF FALSE - NO INTERRUPTS ON DIG OR DXT
-  bool customConfigOfInputOut = false;    // IF FALSE - THEN USING DIG/DXT or ANA...
-  bool payloadType[3] = {0}; // [0] = DIG [1] = DIG [2] = ANA
+  bool interruptsEnabled = false;        // IF FALSE - NO INTERRUPTS ON DIG OR DXT
+  bool customConfigOfInputOut = false;   // IF FALSE - THEN USING DIG/DXT or ANA...
+  bool payloadType[3] = {0}; //[0] = DIG [1] = DIG [2] = ANA
 
   uint8_t digitalPinCount = -1; // How many digital pins is used (need to read the state)
   uint8_t analogPinCount = -1; // How many analog pins is used (need to read the state)
   uint8_t analogDataSize = -1; // Each Analog pin need to have 2 bytes to store its value
-  //uint32_t interruptState = 0;
+
   // about to transmit
-    uint8_t * currentDigitalState;
+  uint8_t * currentDigitalState;
+  uint8_t * currentAnalogState;
   // just receive
   uint8_t * presentDigitalState;
-  uint8_t * currentAnalogState;
+  uint8_t * presentAnalogState;
 };
 
 class LetsCommunicate: public Communicate {
