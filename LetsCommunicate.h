@@ -24,12 +24,14 @@ struct letscommunicate {
   uint8_t analogPinCount = -1; // How many analog pins is used (need to read the state)
   uint8_t analogDataSize = -1; // Each Analog pin need to have 2 bytes to store its value
 
-  // about to transmit
+  // about to transmit (ready to send)
   uint8_t * currentDigitalState;
   uint8_t * currentAnalogState;
-  // just receive
+  // just receive (What is reading now)
   uint8_t * presentDigitalState;
   uint8_t * presentAnalogState;
+  //FLAG - If the state is changed, then transmit the msg
+  bool stateChanged = false;
 };
 
 class LetsCommunicate: public Communicate {
@@ -78,6 +80,9 @@ public:
     1st const the return type that is not able to change,
     2nd const the function annot change the value in struct */
   const letscommunicate * getLetsCommunicateState() const;
+
+  /* FUNTION TO CHECK IF THE PRESENT STATE IS DIFF THAN THE CURRENT STATE */
+  void checkState(uint8_t*, uint8_t*);
 
   /* FUNTION TO CONSTRUCT PREABLE + DATA MSG AND TRANSMIT (SEND) */
   //SOME WORK NEEDS TO DO - OVERRIDE TO COMMUNICATE BY LETSCOMMUNICATE...
