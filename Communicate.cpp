@@ -26,15 +26,20 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
 
   switch(_type) {
     case SYN:
+    Serial.print("SEQUENCE TYPE (should be 0)----------------------: ");
+    Serial.println(_type);
       channel.preamble[6] = _type;
     break;
 
-    //???
     case CNT:
       channel.preamble[6] = _type;
+      Serial.print("SEQUENCE TYPE (should be 3)----------------------: ");
+      Serial.println(_type);
     break;
 
     case FIN:
+    Serial.print("SEQUENCE TYPE (should be 4)----------------------: ");
+    Serial.println(_type);
       channel.preamble[6] = _type;
     break;
   }
@@ -145,13 +150,19 @@ switch(_comm) {
   }
     uint8_t receive;
     do {
-        (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
+      Serial.print("SEQUENCE A ----------------------: ");
+      Serial.println(seq);
 
       if(seq == 1){
+      //Construct preamble
+      (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
       //constructData
       (*this).constructData(_payloadType, _payloadSize, _payloadState, (*this).communicationState->master);
       //send the preamble + data msg
       (*this).constructMaster(_payloadType, _payloadSize, (*this).communicationState->master);
+    } else {
+      //Construct preamble
+      (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
     }
 
       receive = send(_comm, (*this).communicationState->master);
@@ -211,9 +222,11 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
       uint8_t counter = 0;
       uint8_t receive = 0;
       do {
+          //SYN or FIN
           for(int i = 0; i < PREAMBLE_SIZE; i++)
             Serial.write(channel.preamble[i]);
 
+          //CNT
           if(channel.preamble[6] == CNT) {
             for(int i = 0; i < (*this).transmitTotalMsgSize; i++){
               Serial.write((*this).masterMsg[i]);

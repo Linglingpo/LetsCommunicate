@@ -34,6 +34,7 @@ void discover(Serial p) {
   System.out.println("IN DISCOVERED ---------------------------------");
   short _temp = (short)p.read(); // preamble size
   if (_temp == PREAMBLE_SIZE) {
+    
     preamble = new short[PREAMBLE_SIZE - OFFSET]; // no ~, no Preamble Size
     System.out.print("ARDUINO DISCOVERED PREAMBLE: ");
     for (int i = 0; i < PREAMBLE_SIZE - OFFSET; i++) {
@@ -64,6 +65,19 @@ void discover(Serial p) {
   }
 }
 
+void readData(Serial p) {
+  System.out.println("IN DATA ---------------------------------"); 
+  
+  // ------------------ DATA ---------------------//
+  payloadType = (short)p.read(); // DIG/DXT/ANA/ALL
+  dataSize = (short)p.read();
+
+  System.out.print("Payload Type: "); 
+  System.out.println(payloadType); 
+  System.out.print("DATA Size: "); 
+  System.out.println(dataSize); 
+
+}
 
 void handle(Serial p) {
   System.out.println("IN HANDLE ---------------------------------");
@@ -81,29 +95,9 @@ void handle(Serial p) {
     println();
   } // End of preamble
 
-
-  // ------------------ DATA ---------------------//
-  short _payloadType = (short)p.read(); // DIG/DXT/ANA/ALL
-  short _dataSize = (short)p.read();
-
-  System.out.print("Payload Type: "); 
-  System.out.println(_payloadType); 
-  System.out.print("DATA Size: "); 
-  System.out.println(_dataSize); 
-
-  if (_payloadType == DIG) {
-    System.out.println("IN DIG ---------------------------------"); 
-    data = new short[_dataSize - OFFSET]; // no Payload Type, no Data Size
-    System.out.print("DATA MSG: ");
-    for (int i = 0; i < _dataSize - OFFSET; i++) {
-      data[i] = (short)p.read(); // reading data state
-      System.out.print(data[i]); 
-      System.out.print(" ");
-    }
-  } // end of DIG
+  if(preamble[4] == CNT) {  readData(p); }
   
-  println();
-  
+
   /* RESPONSE FROM PROCESSING */
   short[] _preamble = peek(preamble);
   System.out.print("PROCESSING HANDLE PREAMBLE: ");
@@ -112,7 +106,6 @@ void handle(Serial p) {
     System.out.print(" ");
     port.write(_preamble[i]);
   }
-  
   println();
 }
 
@@ -164,7 +157,6 @@ short[] peek(short[] type) {
     }
     _temp[5] = (ack = type[2]);
     _temp[6] = FIN;
-
     break;
   }
   return _temp;
@@ -213,6 +205,9 @@ short syn = 0;    // SYN_ID
 short ack = 0;    // ACK_ID
 short source = 0; // SENDER_ID
 short preamble[];
+
+short payloadType;
+short dataSize;
 short data[];
 short payload_digital[];
 short payload_analog[];
