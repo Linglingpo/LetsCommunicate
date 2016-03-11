@@ -133,55 +133,55 @@ uint8_t Communicate::constructMaster(uint8_t _payloadType, uint8_t _payloadSize,
 
 }
 
-uint8_t Communicate::transmissionMsg(uint8_t _comm, uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState){
-// HAVE WE BEEN DISCOVERED...
-uint8_t _return = 0;
-uint8_t seq = 0;
-uint8_t * sequence = new uint8_t[3];
-sequence[0] = SYN;
-sequence[1] = CNT;
-sequence[2] = FIN;
-
-// Need to know which communication type first
-switch(_comm) {
-  case HARDSERIAL:
-  /* WE DONOT HAVE TO DO THIS - WE SYN REGARDLESS ;) */
-  // if (!(*this).communicationState->master.discovered){
-  //   (*this).discover(_comm);
-  // }
-    uint8_t receive;
-    do {
-      Serial.print("SEQUENCE A ----------------------: ");
-      Serial.println(seq);
-
-      if(seq == 1){
-      //Construct preamble
-      (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
-      //constructData
-      (*this).constructData(_payloadType, _payloadSize, _payloadState, (*this).communicationState->master);
-      //send the preamble + data msg
-      (*this).constructMaster(_payloadType, _payloadSize, (*this).communicationState->master);
-    } else {
-      //Construct preamble
-      (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
-    }
-
-      receive = send(_comm, (*this).communicationState->master);
-      //to control SYN & FIN in discover
-      if(receive == 0) { return 0; }
-    } while(seq < 3);
-    return 1;
-  break;
-
-  case SOFTSERIAL:
-    //return 0;
-  break;
-  case ISQUAREDC:
-    //return 0;
-  break;
-    }
-return _return;
-}
+// uint8_t Communicate::transmissionMsg(uint8_t _comm, uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState){
+// // HAVE WE BEEN DISCOVERED...
+// uint8_t _return = 0;
+// uint8_t seq = 0;
+// uint8_t * sequence = new uint8_t[3];
+// sequence[0] = SYN;
+// sequence[1] = CNT;
+// sequence[2] = FIN;
+//
+// // Need to know which communication type first
+// switch(_comm) {
+//   case HARDSERIAL:
+//   /* WE DONOT HAVE TO DO THIS - WE SYN REGARDLESS ;) */
+//   // if (!(*this).communicationState->master.discovered){
+//   //   (*this).discover(_comm);
+//   // }
+//     uint8_t receive;
+//     do {
+//       Serial.print("SEQUENCE A ----------------------: ");
+//       Serial.println(seq);
+//
+//       if(seq == 1){
+//       //Construct preamble
+//       (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
+//       //constructData
+//       (*this).constructData(_payloadType, _payloadSize, _payloadState, (*this).communicationState->master);
+//       //send the preamble + data msg
+//       (*this).constructMaster(_payloadType, _payloadSize, (*this).communicationState->master);
+//     } else {
+//       //Construct preamble
+//       (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
+//     }
+//
+//       receive = send(_comm, (*this).communicationState->master);
+//       //to control SYN & FIN in discover
+//       if(receive == 0) { return 0; }
+//     } while(seq < 3);
+//     return 1;
+//   break;
+//
+//   case SOFTSERIAL:
+//     //return 0;
+//   break;
+//   case ISQUAREDC:
+//     //return 0;
+//   break;
+//     }
+// return _return;
+// }
 
 
 uint8_t Communicate::discover(uint8_t _comm) {
@@ -194,6 +194,9 @@ uint8_t Communicate::discover(uint8_t _comm) {
 
       uint8_t receive;
       do {
+        Serial.print("Checking for FAILURE in DISCOVER:  ");
+        Serial.println(seq);
+
         (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
         receive = send(_comm, (*this).communicationState->master);
         //to control SYN & FIN in discover
@@ -242,6 +245,10 @@ uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, u
 
       uint8_t receive;
       do {
+
+          Serial.print("Checking for FAILURE in SHARE:  ");
+          Serial.println(seq);
+
           (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
           receive = send(_comm, (*this).communicationState->master);
           if(receive == 0) { return 0; }
@@ -340,8 +347,13 @@ uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
     case SYN:
       /* WE NEED TO CHECK EVERY FIELD IN THE RECEIVED MESSAGE */
         channel.target = response[2];
-        channel.syn    = response[4] + 1;
-        channel.ack    = response[4];
+        Serial.print(response[4]);
+        if (response[4] == 255){
+          channel.syn = 0;
+        } else {
+        channel.syn  = response[4] + 1;
+        }
+        channel.ack  = response[4];
       /* SEND FINISH MESSAGE - WE HAVE DISCOVERED AND SYNCHED */
       return 1;
       break;
@@ -350,14 +362,21 @@ uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
     case RST:
       break;
     case CNT:
-    //???
     channel.target = response[2];
+    if (response[4] == 255){
+      channel.syn = 0;
+    } else {
     channel.syn = response[4] + 1;
+    }
     channel.ack = response[4];
     return 1;
       break;
     case FIN:
+    if (response[4] == 255){
+      channel.syn = 0;
+    } else {
       channel.syn = response[4] + 1;
+    }
       channel.ack = response[4];
       channel.discovered = true;
       return 1;

@@ -120,8 +120,12 @@ short[] peek(short[] type) {
   case SYN:
     /* SYNCHRONISE */
     System.out.println("SYNCHRONISING...");
+    if (syn == 255){
+      syn = 0;
+    } 
     ++syn;
-    _temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn; //SNY
+    //_temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn; //SNY
+    _temp[4] = ( !discovered ) ? syn = (short)250 : ++syn; //SNY
     _temp[5] = ( ack = type[2] ); // ACK
     _temp[6] = SYN; // Payload Type
     break;
@@ -136,7 +140,13 @@ short[] peek(short[] type) {
     System.out.println("CONTINIUING...");
     //check Syn
     if ( ++syn == type[2] ) {
-      _temp[4] = ++syn; //SNY
+      
+      if (syn == 255){
+         syn = 0;
+       }else {
+        _temp[4] = ++syn; //SNY
+       }
+       
       _temp[5] = ( ack = type[2] ); //ACK
       _temp[6] = CNT;
     }
@@ -148,7 +158,13 @@ short[] peek(short[] type) {
     //System.out.println("MSGID IS: " + type[2]);
     //checking the Syn form arduino
     if ( ++syn == type[2] ) {
+      
+       if (syn == 255){
+         syn = 0;
+       }else {
       _temp[4] = ++syn;
+       }
+       
       if ( !discovered ) {
         discovered = true;
       }
