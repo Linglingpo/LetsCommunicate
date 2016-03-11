@@ -274,8 +274,8 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
 
           //CNT
           if(channel.preamble[6] == CNT) {
-            for(int i = 0; i < (*this).transmitTotalMsgSize; i++){
-              Serial.print((*this).masterMsg[i]);
+            for(int i = 0; i < 14; i++){
+              Serial.write((*this).communicationState->master.digitalPayload[i]);
             }
           }
 
@@ -340,8 +340,8 @@ uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
     case SYN:
       /* WE NEED TO CHECK EVERY FIELD IN THE RECEIVED MESSAGE */
         channel.target = response[2];
-        channel.syn = response[4] + 1;
-        channel.ack = response[4];
+        channel.syn    = response[4] + 1;
+        channel.ack    = response[4];
       /* SEND FINISH MESSAGE - WE HAVE DISCOVERED AND SYNCHED */
       return 1;
       break;
@@ -354,7 +354,7 @@ uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
     channel.target = response[2];
     channel.syn = response[4] + 1;
     channel.ack = response[4];
-    channel.preamble[6] = response[6];
+    return 1;
       break;
     case FIN:
       channel.syn = response[4] + 1;

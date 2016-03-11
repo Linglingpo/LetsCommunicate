@@ -184,8 +184,8 @@ void LetsCommunicate::stateOfTheUnion() {
 }
 
 void LetsCommunicate::checkState(uint8_t* _presentState, uint8_t* _currentState){
-  Serial.print("I AM CHECKING !!!!! ------------------");
-  Serial.println();
+  //Serial.print("I AM CHECKING !!!!! ------------------");
+  //Serial.println();
   for(int i = 0; i < (*this).state-> digitalPinCount; i ++){
     if(_presentState [i] != _currentState [i]){
       (*this).state-> stateChanged = true;
@@ -206,6 +206,7 @@ void LetsCommunicate::transmit(uint8_t _comm, uint8_t _payloadType){
       (*this).share(_comm, _payloadType, (*this).state-> digitalPinCount, (*this).state->presentDigitalState);
       //(*this).transmissionMsg(_comm, _payloadType, (*this).state-> digitalPinCount, (*this).state->presentDigitalState);
       (*this).state-> stateChanged = false;
+      (*this).stateOfTheUnion();
       }
       break;
       case DXT:
