@@ -20,6 +20,7 @@ void draw() {
 
 void serialEvent(Serial p) {
   /* ENSURE WHILE(... > 0) && port.bufferUntil('\n') */
+
   while (p.available() > 0) {
     /* CHECK FOR HELLO = 126 | '~' */
     short _temp = (short)p.read();
@@ -34,80 +35,114 @@ void serialEvent(Serial p) {
 boolean receive(Serial p) {
   boolean _receive = false;
   /* CHECK PREAMBLE SIZE */
-  if( (short)p.read() != PREAMBLE_SIZE ) return false;
-  
+  if ( (short)p.read() != PREAMBLE_SIZE ) return false;
+
   /* OK - PREAMBLE SIZE APPEARS TO BE CORRECT - LETS CONTINUE */
   preamble = new short[PREAMBLE_SIZE - OFFSET]; // no ~, no Preamble Size
 
-    for (int i = 0; i < PREAMBLE_SIZE - OFFSET; i++) {
-      preamble[i] = (short)p.read();
-      System.out.print(preamble[i]);
-      System.out.print(" ");
-    }
-    println();
-    
-    /* CHECK IF WE HAVE A PAYLOAD FOLLOWING THE PREAMBLE */
-    if( preamble[4] == CNT ) {
-      System.out.print("PAYLOAD ");
+  for (int i = 0; i < PREAMBLE_SIZE - OFFSET; i++) {
+    preamble[i] = (short)p.read();
+    System.out.print(preamble[i]);
+    System.out.print(" ");
+  }
+  println();
+
+  /* CHECK IF WE HAVE A PAYLOAD FOLLOWING THE PREAMBLE */
+  if ( preamble[4] == CNT ) {
+    System.out.print("PAYLOAD ");
+
+    if (p.available() > 0) { 
+
       short[] temp = new short[14];
-      
-    for (int i = 0; i < 14; i++) {
-     temp[i] = 0;
-     temp[i] = (short) p.read();
-     System.out.print(temp[i]);
-     System.out.print(" ");
-     }
+
+      for (int i = 0; i < 14; i++) {
+        temp[i] = 0;
+        temp[i] = (short) p.read();
+        System.out.print(temp[i]);
+        System.out.print(" ");
+      }
     }
-    //short _temp = (short)p.read();
-    //switch(_temp) {
-    //  case DIG: 
-    //    //if( (short)p.read() != DIGSIZE ) return false;
-    //    //payload = new short[DIGSIZE];
-    //  break;
-    //  case DXT: 
-    //    //if( (short)p.read() != DIGSIZE + DXTSIZE ) return false;
-    //    //payload = new short[DIGSIZE + DXTSIZE];
-    //  break;
-    //  case ANA:
-        
-    //  break;
-    //  case ALL: 
-    //  break;
-    //}
-      
-    //for (int i = 0; i < 12; i++) {
-    //  //payload[i] = (short) p.read();
-    //  System.out.print(payload[i]);
-    //  System.out.print(" ");
-    //  }
-    //  System.out.print("PAYLOAD ");
-    //}
-  
+  }
+
+  //short _temp = (short)p.read();
+  //switch(_temp) {
+  //  case DIG: 
+  //    //if( (short)p.read() != DIGSIZE ) return false;
+  //    //payload = new short[DIGSIZE];
+  //  break;
+  //  case DXT: 
+  //    //if( (short)p.read() != DIGSIZE + DXTSIZE ) return false;
+  //    //payload = new short[DIGSIZE + DXTSIZE];
+  //  break;
+  //  case ANA:
+
+  //  break;
+  //  case ALL: 
+  //  break;
+  //}
+
+  //for (int i = 0; i < 12; i++) {
+  //  //payload[i] = (short) p.read();
+  //  System.out.print(payload[i]);
+  //  System.out.print(" ");
+  //  }
+  //  System.out.print("PAYLOAD ");
+  //}
   return true;
 }
 
 void send(Serial p) {
-    /* RESPONSE FROM PROCESSING */
-    short[] _preamble = peek(this.preamble);
+  /* RESPONSE FROM PROCESSING */
+  short[] _preamble = peek(this.preamble);
+  if (_preamble != null) {
     for (int i = 0; i < PREAMBLE_SIZE; i++) {
       System.out.print(_preamble[i]);
       System.out.print(" ");
       port.write(_preamble[i]);
       _preamble[i] = 0;
     }
-    println();  println();
+  }
+  println();  
+  println();
 }
 
 /* ----- INITIAL SYNCHRONISATION ----- */
 void discover(Serial p) {
-  if(receive(p)) { send(p); } 
+  if (receive(p)) { 
+    send(p);
+  }
 }
 
 void handle(Serial p) {
-  if(receive(p)) { send(p); }
+  if (receive(p)) { 
+    send(p);
+  }
 }
 
+//------------ Start messy around with the SYN -----------// 
+short checkSyn() {
 
+  if (syn == ack +1) {
+    synCorrected = true; 
+  }
+  
+  if (synCorrected){
+  if (syn == maxSynNumer) {
+      syn = 0;
+    } else {
+      ++syn;
+    }
+  } else {
+    print("Arduino send more than one msg... ");
+    println();
+  }
+
+  print ("In Chenck SYN: ");
+  println(syn);
+  return syn;
+}
+
+//------------ Start messy around with the SYN -----------// 
 short[] peek(short[] type) {
   short _temp[] = new short[PREAMBLE_SIZE];
 
@@ -115,17 +150,16 @@ short[] peek(short[] type) {
   _temp[1] = PREAMBLE_SIZE;
   _temp[2] = MYID;
   _temp[3] = ( !discovered ) ? source = type[0] : source; // Arduino ID
-  
+
   switch(type[4]) {
   case SYN:
     /* SYNCHRONISE */
     System.out.println("SYNCHRONISING...");
-    if (syn == 255){
-      syn = 0;
-    } 
-    ++syn;
+    checkSyn();
     //_temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn; //SNY
-    _temp[4] = ( !discovered ) ? syn = (short)250 : ++syn; //SNY
+    _temp[4] = ( !discovered ) ? syn = (short)random(0, maxSynNumer) : checkSyn(); //SNY
+
+
     _temp[5] = ( ack = type[2] ); // ACK
     _temp[6] = SYN; // Payload Type
     break;
@@ -139,14 +173,8 @@ short[] peek(short[] type) {
     /* CONTINUE */
     System.out.println("CONTINIUING...");
     //check Syn
-    if ( ++syn == type[2] ) {
-      
-      if (syn == 255){
-         syn = 0;
-       }else {
-        _temp[4] = ++syn; //SNY
-       }
-       
+    if ( checkSyn() == type[2] ) {
+      _temp[4] = checkSyn(); //SNY
       _temp[5] = ( ack = type[2] ); //ACK
       _temp[6] = CNT;
     }
@@ -154,17 +182,11 @@ short[] peek(short[] type) {
   case FIN:
     /* FINISH */
     System.out.println("FINISHING...");
-    //System.out.println("SYN IS: " + syn);
-    //System.out.println("MSGID IS: " + type[2]);
     //checking the Syn form arduino
-    if ( ++syn == type[2] ) {
-      
-       if (syn == 255){
-         syn = 0;
-       }else {
-      _temp[4] = ++syn;
-       }
-       
+    if ( checkSyn() == type[2] ) {
+
+      _temp[4] = checkSyn();
+
       if ( !discovered ) {
         discovered = true;
       }
@@ -172,6 +194,8 @@ short[] peek(short[] type) {
     _temp[5] = (ack = type[2]);
     _temp[6] = FIN;
     break;
+  default:
+    return null;
   }
   return _temp;
 }
@@ -220,6 +244,10 @@ short ack = 0;    // ACK_ID
 short source = 0; // SENDER_ID
 short preamble[];
 short payload[];
+
+//Syn number goes wrong when it is too high
+short maxSynNumer = 200;
+boolean synCorrected = false;
 
 short payloadType;
 short dataSize;
