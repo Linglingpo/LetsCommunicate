@@ -58,15 +58,15 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, u
 
   Serial.print("In Data Construct: ");
 
-  channel.payload_digital[0] = _payloadType;
-  channel.payload_digital[1] = _payloadSize;
+  channel.digitalPayload[0] = _payloadType;
+  channel.digitalPayload[1] = _payloadSize;
 
 
   switch(_payloadType) {
     case DIG:
-    for(int i = DATASIZE_OFFSET; i < _payloadSize + DATASIZE_OFFSET; i++){
-      channel.payload_digital[i] = _payloadState[i];
-      Serial.print(channel.payload_digital[i]);
+    for(int i = DIGDXT_OFFSET; i < _payloadSize + DIGDXT_OFFSET; i++){
+      channel.digitalPayload[i] = _payloadState[i];
+      Serial.print(channel.digitalPayload[i]);
       Serial.print(" ");
     }
     Serial.println();
@@ -84,7 +84,7 @@ uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, u
 }
 
 uint8_t Communicate::constructMaster(uint8_t _payloadType, uint8_t _payloadSize, transmit & channel){
-  (*this).transmitTotalMsgSize = PREAMBLE_SIZE + DATASIZE_OFFSET + _payloadSize;
+  (*this).transmitTotalMsgSize = PREAMBLE_SIZE + DIGDXT_OFFSET + _payloadSize;
   (*this).masterMsg = new uint8_t[(*this).transmitTotalMsgSize];
   //Store preamble
   for(int i = 0 ; i < PREAMBLE_SIZE; i++){
@@ -95,7 +95,7 @@ uint8_t Communicate::constructMaster(uint8_t _payloadType, uint8_t _payloadSize,
     case DIG:
     //Store pinStates
     for(int j = PREAMBLE_SIZE ; j < (*this).transmitTotalMsgSize; j++){
-      (*this).masterMsg[j] = channel.payload_digital[j - PREAMBLE_SIZE];
+      (*this).masterMsg[j] = channel.digitalPayload[j - PREAMBLE_SIZE];
     }
     break;
 
@@ -145,9 +145,10 @@ sequence[2] = FIN;
 // Need to know which communication type first
 switch(_comm) {
   case HARDSERIAL:
-  if (!(*this).communicationState->master.discovered){
-    (*this).discover(_comm);
-  }
+  /* WE DONOT HAVE TO DO THIS - WE SYN REGARDLESS ;) */
+  // if (!(*this).communicationState->master.discovered){
+  //   (*this).discover(_comm);
+  // }
     uint8_t receive;
     do {
       Serial.print("SEQUENCE A ----------------------: ");
@@ -186,9 +187,7 @@ return _return;
 uint8_t Communicate::discover(uint8_t _comm) {
   uint8_t _return = 0;
   uint8_t seq = 0;
-  uint8_t * sequence = new uint8_t[2];
-  sequence[0] = SYN;
-  sequence[1] = FIN;
+  uint8_t sequence[2] = { SYN, FIN };
 
   switch(_comm) {
     case HARDSERIAL:
@@ -213,6 +212,53 @@ uint8_t Communicate::discover(uint8_t _comm) {
   return _return;
 }
 
+uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, uint8_t * _payloadState) {
+  uint8_t _return     = 0;
+  uint8_t seq         = 0;
+  uint8_t sequence[3] = { SYN, CNT, FIN };
+
+  switch(_comm) {
+
+    case HARDSERIAL:
+      /* PREPARE THE PAYLOAD and ASSOCIATE WITH CHANNEL */
+      switch(_type) {
+        case DIG:
+          (*this).communicationState->master.digitalPayload = new uint8_t[ _payloadSize + DIGDXT_OFFSET ];
+          (*this).communicationState->master.digitalPayload[0] = _type;
+          (*this).communicationState->master.digitalPayload[1] = _payloadSize;
+
+          for(int i = 0; i < _payloadSize; i++)
+            (*this).communicationState->master.digitalPayload[i + DIGDXT_OFFSET] = _payloadState[i];
+        break;
+        case DXT:
+          (*this).communicationState->master.digitalPayload = new uint8_t[ _payloadSize + DIGDXT_OFFSET ];
+          (*this).communicationState->master.digitalPayload[0] = _type;
+          (*this).communicationState->master.digitalPayload[1] = _payloadSize;
+
+          for(int i = 0; i < _payloadSize; i++)
+            (*this).communicationState->master.digitalPayload[i + DIGDXT_OFFSET] = _payloadState[i];
+        break;
+      }
+
+      uint8_t receive;
+      do {
+          (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
+          receive = send(_comm, (*this).communicationState->master);
+          if(receive == 0) { return 0; }
+      } while(seq < 3);
+      return 1;
+    break;
+
+    case SOFTSERIAL:
+      //return 0;
+    break;
+    case ISQUAREDC:
+      //return 0;
+    break;
+    }
+  return _return;
+}
+
 uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
   uint8_t _return = 0;
 
@@ -222,14 +268,14 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
       uint8_t counter = 0;
       uint8_t receive = 0;
       do {
-          //SYN or FIN
+          //ALWAYS TRANSMIT THE PREAMBLE {SYN, CNT or FIN}
           for(int i = 0; i < PREAMBLE_SIZE; i++)
             Serial.write(channel.preamble[i]);
 
           //CNT
           if(channel.preamble[6] == CNT) {
             for(int i = 0; i < (*this).transmitTotalMsgSize; i++){
-              Serial.write((*this).masterMsg[i]);
+              Serial.print((*this).masterMsg[i]);
             }
           }
 

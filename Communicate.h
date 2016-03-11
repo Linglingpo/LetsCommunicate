@@ -33,7 +33,7 @@
 
 #define OFFSET  0x02 // DIG OFFSET
 #define ANALOG_OFFSET 0x02 //ANALOG OFFSET
-#define DATASIZE_OFFSET 0x02 // FOR PAYLOADTYPE & DATA SIZES
+#define DIGDXT_OFFSET 0x02 // FOR PAYLOADTYPE & DATA SIZES
 #define DIGSIZE 0x0E //14 Digital Pins
 #define DXTSIZE 0x06 //6 Analog to Digital Pins
 #define ANASIZE 0x06 //6 Analog Pins
@@ -45,13 +45,13 @@
 struct transmit {
   bool discovered = false;
   uint8_t preamble[PREAMBLE_SIZE];
-  uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
+  //uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
+  uint8_t * digitalPayload;
   uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
 
   uint8_t syn = 0;
   uint8_t ack = 0;
-  uint8_t target = 0;     // THEIR_ID
-
+  uint8_t target = 0;     // THEIR_IDx
 };
 
 struct communicationType {
@@ -77,6 +77,7 @@ public:
   uint8_t send(uint8_t, transmit &);
   //virtual???
   uint8_t discover(uint8_t);
+  uint8_t share(uint8_t, uint8_t, uint8_t, uint8_t * );
   /* virtual??? - Change function name to "transmit"
   transmissionMsg function that will be override in LetsCommunicate.cpp
   (communication type, payload type, payload size, *payload stats); */

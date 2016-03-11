@@ -4,7 +4,8 @@ Serial port;
 
 void setup() {
   size(200, 200);
-  String portName = Serial.list()[5];
+
+  String portName = Serial.list()[4];
   println(Serial.list());
   port = new Serial(this, portName, 115200);
   port.bufferUntil('\n');
@@ -21,10 +22,10 @@ void serialEvent(Serial p) {
   /* ENSURE WHILE(... > 0) && port.bufferUntil('\n') */
   while (p.available() > 0) {
     /* CHECK FOR HELLO = 126 | '~' */
-    short _temp = (short)p.read();
-    if ( (_temp == HELLO) && ((!discovered)) ) {
+    short _temp = (short)p.read(); 
+    if ( (_temp == HELLO) && ( !discovered ) ) {
       discover(p);
-    } else if ( (_temp == HELLO) && ((discovered)) ) {
+    } else if ( (_temp == HELLO) && ( discovered ) ) {
       handle(p);
     }
   }
@@ -34,12 +35,12 @@ void discover(Serial p) {
   System.out.println("IN DISCOVERED ---------------------------------");
   short _temp = (short)p.read(); // preamble size
   if (_temp == PREAMBLE_SIZE) {
-    
+
     preamble = new short[PREAMBLE_SIZE - OFFSET]; // no ~, no Preamble Size
     System.out.print("ARDUINO DISCOVERED PREAMBLE: ");
     for (int i = 0; i < PREAMBLE_SIZE - OFFSET; i++) {
       preamble[i] = (short)p.read();
-      System.out.print(preamble[i]); 
+      System.out.print(preamble[i]);
       System.out.print(" ");
     }
     println();
@@ -48,7 +49,7 @@ void discover(Serial p) {
     short[] _preamble = peek(preamble);
     System.out.print("PROCESSING DISCOVERED PREAMBLE: ");
     for (int i = 0; i < PREAMBLE_SIZE; i++) {
-      System.out.print(_preamble[i]); 
+      System.out.print(_preamble[i]);
       System.out.print(" ");
       port.write(_preamble[i]);
     }
@@ -66,16 +67,16 @@ void discover(Serial p) {
 }
 
 void readData(Serial p) {
-  System.out.println("IN DATA ---------------------------------"); 
-  
+  System.out.println("IN DATA ---------------------------------");
+
   // ------------------ DATA ---------------------//
   payloadType = (short)p.read(); // DIG/DXT/ANA/ALL
   dataSize = (short)p.read();
 
-  System.out.print("Payload Type: "); 
-  System.out.println(payloadType); 
-  System.out.print("DATA Size: "); 
-  System.out.println(dataSize); 
+  System.out.print("Payload Type: ");
+  System.out.println(payloadType);
+  System.out.print("DATA Size: ");
+  System.out.println(dataSize);
 
 }
 
@@ -89,20 +90,20 @@ void handle(Serial p) {
     System.out.print("ARDUINO HANDLE PREAMBLE: ");
     for (int i = 0; i < PREAMBLE_SIZE - OFFSET; i++) {
       preamble[i] = (short)p.read();
-      System.out.print(preamble[i]); 
+      System.out.print(preamble[i]);
       System.out.print(" ");
     }
     println();
   } // End of preamble
 
   if(preamble[4] == CNT) {  readData(p); }
-  
+
 
   /* RESPONSE FROM PROCESSING */
   short[] _preamble = peek(preamble);
   System.out.print("PROCESSING HANDLE PREAMBLE: ");
   for (int i = 0; i < PREAMBLE_SIZE; i++) {
-    System.out.print(_preamble[i]); 
+    System.out.print(_preamble[i]);
     System.out.print(" ");
     port.write(_preamble[i]);
   }
@@ -151,7 +152,7 @@ short[] peek(short[] type) {
     if (++syn == type[2]) {
       //processing Syn update
       _temp[4] = ++syn;
-      if (!discovered) { 
+      if (!discovered) {
         discovered = true;
       }
     }

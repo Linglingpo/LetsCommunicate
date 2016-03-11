@@ -203,7 +203,8 @@ void LetsCommunicate::transmit(uint8_t _comm, uint8_t _payloadType){
     switch(_payloadType) {
       case DIG:
       if((*this).state-> stateChanged){
-      (*this).transmissionMsg(_comm, _payloadType, (*this).state-> digitalPinCount, (*this).state->presentDigitalState);
+      (*this).share(_comm, _payloadType, (*this).state-> digitalPinCount, (*this).state->presentDigitalState);
+      //(*this).transmissionMsg(_comm, _payloadType, (*this).state-> digitalPinCount, (*this).state->presentDigitalState);
       (*this).state-> stateChanged = false;
       }
       break;

@@ -12,17 +12,17 @@
 #include "Communicate.h"
 
 struct letscommunicate {
-  uint8_t mastercomm = -1;  // COMMUNICATION TYPE - HARDSERIAL | SOFTSERIAL | ISQUAREDC
-  uint8_t intercomm = -1;   // COMMUNICATION TYPE - SOFTSERIAL | ISQUAREDC
-  uint8_t source = -1;     // MY_ID
+  uint8_t mastercomm = 0;  // COMMUNICATION TYPE - HARDSERIAL | SOFTSERIAL | ISQUAREDC
+  uint8_t intercomm  = 0;  // COMMUNICATION TYPE - SOFTSERIAL | ISQUAREDC
+  uint8_t source     = 0;  // MY_ID
 
   bool interruptsEnabled = false;        // IF FALSE - NO INTERRUPTS ON DIG OR DXT
   bool customConfigOfInputOut = false;   // IF FALSE - THEN USING DIG/DXT or ANA...
-  bool payloadType[3] = {0}; //[0] = DIG [1] = DIG [2] = ANA
+  bool payloadType[3] = { 0 }; //[0] = DIG [1] = DIG [2] = ANA
 
-  uint8_t digitalPinCount = -1; // How many digital pins is used (need to read the state)
-  uint8_t analogPinCount = -1; // How many analog pins is used (need to read the state)
-  uint8_t analogDataSize = -1; // Each Analog pin need to have 2 bytes to store its value
+  uint8_t digitalPinCount = 0; // How many digital pins is used (need to read the state)
+  uint8_t analogPinCount  = 0; // How many analog pins is used (need to read the state)
+  uint8_t analogDataSize  = 0; // Each Analog pin need to have 2 bytes to store its value
 
   // about to transmit (ready to send)
   uint8_t * currentDigitalState;
