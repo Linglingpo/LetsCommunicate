@@ -19,6 +19,7 @@
 
 /* SYN RESET CONTROL */
 #define MAXMSGS 0xFF
+
 /* COMMUNICATIONS TYPE */
 #define HARDSERIAL  0x00
 #define SOFTSERIAL  0x01
@@ -34,12 +35,11 @@
 #define OFFSET  0x02 // DIG OFFSET
 #define ANALOG_OFFSET 0x02 //ANALOG OFFSET
 #define DIGDXT_OFFSET 0x02 // FOR PAYLOADTYPE & DATA SIZES
-#define DIGSIZE 0x0E //14 Digital Pins
+#define DIGSIZE 0x0C //14 Digital Pins
 #define DXTSIZE 0x06 //6 Analog to Digital Pins
 #define ANASIZE 0x06 //6 Analog Pins
 
 #define MAX_ATTEMPTS 0x03
-
 
 //using this one
 struct transmit {
@@ -47,7 +47,7 @@ struct transmit {
   uint8_t preamble[PREAMBLE_SIZE];
   //uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
   uint8_t * digitalPayload;
-  uint8_t payload_analog[PAYLOAD_ANALOG_SIZE];
+  uint8_t * payload;
 
   uint8_t syn = 0;
   uint8_t ack = 0;
@@ -73,30 +73,25 @@ public:
   Communicate();
   Communicate(uint8_t , uint8_t);
   Communicate(uint8_t , uint8_t , uint8_t);
-  //virtual???
-  uint8_t send(uint8_t, transmit &);
-  //virtual???
+
   uint8_t discover(uint8_t);
   uint8_t share(uint8_t, uint8_t, uint8_t, uint8_t * );
   /* virtual??? - Change function name to "transmit"
   transmissionMsg function that will be override in LetsCommunicate.cpp
   (communication type, payload type, payload size, *payload stats); */
-  uint8_t transmissionMsg(uint8_t , uint8_t, uint8_t , uint8_t*);
-  uint8_t transmitTotalMsgSize = -1;
+  //uint8_t transmissionMsg(uint8_t , uint8_t, uint8_t , uint8_t*);
+  //uint8_t transmitTotalMsgSize = -1;
   //preamble + data
-  uint8_t * masterMsg;
-
-
+  //uint8_t * masterMsg;
 
 private:
   communicationType * communicationState;
   uint8_t constructPreamble(uint8_t, uint8_t, uint8_t, transmit &);
-  uint8_t constructData(uint8_t, uint8_t, uint8_t*, transmit &);
-
-  uint8_t constructMaster(uint8_t ,uint8_t , transmit &);
-
   uint8_t receive(uint8_t, uint8_t, transmit &);
-  uint8_t peek(uint8_t, transmit & channel);
-  uint8_t reConstructPreamble(uint8_t, uint8_t, uint8_t, transmit &, uint8_t *);
+  uint8_t peek(uint8_t, transmit &);
+  uint8_t send(uint8_t, transmit &);
+  //uint8_t constructData(uint8_t, uint8_t, uint8_t*, transmit &);
+  //uint8_t constructMaster(uint8_t ,uint8_t , transmit &);
+  //uint8_t reConstructPreamble(uint8_t, uint8_t, uint8_t, transmit &, uint8_t *);
 };
 #endif // COMMUNICATE_H

@@ -54,84 +54,84 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
 }
 
 
-uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState, transmit & channel) {
+// uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState, transmit & channel) {
+//
+//   Serial.print("In Data Construct: ");
+//
+//   channel.digitalPayload[0] = _payloadType;
+//   channel.digitalPayload[1] = _payloadSize;
+//
+//
+//   switch(_payloadType) {
+//     case DIG:
+//     for(int i = DIGDXT_OFFSET; i < _payloadSize + DIGDXT_OFFSET; i++){
+//       channel.digitalPayload[i] = _payloadState[i];
+//       Serial.print(channel.digitalPayload[i]);
+//       Serial.print(" ");
+//     }
+//     Serial.println();
+//     break;
+//
+//     case DXT:
+//     break;
+//
+//     case ANA:
+//     break;
+//     case ALL:
+//     //??
+//     break;
+//   }
+// }
 
-  Serial.print("In Data Construct: ");
-
-  channel.digitalPayload[0] = _payloadType;
-  channel.digitalPayload[1] = _payloadSize;
-
-
-  switch(_payloadType) {
-    case DIG:
-    for(int i = DIGDXT_OFFSET; i < _payloadSize + DIGDXT_OFFSET; i++){
-      channel.digitalPayload[i] = _payloadState[i];
-      Serial.print(channel.digitalPayload[i]);
-      Serial.print(" ");
-    }
-    Serial.println();
-    break;
-
-    case DXT:
-    break;
-
-    case ANA:
-    break;
-    case ALL:
-    //??
-    break;
-  }
-}
-
-uint8_t Communicate::constructMaster(uint8_t _payloadType, uint8_t _payloadSize, transmit & channel){
-  (*this).transmitTotalMsgSize = PREAMBLE_SIZE + DIGDXT_OFFSET + _payloadSize;
-  (*this).masterMsg = new uint8_t[(*this).transmitTotalMsgSize];
-  //Store preamble
-  for(int i = 0 ; i < PREAMBLE_SIZE; i++){
-    (*this).masterMsg[i] = channel.preamble[i];
-  }
-
-  switch(_payloadType) {
-    case DIG:
-    //Store pinStates
-    for(int j = PREAMBLE_SIZE ; j < (*this).transmitTotalMsgSize; j++){
-      (*this).masterMsg[j] = channel.digitalPayload[j - PREAMBLE_SIZE];
-    }
-    break;
-
-    case DXT:
-    break;
-
-    case ANA:
-    break;
-
-    case ALL:
-    break;
-  }
-
-  /* DEBUG */
-  Serial.print("In Master Construct: ");
-  Serial.println();
-  Serial.print("Payload Size: ");
-  Serial.print(_payloadSize);
-  Serial.print(" ");
-  Serial.print("Total Size: ");
-  Serial.print((*this).transmitTotalMsgSize);
-  Serial.print(" ");
-  Serial.print("Payload Type In PREAMBLE: ");
-  Serial.print(channel.preamble[6]);
-  Serial.print(" ");
-  Serial.print("Payload Type in MASTER MSG: ");
-  Serial.print((*this).masterMsg[6]);
-  Serial.print(" ");
-  Serial.println();
-  for (int k = 0; k < (*this).transmitTotalMsgSize; k++){
-    Serial.print((*this).masterMsg[k]);
-    Serial.print(" ");
-  }
-  Serial.println();
-
-}
+// uint8_t Communicate::constructMaster(uint8_t _payloadType, uint8_t _payloadSize, transmit & channel){
+//   (*this).transmitTotalMsgSize = PREAMBLE_SIZE + DIGDXT_OFFSET + _payloadSize;
+//   (*this).masterMsg = new uint8_t[(*this).transmitTotalMsgSize];
+//   //Store preamble
+//   for(int i = 0 ; i < PREAMBLE_SIZE; i++){
+//     (*this).masterMsg[i] = channel.preamble[i];
+//   }
+//
+//   switch(_payloadType) {
+//     case DIG:
+//     //Store pinStates
+//     for(int j = PREAMBLE_SIZE ; j < (*this).transmitTotalMsgSize; j++){
+//       (*this).masterMsg[j] = channel.digitalPayload[j - PREAMBLE_SIZE];
+//     }
+//     break;
+//
+//     case DXT:
+//     break;
+//
+//     case ANA:
+//     break;
+//
+//     case ALL:
+//     break;
+//   }
+//
+//   /* DEBUG */
+//   Serial.print("In Master Construct: ");
+//   Serial.println();
+//   Serial.print("Payload Size: ");
+//   Serial.print(_payloadSize);
+//   Serial.print(" ");
+//   Serial.print("Total Size: ");
+//   Serial.print((*this).transmitTotalMsgSize);
+//   Serial.print(" ");
+//   Serial.print("Payload Type In PREAMBLE: ");
+//   Serial.print(channel.preamble[6]);
+//   Serial.print(" ");
+//   Serial.print("Payload Type in MASTER MSG: ");
+//   Serial.print((*this).masterMsg[6]);
+//   Serial.print(" ");
+//   Serial.println();
+//   for (int k = 0; k < (*this).transmitTotalMsgSize; k++){
+//     Serial.print((*this).masterMsg[k]);
+//     Serial.print(" ");
+//   }
+//   Serial.println();
+//
+// }
 
 // uint8_t Communicate::transmissionMsg(uint8_t _comm, uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState){
 // // HAVE WE BEEN DISCOVERED...
