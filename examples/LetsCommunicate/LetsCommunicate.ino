@@ -43,8 +43,8 @@ void setup() {
 void loop() {
   first.run();
   state = first.getLetsCommunicateState();
-  first.stateOfTheUnion();
-  first.transmit(MASTERCOMM, DIG);
+  //first.stateOfTheUnion();
+  //first.transmit(MASTERCOMM, DIG);
   //first.transmit(MASTERCOMM, DXT);
   //first.transmit(MASTERCOMM, ANA);
 

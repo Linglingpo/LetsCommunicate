@@ -1,14 +1,13 @@
 import processing.serial.*;
-
-Serial port;
+Serial communicate;
 
 void setup() {
   size(200, 200);
 
-  String portName = Serial.list()[3];
+  String portName = Serial.list()[4]; //3
   println(Serial.list());
-  port = new Serial(this, portName, 115200);
-  port.bufferUntil('\n');
+  communicate = new Serial(this, portName, 115200);
+  communicate.bufferUntil('\n');
 }
 
 void draw() {
@@ -20,184 +19,159 @@ void draw() {
 
 void serialEvent(Serial p) {
   /* ENSURE WHILE(... > 0) && port.bufferUntil('\n') */
-
-  while (p.available() > 0) {
+  
+  while(p.available() > 0) {
     /* CHECK FOR HELLO = 126 | '~' */
-    short _temp = (short)p.read();
-    if ( (_temp == HELLO) && ( !discovered ) ) {
-      discover(p);
-    } else if ( (_temp == HELLO) && ( discovered ) ) {
-      handle(p);
+    int available = p.available();
+    short temp = (short) p.read();
+    if ( (temp == HELLO) && ( !discovered ) ) {
+      discover(p, temp, available, discovered);
+    } else if ( (temp == HELLO) && ( discovered ) ) {
+      discover(p, temp, available, discovered);
     }
   }
+  p.clear();
 }
 
-boolean receive(Serial p) {
-  boolean _receive = false;
-  /* CHECK PREAMBLE SIZE */
-  if ( (short)p.read() != PREAMBLE_SIZE ) return false;
+short[] receive(Serial p, short t, int available) {
+  
+  /* INIT RESPONSE BUFFER BASED ON SERIAL AVAILABLE */
+  short[] receive = new short[available - 1];
+  receive[0] = t;
 
-  /* OK - PREAMBLE SIZE APPEARS TO BE CORRECT - LETS CONTINUE */
-  preamble = new short[PREAMBLE_SIZE - OFFSET]; // no ~, no Preamble Size
+  System.out.println("Serial BYTES #: " + (available - 1));
+  
+  for (int i = 1; i < available - 1; i++)
+    receive[i] = (short) p.read();
 
-  for (int i = 0; i < PREAMBLE_SIZE - OFFSET; i++) {
-    preamble[i] = (short)p.read();
-    System.out.print(preamble[i]);
+  //if ( receive[ 6 ] != CNT ) { p.clear(); }
+  
+  /* CHECK IF WE HAVE A PAYLOAD FOLLOWING THE PREAMBLE */
+  //if ( receive[ 6 ] == CNT ) {
+  //  receive.add( p.read() );
+  //  int _temp = receive.get( 7 );
+  //  switch(_temp) {
+  //   case DIG: 
+  //     if( p.read() != DIGSIZE ) return null;
+  //     //payload = new short[DIGSIZE];
+  //   break;
+  //   case DXT: 
+  //     //if( (short)p.read() != DIGSIZE + DXTSIZE ) return false;
+  //     //payload = new short[DIGSIZE + DXTSIZE];
+  //   break;
+  //   case ANA:
+
+  //   break;
+  //   case ALL: 
+  //   break;
+  //  }
+
+  //  for (int i = 0; i < 12; i++) {
+  //   //payload[i] = (short) p.read();
+  //   System.out.print(payload[i]);
+  //   System.out.print(" ");
+  //   }
+  //   System.out.print("PAYLOAD ");
+  //  }
+  return receive;
+}
+
+void send(Serial p, short[] r) {
+System.out.print("PROCESS SENT: ");
+    for (int i = 0; i < PREAMBLE_SIZE; i++) {
+      System.out.print( r[i] );
+      System.out.print(" ");
+      this.communicate.write( r[ i ] );
+    }
+
+System.out.print(" ");
+System.out.print("\n\n");
+}
+
+short[] check(short[] incoming, boolean d) {
+ 
+  /* RESPONSE BACK FROM PROCESSING BASED ON INCOMING MSG */
+ short[] response = {0};
+ 
+ /* CHECK PREAMBLE SIZE = WHAT WE EXPECT FOR THE PREAMBLE SIZE! */ 
+ if ( incoming[ 1 ] != PREAMBLE_SIZE ) return null;
+ 
+ /* DEBUG! WHAT PROCESSING RECEIVED */
+ System.out.print("ARDUINO SENT: ");
+ for (int i = 0; i < incoming.length; i++) {
+    System.out.print( incoming[i] );
     System.out.print(" ");
   }
-  println();
-
-  /* CHECK IF WE HAVE A PAYLOAD FOLLOWING THE PREAMBLE */
-  if ( preamble[4] == CNT ) {
-    System.out.print("PAYLOAD ");
-
-    if (p.available() > 0) { 
-
-      short[] temp = new short[14];
-
-      for (int i = 0; i < 14; i++) {
-        temp[i] = 0;
-        temp[i] = (short) p.read();
-        System.out.print(temp[i]);
-        System.out.print(" ");
-      }
-    }
-  }
-
-  //short _temp = (short)p.read();
-  //switch(_temp) {
-  //  case DIG: 
-  //    //if( (short)p.read() != DIGSIZE ) return false;
-  //    //payload = new short[DIGSIZE];
-  //  break;
-  //  case DXT: 
-  //    //if( (short)p.read() != DIGSIZE + DXTSIZE ) return false;
-  //    //payload = new short[DIGSIZE + DXTSIZE];
-  //  break;
-  //  case ANA:
-
-  //  break;
-  //  case ALL: 
-  //  break;
-  //}
-
-  //for (int i = 0; i < 12; i++) {
-  //  //payload[i] = (short) p.read();
-  //  System.out.print(payload[i]);
-  //  System.out.print(" ");
-  //  }
-  //  System.out.print("PAYLOAD ");
-  //}
-  return true;
+  System.out.println(" ");
+  
+ /* SELECT WHAT TO DO - DISCOVERED OR NOT */
+ if(!d) {
+   /* THIS MUST BE A SYNCHRONISE MSG FROM SOURCE */
+   if ( ( response = this.peek(incoming) ) != null ) { return response; }
+ }  
+ 
+  if(d) {
+   /* THIS MUST BE A SYNCHRONISE MSG FROM SOURCE */
+   if ( ( response = this.peek(incoming) ) != null ) { return response; }
+ }  
+return response;
 }
 
-void send(Serial p) {
-  /* RESPONSE FROM PROCESSING */
-  short[] _preamble = peek(this.preamble);
-  if (_preamble != null) {
-    for (int i = 0; i < PREAMBLE_SIZE; i++) {
-      System.out.print(_preamble[i]);
-      System.out.print(" ");
-      port.write(_preamble[i]);
-      _preamble[i] = 0;
-    }
-  }
-  println();  
-  println();
-}
 
 /* ----- INITIAL SYNCHRONISATION ----- */
-void discover(Serial p) {
-  if (receive(p)) { 
-    send(p);
-  }
+void discover(Serial p, short t, int available, boolean d) {
+  short[] response; 
+  if ( (response = check( receive(p, t, available), d )) != null ) { send( p, response ); }
 }
 
-void handle(Serial p) {
-  if (receive(p)) { 
-    send(p);
-  }
-}
 
-//------------ Start messy around with the SYN -----------// 
-short checkSyn() {
-
-  if (syn == ack +1) {
-    synCorrected = true; 
-  }
-  
-  if (synCorrected){
-  if (syn == maxSynNumer) {
-      syn = 0;
-    } else {
-      ++syn;
-    }
-  } else {
-    print("Arduino send more than one msg... ");
-    println();
-  }
-
-  print ("In Chenck SYN: ");
-  println(syn);
-  return syn;
-}
-
-//------------ Start messy around with the SYN -----------// 
 short[] peek(short[] type) {
-  short _temp[] = new short[PREAMBLE_SIZE];
+ 
+ /* BUILD PROCESSING RESPONSE */
+ short _temp[] = new short[PREAMBLE_SIZE];
+ _temp[0] = HELLO;
+ _temp[1] = PREAMBLE_SIZE;
+ _temp[2] = MYID;
+ _temp[3] = ( !discovered ) ? source = type[2] : source;
 
-  _temp[0] = HELLO;
-  _temp[1] = PREAMBLE_SIZE;
-  _temp[2] = MYID;
-  _temp[3] = ( !discovered ) ? source = type[0] : source; // Arduino ID
-
-  switch(type[4]) {
-  case SYN:
-    /* SYNCHRONISE */
-    System.out.println("SYNCHRONISING...");
-    checkSyn();
-    //_temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn; //SNY
-    _temp[4] = ( !discovered ) ? syn = (short)random(0, maxSynNumer) : checkSyn(); //SNY
-
-
-    _temp[5] = ( ack = type[2] ); // ACK
-    _temp[6] = SYN; // Payload Type
-    break;
-  case URG:
-    /* URGENT */
-    break;
-  case RST:
-    /* RESET */
-    break;
-  case CNT:
-    /* CONTINUE */
-    System.out.println("CONTINIUING...");
-    //check Syn
-    if ( checkSyn() == type[2] ) {
-      _temp[4] = checkSyn(); //SNY
-      _temp[5] = ( ack = type[2] ); //ACK
-      _temp[6] = CNT;
-    }
-    break;
-  case FIN:
-    /* FINISH */
-    System.out.println("FINISHING...");
-    //checking the Syn form arduino
-    if ( checkSyn() == type[2] ) {
-
-      _temp[4] = checkSyn();
-
-      if ( !discovered ) {
-        discovered = true;
-      }
-    }
-    _temp[5] = (ack = type[2]);
-    _temp[6] = FIN;
-    break;
-  default:
-    return null;
-  }
-  return _temp;
+ switch(type[6]) {
+ case SYN:
+   /* SYNCHRONISE */
+   _temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn;
+   _temp[5] = ( !discovered ) ? ack = type[4] : ack; 
+   _temp[6] = SYN; // Payload Type
+   System.out.println("SYNCHRONISE!");
+   break;
+ case URG:
+   /* URGENT */
+   break;
+ case RST:
+   /* RESET */
+   break;
+ case CNT:
+   ///* CONTINUE */
+   //System.out.println("CONTINIUING...");
+   ////check Syn
+   //if ( checkSyn() == type[2] ) {
+   //  _temp[4] = checkSyn(); //SNY
+   //  _temp[5] = ( ack = type[2] ); //ACK
+   //  _temp[6] = CNT;
+   //}
+   //break;
+ case FIN:
+   /* FINISH */
+   _temp[4] = ++syn;
+   _temp[5] = (ack = type[4]);
+   _temp[6] = FIN;
+   System.out.println("FINISHED!");
+   if ( !discovered ) discovered = true;
+   break;
+   
+ default:
+   return null;
+ }
+ 
+ return _temp;
 }
 
 /********************************************************************************/
@@ -242,7 +216,7 @@ static boolean discovered = false;
 short syn = 0;    // SYN_ID
 short ack = 0;    // ACK_ID
 short source = 0; // SENDER_ID
-short preamble[];
+short preamble[][] = new short[3][PREAMBLE_SIZE];
 short payload[];
 
 //Syn number goes wrong when it is too high

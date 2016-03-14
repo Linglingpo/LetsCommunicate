@@ -286,7 +286,7 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
             }
           }
 
-          Serial.write("\n");
+          Serial.write('\n');
           receive = (*this).receive(_comm, counter++, channel);
           /* IF THIS IS TRUE - THEN COMMUICATION FAILED - ERROR - receive has several error codes */
           if( counter == MAX_ATTEMPTS ) {
@@ -347,12 +347,12 @@ uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
     case SYN:
       /* WE NEED TO CHECK EVERY FIELD IN THE RECEIVED MESSAGE */
         channel.target = response[2];
-        Serial.print(response[4]);
-        if (response[4] == 255){
-          channel.syn = 0;
-        } else {
+        //Serial.print(response[4]);
+        // if (response[4] == 255){
+        //   channel.syn = 0;
+        // } else {
         channel.syn  = response[4] + 1;
-        }
+        //}
         channel.ack  = response[4];
       /* SEND FINISH MESSAGE - WE HAVE DISCOVERED AND SYNCHED */
       return 1;
