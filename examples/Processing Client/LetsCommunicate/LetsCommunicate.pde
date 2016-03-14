@@ -1,10 +1,11 @@
 import processing.serial.*;
+import java.util.Arrays;
 Serial communicate;
 
 void setup() {
   size(200, 200);
 
-  String portName = Serial.list()[4]; //3
+  String portName = Serial.list()[3]; //3
   println(Serial.list());
   communicate = new Serial(this, portName, 115200);
   communicate.bufferUntil('\n');
@@ -24,11 +25,8 @@ void serialEvent(Serial p) {
     /* CHECK FOR HELLO = 126 | '~' */
     int available = p.available();
     short temp = (short) p.read();
-    if ( (temp == HELLO) && ( !discovered ) ) {
+    if(temp == HELLO)
       discover(p, temp, available, discovered);
-    } else if ( (temp == HELLO) && ( discovered ) ) {
-      discover(p, temp, available, discovered);
-    }
   }
   p.clear();
 }
@@ -37,10 +35,9 @@ short[] receive(Serial p, short t, int available) {
   
   /* INIT RESPONSE BUFFER BASED ON SERIAL AVAILABLE */
   short[] receive = new short[available - 1];
-  receive[0] = t;
-
   System.out.println("Serial BYTES #: " + (available - 1));
   
+  receive[0] = t;
   for (int i = 1; i < available - 1; i++)
     receive[i] = (short) p.read();
 
@@ -88,22 +85,39 @@ System.out.print(" ");
 System.out.print("\n\n");
 }
 
+/* ------------------------- SYNCHRONISATION ------------------------- */
+void discover(Serial p, short t, int available, boolean d) {
+  short[] response; 
+  if ( (response = check( receive(p, t, available), d )) != null ) { send( p, response ); }
+}
+
 short[] check(short[] incoming, boolean d) {
  
   /* RESPONSE BACK FROM PROCESSING BASED ON INCOMING MSG */
  short[] response = {0};
  
- /* CHECK PREAMBLE SIZE = WHAT WE EXPECT FOR THE PREAMBLE SIZE! */ 
+  /* CHECK PREAMBLE SIZE = WHAT WE EXPECT FOR THE PREAMBLE SIZE! */ 
  if ( incoming[ 1 ] != PREAMBLE_SIZE ) return null;
- 
+ System.out.println("THE INDEX: " + index);
+  
+ /* SAVE TO HISTORY */
+ in[ index % 3 ] = Arrays.copyOfRange(incoming, 0, PREAMBLE_SIZE);
+ if(in[ index % 3 ][6] == CNT) { 
+   payload[ index % 3 ] = Arrays.copyOfRange(incoming, 7, incoming.length - 1);
+ } else {
+   payload[ index % 3 ] = null;
+ }
+
  /* DEBUG! WHAT PROCESSING RECEIVED */
  System.out.print("ARDUINO SENT: ");
- for (int i = 0; i < incoming.length; i++) {
-    System.out.print( incoming[i] );
+ for (int i = 0; i < in[index % 3].length; i++) {
+    System.out.print( in[index % 3][i] );
     System.out.print(" ");
   }
   System.out.println(" ");
   
+ index++;
+
  /* SELECT WHAT TO DO - DISCOVERED OR NOT */
  if(!d) {
    /* THIS MUST BE A SYNCHRONISE MSG FROM SOURCE */
@@ -114,16 +128,9 @@ short[] check(short[] incoming, boolean d) {
    /* THIS MUST BE A SYNCHRONISE MSG FROM SOURCE */
    if ( ( response = this.peek(incoming) ) != null ) { return response; }
  }  
+
 return response;
 }
-
-
-/* ----- INITIAL SYNCHRONISATION ----- */
-void discover(Serial p, short t, int available, boolean d) {
-  short[] response; 
-  if ( (response = check( receive(p, t, available), d )) != null ) { send( p, response ); }
-}
-
 
 short[] peek(short[] type) {
  
@@ -137,6 +144,7 @@ short[] peek(short[] type) {
  switch(type[6]) {
  case SYN:
    /* SYNCHRONISE */
+   ++syn;
    _temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn;
    _temp[5] = ( !discovered ) ? ack = type[4] : ack; 
    _temp[6] = SYN; // Payload Type
@@ -158,8 +166,10 @@ short[] peek(short[] type) {
    //  _temp[6] = CNT;
    //}
    //break;
+   
  case FIN:
    /* FINISH */
+   ++syn;
    _temp[4] = ++syn;
    _temp[5] = (ack = type[4]);
    _temp[6] = FIN;
@@ -183,7 +193,7 @@ final short MYID = 0x10; // MY_ID - 16
 final short HISTORY_SIZE         = 0x03;
 final short PREAMBLE_SIZE        = 0x07; //7
 //final short PAYLOAD_DIGITAL_SIZE = 0x03;
-final short PAYLOAD_ANALOG_SIZE  = 0x0C; //12 data size
+//final short PAYLOAD_ANALOG_SIZE  = 0x0C; //12 data size
 
 /* PREAMBLE TYPES */
 final short HELLO = 0x7E; // ~ Start of Message
@@ -207,6 +217,7 @@ final short ANASIZE = 0x06; //6 Pin count
 
 /* SYN RESET CONTROL */
 final short MAXMSGS =  0xFF;
+
 /* COMMUNICATIONS TYPE */
 final short HARDSERIAL = 0x00;
 final short SOFTSERIAL = 0x01;
@@ -216,16 +227,15 @@ static boolean discovered = false;
 short syn = 0;    // SYN_ID
 short ack = 0;    // ACK_ID
 short source = 0; // SENDER_ID
-short preamble[][] = new short[3][PREAMBLE_SIZE];
-short payload[];
 
-//Syn number goes wrong when it is too high
-short maxSynNumer = 200;
-boolean synCorrected = false;
+/* PREAMBLE HISTORY - SENT & RECEIVED */
+short in[][]  = new short[HISTORY_SIZE][PREAMBLE_SIZE];
+short out[][] = new short[HISTORY_SIZE][PREAMBLE_SIZE];
+static short index   = 0; // HISTORY INDEX
 
-short payloadType;
-short dataSize;
-short data[];
+/* PAYLOAD HISTORY - RECEIVED - RAGGED 2D ARRAY */
+short payload[][]  = new short[HISTORY_SIZE][];
+
 short payload_digital[];
 short payload_analog[];
 
