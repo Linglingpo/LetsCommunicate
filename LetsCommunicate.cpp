@@ -27,8 +27,9 @@ void LetsCommunicate::initialiseInputWithInterruptsAs(uint8_t _payloadType) {
 
 void LetsCommunicate::initialiseDIGDXT(uint8_t _payloadType) {
   // The ternary operator: condition ? expression1 : expression2
-  (*this).state->digitalPinCount = (_payloadType == DIG) ? DIGSIZE - OFFSET : (DIGSIZE + DXTSIZE) - OFFSET;
+  (*this).state->digitalPinCount = (_payloadType == DIG) ? DIGSIZE : (DIGSIZE + DXTSIZE);
   //presentDigitalState = array to keep the state of IO
+  Serial.print("DIGITAL PIN COUNT: "); Serial.println((*this).state->digitalPinCount, DEC);
   (*this).state->presentDigitalState = new uint8_t[(*this).state->digitalPinCount];
   //currentDigitalState = history
   (*this).state->currentDigitalState = new uint8_t[(*this).state->digitalPinCount];

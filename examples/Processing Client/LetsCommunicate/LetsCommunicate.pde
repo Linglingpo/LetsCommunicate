@@ -38,8 +38,11 @@ short[] receive(Serial p, short t, int available) {
   System.out.println("Serial BYTES #: " + (available - 1));
   
   receive[0] = t;
-  for (int i = 1; i < available - 1; i++)
+  for (int i = 1; i < receive.length; i++){
     receive[i] = (short) p.read();
+        System.out.print( receive[i] );
+        System.out.print(" ");
+  }
 
   //if ( receive[ 6 ] != CNT ) { p.clear(); }
   
@@ -70,19 +73,14 @@ short[] receive(Serial p, short t, int available) {
   //   }
   //   System.out.print("PAYLOAD ");
   //  }
+  p.clear();
   return receive;
 }
 
 void send(Serial p, short[] r) {
-System.out.print("PROCESS SENT: ");
-    for (int i = 0; i < PREAMBLE_SIZE; i++) {
-      System.out.print( r[i] );
-      System.out.print(" ");
-      this.communicate.write( r[ i ] );
-    }
-
-System.out.print(" ");
-System.out.print("\n\n");
+  for (int i = 0; i < PREAMBLE_SIZE; i++) {
+    p.write( r[ i ] );
+  }
 }
 
 /* ------------------------- SYNCHRONISATION ------------------------- */
@@ -116,17 +114,30 @@ short[] check(short[] incoming, boolean d) {
   }
   System.out.println(" ");
   
- index++;
-
- /* SELECT WHAT TO DO - DISCOVERED OR NOT */
- if(!d) {
-   /* THIS MUST BE A SYNCHRONISE MSG FROM SOURCE */
-   if ( ( response = this.peek(incoming) ) != null ) { return response; }
- }  
+ /* WE NEED TO VERIFY THE INCOMING DATA TO WHAT WE KNOW OF THE NETWORK */
+ if(!d || ( in[ index % 3 ][2] != source && in[ index % 3 ][3] != MYID ) ) {
+   
+   if ( ( response = this.peek( incoming ) ) != null ) {
+     
+     /* SAVE TO HISTORY */
+     out[ index % 3 ] = Arrays.copyOfRange(response, 0, PREAMBLE_SIZE);
+     
+     /* DEBUG! WHAT PROCESSING SENT */
+     System.out.print("PROCESS SENT: ");
+     for (int i = 0; i < out[index % 3].length; i++) {
+        System.out.print( out[index % 3][i] );
+        System.out.print(" ");
+     }
+      System.out.println(" ");
+      System.out.println(" ");
+      index++;
+     return response; 
+   }
+ } 
  
   if(d) {
    /* THIS MUST BE A SYNCHRONISE MSG FROM SOURCE */
-   if ( ( response = this.peek(incoming) ) != null ) { return response; }
+   if ( ( response = this.peek(incoming) ) != null ) { index++; return response; }
  }  
 
 return response;
@@ -146,7 +157,8 @@ short[] peek(short[] type) {
    /* SYNCHRONISE */
    ++syn;
    _temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn;
-   _temp[5] = ( !discovered ) ? ack = type[4] : ack; 
+   ack = type[4];
+   _temp[5] = ack; 
    _temp[6] = SYN; // Payload Type
    System.out.println("SYNCHRONISE!");
    break;
@@ -158,20 +170,20 @@ short[] peek(short[] type) {
    break;
  case CNT:
    ///* CONTINUE */
-   //System.out.println("CONTINIUING...");
-   ////check Syn
-   //if ( checkSyn() == type[2] ) {
-   //  _temp[4] = checkSyn(); //SNY
-   //  _temp[5] = ( ack = type[2] ); //ACK
-   //  _temp[6] = CNT;
-   //}
-   //break;
+    System.out.println("CONTINIUED!");
+    ++syn;
+    ack = type[4];
+    _temp[4] = ++syn; //SNY
+    _temp[5] = ack; //ACK
+    _temp[6] = CNT;
+   break;
    
  case FIN:
    /* FINISH */
    ++syn;
    _temp[4] = ++syn;
-   _temp[5] = (ack = type[4]);
+   ack = type[4];
+   _temp[5] = ack;
    _temp[6] = FIN;
    System.out.println("FINISHED!");
    if ( !discovered ) discovered = true;

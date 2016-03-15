@@ -35,7 +35,7 @@
 #define OFFSET  0x02 // DIG OFFSET
 #define ANALOG_OFFSET 0x02 //ANALOG OFFSET
 #define DIGDXT_OFFSET 0x02 // FOR PAYLOADTYPE & DATA SIZES
-#define DIGSIZE 0x0C //14 Digital Pins
+#define DIGSIZE 0x0C //12 Digital Pins - TX/RX (OFFSET)
 #define DXTSIZE 0x06 //6 Analog to Digital Pins
 #define ANASIZE 0x06 //6 Analog Pins
 

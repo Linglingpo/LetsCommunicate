@@ -229,6 +229,7 @@ uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, u
           (*this).communicationState->master.digitalPayload = new uint8_t[ _payloadSize + DIGDXT_OFFSET ];
           (*this).communicationState->master.digitalPayload[0] = _type;
           (*this).communicationState->master.digitalPayload[1] = _payloadSize;
+          Serial.print("PAYLOAD SIZE: "); Serial.println(_payloadSize, DEC);
 
           for(int i = 0; i < _payloadSize; i++)
             (*this).communicationState->master.digitalPayload[i + DIGDXT_OFFSET] = _payloadState[i];
