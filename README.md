@@ -1,3 +1,0 @@
-# LetsCommunicate
-Please work!
-Initial Version of Arduino Communications Library...
