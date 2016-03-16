@@ -267,6 +267,14 @@ uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, u
   return _return;
 }
 
+void Communicate::slip(uint8_t s) {
+  if(s == 10) {
+    Serial.write('!');
+    Serial.write( s - 1 );
+  } else
+    Serial.write(s);
+}
+
 uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
   uint8_t _return = 0;
 
@@ -278,12 +286,13 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
       do {
           //ALWAYS TRANSMIT THE PREAMBLE {SYN, CNT or FIN}
           for(int i = 0; i < PREAMBLE_SIZE; i++)
-            Serial.write(channel.preamble[i]);
+            (*this).slip(channel.preamble[i]);
 
           //CNT
           if(channel.preamble[6] == CNT) {
-            for(int i = 0; i < 14; i++){
-              Serial.write((*this).communicationState->master.digitalPayload[i]);
+            for(int i = 0; i < 14; i++) {
+              (*this).slip((*this).communicationState->master.digitalPayload[i]);
+              //Serial.write((*this).communicationState->master.digitalPayload[i]);
             }
           }
 

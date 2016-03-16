@@ -86,6 +86,7 @@ public:
 
 private:
   communicationType * communicationState;
+  void slip(uint8_t);
   uint8_t constructPreamble(uint8_t, uint8_t, uint8_t, transmit &);
   uint8_t receive(uint8_t, uint8_t, transmit &);
   uint8_t peek(uint8_t, transmit &);

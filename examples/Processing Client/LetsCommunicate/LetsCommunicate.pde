@@ -39,40 +39,17 @@ short[] receive(Serial p, short t, int available) {
   
   receive[0] = t;
   for (int i = 1; i < receive.length; i++){
-    receive[i] = (short) p.read();
-        System.out.print( receive[i] );
-        System.out.print(" ");
+    
+    short temp = (short) p.read();
+    if(temp != '!') {
+      receive[i] = temp;
+    } else {
+      System.out.println("SLIPPED!");
+      receive[i] = (short) ( p.read() + 1 );
+      i++;
+    }
   }
-
-  //if ( receive[ 6 ] != CNT ) { p.clear(); }
   
-  /* CHECK IF WE HAVE A PAYLOAD FOLLOWING THE PREAMBLE */
-  //if ( receive[ 6 ] == CNT ) {
-  //  receive.add( p.read() );
-  //  int _temp = receive.get( 7 );
-  //  switch(_temp) {
-  //   case DIG: 
-  //     if( p.read() != DIGSIZE ) return null;
-  //     //payload = new short[DIGSIZE];
-  //   break;
-  //   case DXT: 
-  //     //if( (short)p.read() != DIGSIZE + DXTSIZE ) return false;
-  //     //payload = new short[DIGSIZE + DXTSIZE];
-  //   break;
-  //   case ANA:
-
-  //   break;
-  //   case ALL: 
-  //   break;
-  //  }
-
-  //  for (int i = 0; i < 12; i++) {
-  //   //payload[i] = (short) p.read();
-  //   System.out.print(payload[i]);
-  //   System.out.print(" ");
-  //   }
-  //   System.out.print("PAYLOAD ");
-  //  }
   p.clear();
   return receive;
 }
@@ -113,6 +90,16 @@ short[] check(short[] incoming, boolean d) {
     System.out.print(" ");
   }
   System.out.println(" ");
+  
+ /* DEBUG! WHAT PROCESSING RECEIVED */
+ System.out.print("ARDUINO SENT: ");
+ if( payload[ index % 3 ] != null) {
+ for (int i = 0; i < payload[index % 3].length; i++) {
+    System.out.print( payload[index % 3][i] );
+    System.out.print(" ");
+  }
+  System.out.println(" ");
+ }
   
  /* WE NEED TO VERIFY THE INCOMING DATA TO WHAT WE KNOW OF THE NETWORK */
  if(!d || ( in[ index % 3 ][2] != source && in[ index % 3 ][3] != MYID ) ) {
