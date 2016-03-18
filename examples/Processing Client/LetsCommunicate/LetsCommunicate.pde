@@ -5,7 +5,7 @@ Serial communicate;
 void setup() {
   size(200, 200);
 
-  String portName = Serial.list()[3]; //3
+  String portName = Serial.list()[5]; //3
   println(Serial.list());
   communicate = new Serial(this, portName, 115200);
   communicate.bufferUntil('\n');
@@ -41,7 +41,7 @@ short[] receive(Serial p, short t, int available) {
   for (int i = 1; i < receive.length; i++){
 
     short temp = (short) p.read();
-    if(temp != '!' && ) {
+    if(temp != '!') {
       receive[i] = temp;
     } else {
       System.out.println("SLIPPED!");
