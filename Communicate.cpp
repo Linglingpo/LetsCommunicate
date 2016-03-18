@@ -268,10 +268,10 @@ uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, u
 }
 
 void Communicate::slip(uint8_t s) {
-  if(s == 10) {
-    Serial.write('!');
+  if(s == 10) { //'/n'
+    Serial.write('!'); // 33
     Serial.write( s - 1 );
-    Serial.write('=');
+    Serial.write('?'); // 63
   } else
     Serial.write(s);
 }
