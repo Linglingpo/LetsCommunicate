@@ -271,6 +271,7 @@ void Communicate::slip(uint8_t s) {
   if(s == 10) {
     Serial.write('!');
     Serial.write( s - 1 );
+    Serial.write('=');
   } else
     Serial.write(s);
 }

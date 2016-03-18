@@ -20,7 +20,7 @@ void draw() {
 
 void serialEvent(Serial p) {
   /* ENSURE WHILE(... > 0) && port.bufferUntil('\n') */
-  
+
   while(p.available() > 0) {
     /* CHECK FOR HELLO = 126 | '~' */
     int available = p.available();
@@ -32,16 +32,16 @@ void serialEvent(Serial p) {
 }
 
 short[] receive(Serial p, short t, int available) {
-  
+
   /* INIT RESPONSE BUFFER BASED ON SERIAL AVAILABLE */
   short[] receive = new short[available - 1];
   System.out.println("Serial BYTES #: " + (available - 1));
-  
+
   receive[0] = t;
   for (int i = 1; i < receive.length; i++){
-    
+
     short temp = (short) p.read();
-    if(temp != '!') {
+    if(temp != '!' && ) {
       receive[i] = temp;
     } else {
       System.out.println("SLIPPED!");
@@ -49,7 +49,7 @@ short[] receive(Serial p, short t, int available) {
       i++;
     }
   }
-  
+
   p.clear();
   return receive;
 }
@@ -62,23 +62,23 @@ void send(Serial p, short[] r) {
 
 /* ------------------------- SYNCHRONISATION ------------------------- */
 void discover(Serial p, short t, int available, boolean d) {
-  short[] response; 
+  short[] response;
   if ( (response = check( receive(p, t, available), d )) != null ) { send( p, response ); }
 }
 
 short[] check(short[] incoming, boolean d) {
- 
+
   /* RESPONSE BACK FROM PROCESSING BASED ON INCOMING MSG */
  short[] response = {0};
- 
-  /* CHECK PREAMBLE SIZE = WHAT WE EXPECT FOR THE PREAMBLE SIZE! */ 
+
+  /* CHECK PREAMBLE SIZE = WHAT WE EXPECT FOR THE PREAMBLE SIZE! */
  if ( incoming[ 1 ] != PREAMBLE_SIZE ) return null;
  System.out.println("THE INDEX: " + index);
-  
+
  /* SAVE TO HISTORY */
  in[ index % 3 ] = Arrays.copyOfRange(incoming, 0, PREAMBLE_SIZE);
- if(in[ index % 3 ][6] == CNT) { 
-   payload[ index % 3 ] = Arrays.copyOfRange(incoming, 7, incoming.length - 1);
+ if(in[ index % 3 ][6] == CNT) {
+   payload[ index % 3 ] = Arrays.copyOfRange(incoming, 7, incoming.length);
  } else {
    payload[ index % 3 ] = null;
  }
@@ -90,7 +90,7 @@ short[] check(short[] incoming, boolean d) {
     System.out.print(" ");
   }
   System.out.println(" ");
-  
+
  /* DEBUG! WHAT PROCESSING RECEIVED */
  System.out.print("ARDUINO SENT: ");
  if( payload[ index % 3 ] != null) {
@@ -100,15 +100,15 @@ short[] check(short[] incoming, boolean d) {
   }
   System.out.println(" ");
  }
-  
+
  /* WE NEED TO VERIFY THE INCOMING DATA TO WHAT WE KNOW OF THE NETWORK */
  if(!d || ( in[ index % 3 ][2] != source && in[ index % 3 ][3] != MYID ) ) {
-   
+
    if ( ( response = this.peek( incoming ) ) != null ) {
-     
+
      /* SAVE TO HISTORY */
      out[ index % 3 ] = Arrays.copyOfRange(response, 0, PREAMBLE_SIZE);
-     
+
      /* DEBUG! WHAT PROCESSING SENT */
      System.out.print("PROCESS SENT: ");
      for (int i = 0; i < out[index % 3].length; i++) {
@@ -118,20 +118,20 @@ short[] check(short[] incoming, boolean d) {
       System.out.println(" ");
       System.out.println(" ");
       index++;
-     return response; 
+     return response;
    }
- } 
- 
+ }
+
   if(d) {
    /* THIS MUST BE A SYNCHRONISE MSG FROM SOURCE */
    if ( ( response = this.peek(incoming) ) != null ) { index++; return response; }
- }  
+ }
 
 return response;
 }
 
 short[] peek(short[] type) {
- 
+
  /* BUILD PROCESSING RESPONSE */
  short _temp[] = new short[PREAMBLE_SIZE];
  _temp[0] = HELLO;
@@ -145,7 +145,7 @@ short[] peek(short[] type) {
    ++syn;
    _temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn;
    ack = type[4];
-   _temp[5] = ack; 
+   _temp[5] = ack;
    _temp[6] = SYN; // Payload Type
    System.out.println("SYNCHRONISE!");
    break;
@@ -164,7 +164,7 @@ short[] peek(short[] type) {
     _temp[5] = ack; //ACK
     _temp[6] = CNT;
    break;
-   
+
  case FIN:
    /* FINISH */
    ++syn;
@@ -175,11 +175,11 @@ short[] peek(short[] type) {
    System.out.println("FINISHED!");
    if ( !discovered ) discovered = true;
    break;
-   
+
  default:
    return null;
  }
- 
+
  return _temp;
 }
 
