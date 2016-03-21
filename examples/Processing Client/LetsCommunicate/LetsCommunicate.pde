@@ -7,7 +7,7 @@ boolean got192 = false;
 void setup() {
   size(200, 200);
 
-  String portName = Serial.list()[5]; //3
+  String portName = Serial.list()[6]; //3
   println(Serial.list());
   communicate = new Serial(this, portName, 115200);
   communicate.bufferUntil('\n');
@@ -186,7 +186,8 @@ short[] peek(short[] type) {
   case SYN:
     /* SYNCHRONISE */
     ++syn;
-    _temp[4] = ( !discovered ) ? syn = (short)random(150, 255) : ++syn;
+    _temp[4] = ( !discovered ) ? syn = (short)random(200, 255) : ++syn;
+    //_temp[4] = ( !discovered ) ? syn = (short)random(0, 5) : ++syn;
     //_temp[4] = ( !discovered ) ? syn = (short)9 : ++syn;
 
     ack = type[4];
