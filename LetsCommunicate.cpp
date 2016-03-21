@@ -167,17 +167,18 @@ void LetsCommunicate::stateOfTheUnion() {
   Serial.print("stateChanged: ");
   Serial.println((*this).state->stateChanged);
 
-/*
+  /*
   //------  MSG to transmit -------//
   Serial.println("Transmit Massage: ");
   //DIG or DXT
   if((*this).state->payloadType[0] || (*this).state->payloadType[1]){
-  for(int i = 0; i < (*this).transmitTotalMsgSize; i++){
-    Serial.print(masterMsg[i]);
+  for(int i = 0; i < (*this).state-> digitalPinCount; i++){
+    Serial.print((*this).state->digitalPayload[i]);
     Serial.print(" ");
     }
   }
-*/
+  */
+
 
   Serial.println();
   Serial.println("*--------------------------------------------------------------------------------");

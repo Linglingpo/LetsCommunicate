@@ -46,7 +46,7 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
 
   Serial.print("S PREAMBLE: ");
   for(int i = 0; i < PREAMBLE_SIZE; i++) {
-    Serial.print(channel.preamble[i]); Serial.print(" ");
+    Serial.print(channel.preamble[i]); //Serial.print(" ");
   }
   Serial.println("");
 
@@ -231,8 +231,12 @@ uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, u
           (*this).communicationState->master.digitalPayload[1] = _payloadSize;
           Serial.print("PAYLOAD SIZE: "); Serial.println(_payloadSize, DEC);
 
-          for(int i = 0; i < _payloadSize; i++)
+          Serial.print("Digital Payload: ");
+          for(int i = 0; i < _payloadSize; i++){
             (*this).communicationState->master.digitalPayload[i + DIGDXT_OFFSET] = _payloadState[i];
+            Serial.print((*this).communicationState->master.digitalPayload[i]); Serial.print(" ");
+          }
+          Serial.println();
         break;
         case DXT:
           (*this).communicationState->master.digitalPayload = new uint8_t[ _payloadSize + DIGDXT_OFFSET ];
@@ -269,6 +273,7 @@ uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, u
 
 void Communicate::slip(uint8_t s) {
   if(s == 10) { //'/n'
+    //Serial.println("IN SLIP ------------");
     Serial.write('!'); // 33
     Serial.write( s - 1 );
     Serial.write('?'); // 63

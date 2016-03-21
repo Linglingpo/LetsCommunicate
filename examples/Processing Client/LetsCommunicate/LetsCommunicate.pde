@@ -47,6 +47,9 @@ short[] receive(Serial p, short t, int available) {
 
   for (int i = 1; i < temp.length; i++) {
     temp[i] = (short) p.read();
+    if (temp[i] == '!' && temp[i+2] == '?') {
+      System.out.println(" ------- I got ! and ?  IN FOR LOOP !!!------- ");
+    }
     System.out.print(temp[i]);
     System.out.print(" ");
   }
@@ -188,8 +191,8 @@ short[] peek(short[] type) {
     /* SYNCHRONISE */
     ++syn;
     //_temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn;
-    _temp[4] = ( !discovered ) ? syn = (short)random(200, 255) : ++syn;
-    //_temp[4] = ( !discovered ) ? syn = (short)random(0, 5) : ++syn;
+    //_temp[4] = ( !discovered ) ? syn = (short)random(200, 255) : ++syn;
+    _temp[4] = ( !discovered ) ? syn = (short)random(0, 5) : ++syn;
     //_temp[4] = ( !discovered ) ? syn = (short)9 : ++syn;
 
     ack = type[4];
@@ -225,6 +228,8 @@ short[] peek(short[] type) {
     break;
 
   default:
+     //ERROR
+    System.out.println("NULL !!");
     return null;
   }
 
