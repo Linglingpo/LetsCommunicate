@@ -52,10 +52,12 @@ short[] receive(Serial p, short t, int available) {
   }
 
   if (temp[4] == '!' && temp[6] == '?') {
+    System.out.println();
     System.out.println(" ------- I got ! and ? ------- ");
     got192 = true;
     //skip and put the value in the next index
   } else if (temp[4] != '!' && temp[6] != '?') {
+    System.out.println();
     System.out.println(" ------- I got regular number ------- ");
   }
 
@@ -75,19 +77,18 @@ short[] receive(Serial p, short t, int available) {
     receive = temp;
   }
 
+  System.out.print("Receive Array: ");
   for (int i = 0; i < receive.length; i++) {
     System.out.print(receive[i]);
     System.out.print(" ");
   }
 
   System.out.println();
-  System.out.println("Serial BYTES #: " + (available - 1));
-  
+  //System.out.println("Serial BYTES #: " + (available - 1));
+
   p.clear();
   return receive;
 }
-
-
 
 
 void send(Serial p, short[] r) {
@@ -113,7 +114,7 @@ short[] check(short[] incoming, boolean d) {
 
   /* CHECK PREAMBLE SIZE = WHAT WE EXPECT FOR THE PREAMBLE SIZE! */
   if ( incoming[ 1 ] != PREAMBLE_SIZE ) return null;
-  System.out.println("THE INDEX: " + index);
+  //System.out.println("THE INDEX: " + index);
 
   /* SAVE TO HISTORY */
   in[ index % 3 ] = Arrays.copyOfRange(incoming, 0, PREAMBLE_SIZE);
@@ -186,6 +187,7 @@ short[] peek(short[] type) {
   case SYN:
     /* SYNCHRONISE */
     ++syn;
+    //_temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn;
     _temp[4] = ( !discovered ) ? syn = (short)random(200, 255) : ++syn;
     //_temp[4] = ( !discovered ) ? syn = (short)random(0, 5) : ++syn;
     //_temp[4] = ( !discovered ) ? syn = (short)9 : ++syn;
