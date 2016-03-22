@@ -63,13 +63,13 @@ short[] receive(Serial p, short t, int available) {
     }
   }
 
-/*
+  /*
   System.out.print("Temp2 Array: ");
-  for (int i = 0; i < temp2.length; i++) {
-    System.out.print(temp2[i]);
-    System.out.print(" ");
-  }
-*/
+   for (int i = 0; i < temp2.length; i++) {
+   System.out.print(temp2[i]);
+   System.out.print(" ");
+   }
+   */
 
   System.out.println();
   //System.out.println("Serial BYTES #: " + (available - 1));
@@ -91,6 +91,7 @@ void send(Serial p, short[] r) {
 void discover(Serial p, short t, int available, boolean d) {
   short[] response;
   if ( (response = check( receive(p, t, available), d )) != null ) { 
+    println("before send, we have  null! ");
     send( p, response );
   }
 }
@@ -132,6 +133,20 @@ short[] check(short[] incoming, boolean d) {
     System.out.println(" ");
   }
 
+  // if the arduino msg is the same as last one
+
+  int index012 = index % 3;
+
+  if (index != 0) {
+  if ( in[index012][4] == in [index012-1 ][4] && in[index012][5] == in [index012 -1][5]) {
+    //indexHistory = (indexHistory == 0) ? 2 : indexHistory -1;
+    println("Index after %: " + index012);
+    out[index012 ] = out[index012 -1 ];
+     return out[index012 -1 ];
+    }
+  }
+
+
   /* WE NEED TO VERIFY THE INCOMING DATA TO WHAT WE KNOW OF THE NETWORK */
   if (!d || ( in[ index % 3 ][2] != source && in[ index % 3 ][3] != MYID ) ) {
 
@@ -155,7 +170,8 @@ short[] check(short[] incoming, boolean d) {
 
   if (d) {
     /* THIS MUST BE A SYNCHRONISE MSG FROM SOURCE */
-    if ( ( response = this.peek(incoming) ) != null ) { 
+    if (( response = this.peek(incoming) ) != null ) { 
+      println("Processing not building preable");
       index++; 
       return response;
     }
@@ -177,10 +193,9 @@ short[] peek(short[] type) {
   case SYN:
     /* SYNCHRONISE */
     ++syn;
-    //_temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn;
-    _temp[4] = ( !discovered ) ? syn = (short)random(200, 255) : ++syn;
+    _temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn;
+    //_temp[4] = ( !discovered ) ? syn = (short)random(200, 255) : ++syn;
     //_temp[4] = ( !discovered ) ? syn = (short)random(0, 5) : ++syn;
-    //_temp[4] = ( !discovered ) ? syn = (short)9 : ++syn;
 
     ack = type[4];
     _temp[5] = ack;
