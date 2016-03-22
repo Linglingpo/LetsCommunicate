@@ -40,57 +40,44 @@ short[] receive(Serial p, short t, int available) {
   //126
   temp[0] = t; 
 
-  System.out.print("Temp Array: ");
-
-  System.out.print(temp[0]);
-  System.out.print(" ");
-
+  //System.out.print("Temp Array: ");
+  //System.out.print(temp[0] + " ");
   for (int i = 1; i < temp.length; i++) {
     temp[i] = (short) p.read();
-    if (temp[i] == '!' && temp[i+2] == '?') {
-      System.out.println(" ------- I got ! and ?  IN FOR LOOP !!!------- ");
+    //System.out.print(temp[i]);
+    //System.out.print(" ");
+  }
+  System.out.println();
+  //New array that stores correct data and ready to give to receive array 
+  //33 and 69 shoulde be removed
+  short[] temp2 = new short[temp.length];
+  //126
+  int position = 0;
+  temp2[position++] = temp[0]; 
+  for (int i = 1; i <temp.length; i++) {
+    if (temp [i] == '!' && temp [i+2] == '?') {
+      temp2[position++] = (short) (temp[i+1] + 1);
+      i = i + 2;
+    } else {
+      temp2[position++] = temp[i];
     }
-    System.out.print(temp[i]);
+  }
+
+/*
+  System.out.print("Temp2 Array: ");
+  for (int i = 0; i < temp2.length; i++) {
+    System.out.print(temp2[i]);
     System.out.print(" ");
   }
-
-  if (temp[4] == '!' && temp[6] == '?') {
-    System.out.println();
-    System.out.println(" ------- I got ! and ? ------- ");
-    got192 = true;
-    //skip and put the value in the next index
-  } else if (temp[4] != '!' && temp[6] != '?') {
-    System.out.println();
-    System.out.println(" ------- I got regular number ------- ");
-  }
-
-  short[] receive = new short[7];
-
-  if (got192) {
-    for (int i =0; i < 4; i ++) {
-      receive[i] = temp[i];
-    }
-    //skip the ! = temp [4]
-    receive [4] = (short) (temp [5] + 1) ;
-    //skip the ? = temp [6]
-    receive [5] = temp [7] ;
-    receive [6] = temp [8] ;
-    got192 = false;
-  } else {
-    receive = temp;
-  }
-
-  System.out.print("Receive Array: ");
-  for (int i = 0; i < receive.length; i++) {
-    System.out.print(receive[i]);
-    System.out.print(" ");
-  }
+*/
 
   System.out.println();
   //System.out.println("Serial BYTES #: " + (available - 1));
 
   p.clear();
-  return receive;
+  //return an array "teamp2" from position 0 to the last position, 
+  //which is indicate the index of temp2
+  return Arrays.copyOfRange(temp2, 0, position);
 }
 
 
@@ -191,8 +178,8 @@ short[] peek(short[] type) {
     /* SYNCHRONISE */
     ++syn;
     //_temp[4] = ( !discovered ) ? syn = (short)random(0, 255) : ++syn;
-    //_temp[4] = ( !discovered ) ? syn = (short)random(200, 255) : ++syn;
-    _temp[4] = ( !discovered ) ? syn = (short)random(0, 5) : ++syn;
+    _temp[4] = ( !discovered ) ? syn = (short)random(200, 255) : ++syn;
+    //_temp[4] = ( !discovered ) ? syn = (short)random(0, 5) : ++syn;
     //_temp[4] = ( !discovered ) ? syn = (short)9 : ++syn;
 
     ack = type[4];
@@ -227,8 +214,12 @@ short[] peek(short[] type) {
     if ( !discovered ) discovered = true;
     break;
 
+  case SPC:
+    System.out.println("SPC NULL !!");
+    break;
+
   default:
-     //ERROR
+    //ERROR
     System.out.println("NULL !!");
     return null;
   }
@@ -254,6 +245,8 @@ final short URG   = 0X01; // URG = ACT NOW
 final short RST   = 0x02; // RST = CLEAR?
 final short CNT   = 0x03; // CNT = MORE THAN ONE MESSAGE - CHECK FOR FIN
 final short FIN   = 0X04; // FIN = COMMUNICATIONS FINISHED
+
+final short SPC   = 0X09; // FIN = COMMUNICATIONS FINISHED
 
 final short PWM = 0xFB; // PWM = PWM OUTPUT ?
 final short DIG = 0xFC; // 252 - DIG = DIGITAL
