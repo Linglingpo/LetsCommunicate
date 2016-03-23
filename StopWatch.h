@@ -9,7 +9,7 @@
 #define RUNNING 1
 #define STOPPED 2
 
-#define DEFAULTPERIOD 1000 // 1000 = 1 Second
+#define DEFAULTPERIOD 2000 // 1000 = 1 Second
 
 class StopWatch
 {

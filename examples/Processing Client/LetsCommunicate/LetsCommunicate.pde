@@ -2,8 +2,6 @@ import processing.serial.*;
 import java.util.Arrays;
 Serial communicate;
 
-boolean got192 = false;
-
 void setup() {
   size(200, 200);
 
@@ -43,7 +41,7 @@ void send(Serial p, short[] r) {
 short[] receive(Serial p, short t, int available) {
 
   /* CAPTURE ENTIRE SERIAL MSG FROM ARDUINO FROM '~' to '\n' */
-  short[] temp = new short[ available ];
+  short[] temp = new short[ available - 1 ];
   //126
   temp[0] = t;
   for (int i = 1; i < temp.length; i++) {
@@ -53,7 +51,7 @@ short[] receive(Serial p, short t, int available) {
   /* IN-PLACE SORT, SELECT & CORRECT OF SERIAL DATA FROM ARDUINO */
   int position = 1;
   for (int i = 1; i < temp.length; i++) {
-    if (temp[ i ] == '!' && ( temp[ i + 2 ] == '?' || temp[ i + 2 ] == '\n' )) {
+    if (temp[ i ] == '!' && temp[ i + 2 ] == '?') {
       temp[ position++ ] = (short) (temp[ i + 1 ] + 1);
       i = i + 2;
     } else {
@@ -91,7 +89,7 @@ short[] check(short[] incoming, boolean d) {
   }
 
   /* DEBUG! WHAT PROCESSING RECEIVED */
-  System.out.print("ARDUINO SENT: ");
+  System.out.print("ARDUINO PREABMLE: ");
   for (int i = 0; i < in[index % 3].length; i++) {
     System.out.print( in[index % 3][i] );
     System.out.print(" ");
@@ -99,7 +97,7 @@ short[] check(short[] incoming, boolean d) {
   System.out.println(" ");
 
   /* DEBUG! WHAT PROCESSING RECEIVED */
-  System.out.print("ARDUINO SENT: ");
+  System.out.print("ARDUINO PAYLOAD : ");
   if ( payload[ index % 3 ] != null) {
     for (int i = 0; i < payload[index % 3].length; i++) {
       System.out.print( payload[index % 3][i] );
@@ -107,25 +105,37 @@ short[] check(short[] incoming, boolean d) {
     }
     System.out.println(" ");
   }
-
+System.out.println(" ");
   // if the arduino msg is the same as last one
-
-  //int index012 = index % 3;
-
-  //if (index != 0) {
-  //if ( in[index012][4] == in [index012-1 ][4] && in[index012][5] == in [index012 -1][5]) {
-  //  //indexHistory = (indexHistory == 0) ? 2 : indexHistory -1;
-  //  println("Index after %: " + index012);
-  //  out[index012 ] = out[index012 -1 ];
-  //   return out[index012 -1 ];
-  //  }
-  //}
+  
+  if (index != 0) {
+    
+    int selector = index % 3;
+    int selected = 0;
+    if(selector == 0) { selected = 2; } else { selected = selector - 1; }
+    
+    println("CHECKING HISTORY: " + (index % 3));
+    
+    if ( in[ selector ][ 4 ] == in[ selected ][ 4 ] /* && in[ selector ][ 5 ] == in[ selected ][ 5 ]*/ ) {
+      System.out.print("PROCESS RETRANSMIT: ");
+     for (int i = 0; i < out[selected].length; i++) {
+       System.out.print( out[selected][i] );
+       System.out.print(" ");
+     }
+     System.out.println(" ");
+     System.out.println(" ");
+      
+      return out[ selected ];
+    }
+  }
 
 
   /* WE NEED TO VERIFY THE INCOMING DATA TO WHAT WE KNOW OF THE NETWORK */
-  if (!d || ( in[ index % 3 ][2] != source && in[ index % 3 ][3] != MYID ) ) {
-    
+  //if (!d || ( in[ index % 3 ][2] != source && in[ index % 3 ][3] != MYID ) ) {
+  if ( !d ) {
     System.out.println("FIRST TIME ");
+    
+    
     
    if ( ( response = this.peek( incoming ) ) != null ) {
 
@@ -173,13 +183,17 @@ short[] peek(short[] type) {
   _temp[2] = MYID;
   _temp[3] = ( !discovered ) ? source = type[2] : source;
   
-  /* CHECK THE STATE OF SYN */
-  if(syn > 255) syn = 0;
+  if(syn >= 255) syn = 0; else syn++;
 
   switch(type[6]) {
   case SYN:
     /* SYNCHRONISE */
-    _temp[4] = ( !discovered ) ? syn = (short)random(245, 255) : (short) ( ++syn + 1 ); // FUTURE SYN FROM ARDUINO
+    if( !discovered ) {
+      syn = (short)random(245, 255);
+      _temp[4] = syn++;
+    } else {
+      _temp[4] = syn; // FUTURE SYN FROM ARDUINO
+    }
     _temp[5] = type[4]; // ACK ARDUINO SYN NUMBER
     _temp[6] = SYN; // Payload Type
     System.out.println("SYNCHRONISE!");
@@ -193,14 +207,14 @@ short[] peek(short[] type) {
   case CNT:
     ///* CONTINUE */
     System.out.println("CONTINIUED!");
-    _temp[4] = (short) ( ++syn + 1 ); // FUTURE SYN FROM ARDUINO
+    _temp[4] = (short) syn; // FUTURE SYN FROM ARDUINO
     _temp[5] = type[4]; // ACK ARDUINO SYN NUMBER
     _temp[6] = CNT;
     break;
 
   case FIN:
     /* FINISH */
-    _temp[4] = (short) ( ++syn + 1 ); // FUTURE SYN FROM ARDUINO
+    _temp[4] = (short) syn; // FUTURE SYN FROM ARDUINO
     _temp[5] = type[4]; // ACK ARDUINO SYN NUMBER
     _temp[6] = FIN;
     System.out.println("FINISHED!");
