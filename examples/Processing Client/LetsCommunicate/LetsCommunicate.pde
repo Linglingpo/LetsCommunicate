@@ -7,7 +7,7 @@ boolean got192 = false;
 void setup() {
   size(200, 200);
 
-  String portName = Serial.list()[6]; //3
+  String portName = Serial.list()[3]; //3
   println(Serial.list());
   communicate = new Serial(this, portName, 115200);
   communicate.bufferUntil('\n');
@@ -23,7 +23,7 @@ void draw() {
 void serialEvent(Serial p) {
   /* ENSURE WHILE(... > 0) && port.bufferUntil('\n') */
 
-  while (p.available () > 0) {
+  while (p.available() > 0) {
     /* CHECK FOR HELLO = 126 | '~' */
     int available = p.available();
     short temp = (short) p.read();
@@ -35,51 +35,29 @@ void serialEvent(Serial p) {
 
 short[] receive(Serial p, short t, int available) {
 
-  /* INIT RESPONSE BUFFER BASED ON SERIAL AVAILABLE */
-  short[] temp = new short[available -1];
+  /* CAPTURE ENTIRE SERIAL MSG FROM ARDUINO FROM '~' to '\n' (Excluding '\n') */
+  short[] temp = new short[ available - 1 ];
   //126
-  temp[0] = t; 
-
-  //System.out.print("Temp Array: ");
-  //System.out.print(temp[0] + " ");
+  temp[0] = t;
   for (int i = 1; i < temp.length; i++) {
     temp[i] = (short) p.read();
-    //System.out.print(temp[i]);
-    //System.out.print(" ");
   }
-  System.out.println();
-  //New array that stores correct data and ready to give to receive array 
-  //33 and 69 shoulde be removed
-  short[] temp2 = new short[temp.length];
-  //126
-  int position = 0;
-  temp2[position++] = temp[0]; 
-  for (int i = 1; i <temp.length; i++) {
-    if (temp [i] == '!' && temp [i+2] == '?') {
-      temp2[position++] = (short) (temp[i+1] + 1);
+
+  /* IN-PLACE SORT, SELECT & CORRECT OF SERIAL DATA FROM ARDUINO */
+  int position = 1;
+  for (int i = 1; i < temp.length; i++) {
+    if (temp[ i ] == '!' && temp[ i + 2 ] == '?') {
+      temp[ position++ ] = (short) (temp[ i + 1 ] + 1);
       i = i + 2;
     } else {
-      temp2[position++] = temp[i];
+      temp[ position++ ] = temp[ i ];
     }
   }
-
-  /*
-  System.out.print("Temp2 Array: ");
-   for (int i = 0; i < temp2.length; i++) {
-   System.out.print(temp2[i]);
-   System.out.print(" ");
-   }
-   */
-
-  System.out.println();
-  //System.out.println("Serial BYTES #: " + (available - 1));
-
+  /* CLEAR THE INCOMING SERIAL BUFFER - WE HAVE WHAT WE WANT */
   p.clear();
-  //return an array "teamp2" from position 0 to the last position, 
-  //which is indicate the index of temp2
-  return Arrays.copyOfRange(temp2, 0, position);
+  /* RETURNS SORTED, SELECTED ARRAY FOR FURTHER "PROCESSING" OF SERIAL DATA */
+  return Arrays.copyOfRange(temp, 0, position);
 }
-
 
 void send(Serial p, short[] r) {
   for (int i = 0; i < PREAMBLE_SIZE; i++) {
@@ -90,7 +68,7 @@ void send(Serial p, short[] r) {
 /* ------------------------- SYNCHRONISATION ------------------------- */
 void discover(Serial p, short t, int available, boolean d) {
   short[] response;
-  if ( (response = check( receive(p, t, available), d )) != null ) { 
+  if ( (response = check( receive(p, t, available), d )) != null ) {
     println("before send, we have  null! ");
     send( p, response );
   }
@@ -170,9 +148,9 @@ short[] check(short[] incoming, boolean d) {
 
   if (d) {
     /* THIS MUST BE A SYNCHRONISE MSG FROM SOURCE */
-    if (( response = this.peek(incoming) ) != null ) { 
+    if ( ( response = this.peek(incoming) ) != null ) {
       println("Processing not building preable");
-      index++; 
+      index++;
       return response;
     }
   }
