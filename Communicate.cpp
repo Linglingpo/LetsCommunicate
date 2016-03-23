@@ -358,42 +358,35 @@ uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
   if(response[5] != channel.syn) { return 0; }
   if(response[6] != channel.preamble[6]) { return 0; }
 
+  if(channel.syn > 255) channel.syn = 0;
+
   /* SWITCH TO THE RECEIVED TYPE MESSAGE */
   switch(response[6]) {
     case SYN:
       /* WE NEED TO CHECK EVERY FIELD IN THE RECEIVED MESSAGE */
         channel.target = response[2];
-        //Serial.print(response[4]);
-        // if (response[4] == 255){
-        //   channel.syn = 0;
-        // } else {
-        channel.syn  = response[4] + 1;
-        //}
-        channel.ack  = response[4];
+        channel.ack = channel.syn;
+        channel.syn = ( !channel.discovered ) ? channel.syn = response[4] + 1 : ++channel.syn;
       /* SEND FINISH MESSAGE - WE HAVE DISCOVERED AND SYNCHED */
       return 1;
       break;
+
     case URG:
       break;
+
     case RST:
       break;
+
     case CNT:
-    channel.target = response[2];
-    if (response[4] == 255){
-      channel.syn = 0;
-    } else {
-    channel.syn = response[4] + 1;
-    }
-    channel.ack = response[4];
-    return 1;
+      channel.target = response[2];
+      channel.ack = channel.syn;
+      channel.syn = ++channel.syn;
+      return 1;
       break;
+
     case FIN:
-    if (response[4] == 255){
-      channel.syn = 0;
-    } else {
-      channel.syn = response[4] + 1;
-    }
-      channel.ack = response[4];
+      channel.ack = channel.syn;
+      channel.syn = ++channel.syn;
       channel.discovered = true;
       return 1;
       break;
