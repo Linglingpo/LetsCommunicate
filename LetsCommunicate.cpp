@@ -208,7 +208,7 @@ void LetsCommunicate::transmit(uint8_t _comm, uint8_t _payloadType){
       (*this).share(_comm, _payloadType, (*this).state-> digitalPinCount, (*this).state->presentDigitalState);
       //(*this).transmissionMsg(_comm, _payloadType, (*this).state-> digitalPinCount, (*this).state->presentDigitalState);
       (*this).state-> stateChanged = false;
-      (*this).stateOfTheUnion();
+      //(*this).stateOfTheUnion();
       }
       break;
       case DXT:

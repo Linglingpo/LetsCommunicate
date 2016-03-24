@@ -26,163 +26,26 @@ uint8_t Communicate::constructPreamble(uint8_t _comm, uint8_t _source, uint8_t _
 
   switch(_type) {
     case SYN:
-    Serial.print("SEQUENCE TYPE (should be 0)----------------------: ");
-    Serial.println(_type);
       channel.preamble[6] = _type;
     break;
 
     case CNT:
       channel.preamble[6] = _type;
-      Serial.print("SEQUENCE TYPE (should be 3)----------------------: ");
-      Serial.println(_type);
     break;
 
     case FIN:
-    Serial.print("SEQUENCE TYPE (should be 4)----------------------: ");
-    Serial.println(_type);
       channel.preamble[6] = _type;
     break;
   }
 
-  Serial.print("S PREAMBLE: ");
+  Serial.print("SENT PREAMBLE: ");
   for(int i = 0; i < PREAMBLE_SIZE; i++) {
-    Serial.print(channel.preamble[i]); //Serial.print(" ");
+    Serial.print(channel.preamble[i]); Serial.print(" ");
   }
   Serial.println("");
 
   return 1;
 }
-
-
-// uint8_t Communicate::constructData(uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState, transmit & channel) {
-//
-//   Serial.print("In Data Construct: ");
-//
-//   channel.digitalPayload[0] = _payloadType;
-//   channel.digitalPayload[1] = _payloadSize;
-//
-//
-//   switch(_payloadType) {
-//     case DIG:
-//     for(int i = DIGDXT_OFFSET; i < _payloadSize + DIGDXT_OFFSET; i++){
-//       channel.digitalPayload[i] = _payloadState[i];
-//       Serial.print(channel.digitalPayload[i]);
-//       Serial.print(" ");
-//     }
-//     Serial.println();
-//     break;
-//
-//     case DXT:
-//     break;
-//
-//     case ANA:
-//     break;
-//     case ALL:
-//     //??
-//     break;
-//   }
-// }
-
-// uint8_t Communicate::constructMaster(uint8_t _payloadType, uint8_t _payloadSize, transmit & channel){
-//   (*this).transmitTotalMsgSize = PREAMBLE_SIZE + DIGDXT_OFFSET + _payloadSize;
-//   (*this).masterMsg = new uint8_t[(*this).transmitTotalMsgSize];
-//   //Store preamble
-//   for(int i = 0 ; i < PREAMBLE_SIZE; i++){
-//     (*this).masterMsg[i] = channel.preamble[i];
-//   }
-//
-//   switch(_payloadType) {
-//     case DIG:
-//     //Store pinStates
-//     for(int j = PREAMBLE_SIZE ; j < (*this).transmitTotalMsgSize; j++){
-//       (*this).masterMsg[j] = channel.digitalPayload[j - PREAMBLE_SIZE];
-//     }
-//     break;
-//
-//     case DXT:
-//     break;
-//
-//     case ANA:
-//     break;
-//
-//     case ALL:
-//     break;
-//   }
-//
-//   /* DEBUG */
-//   Serial.print("In Master Construct: ");
-//   Serial.println();
-//   Serial.print("Payload Size: ");
-//   Serial.print(_payloadSize);
-//   Serial.print(" ");
-//   Serial.print("Total Size: ");
-//   Serial.print((*this).transmitTotalMsgSize);
-//   Serial.print(" ");
-//   Serial.print("Payload Type In PREAMBLE: ");
-//   Serial.print(channel.preamble[6]);
-//   Serial.print(" ");
-//   Serial.print("Payload Type in MASTER MSG: ");
-//   Serial.print((*this).masterMsg[6]);
-//   Serial.print(" ");
-//   Serial.println();
-//   for (int k = 0; k < (*this).transmitTotalMsgSize; k++){
-//     Serial.print((*this).masterMsg[k]);
-//     Serial.print(" ");
-//   }
-//   Serial.println();
-//
-// }
-
-// uint8_t Communicate::transmissionMsg(uint8_t _comm, uint8_t _payloadType, uint8_t _payloadSize, uint8_t* _payloadState){
-// // HAVE WE BEEN DISCOVERED...
-// uint8_t _return = 0;
-// uint8_t seq = 0;
-// uint8_t * sequence = new uint8_t[3];
-// sequence[0] = SYN;
-// sequence[1] = CNT;
-// sequence[2] = FIN;
-//
-// // Need to know which communication type first
-// switch(_comm) {
-//   case HARDSERIAL:
-//   /* WE DONOT HAVE TO DO THIS - WE SYN REGARDLESS ;) */
-//   // if (!(*this).communicationState->master.discovered){
-//   //   (*this).discover(_comm);
-//   // }
-//     uint8_t receive;
-//     do {
-//       Serial.print("SEQUENCE A ----------------------: ");
-//       Serial.println(seq);
-//
-//       if(seq == 1){
-//       //Construct preamble
-//       (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
-//       //constructData
-//       (*this).constructData(_payloadType, _payloadSize, _payloadState, (*this).communicationState->master);
-//       //send the preamble + data msg
-//       (*this).constructMaster(_payloadType, _payloadSize, (*this).communicationState->master);
-//     } else {
-//       //Construct preamble
-//       (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
-//     }
-//
-//       receive = send(_comm, (*this).communicationState->master);
-//       //to control SYN & FIN in discover
-//       if(receive == 0) { return 0; }
-//     } while(seq < 3);
-//     return 1;
-//   break;
-//
-//   case SOFTSERIAL:
-//     //return 0;
-//   break;
-//   case ISQUAREDC:
-//     //return 0;
-//   break;
-//     }
-// return _return;
-// }
-
 
 uint8_t Communicate::discover(uint8_t _comm) {
   uint8_t _return = 0;
@@ -194,9 +57,6 @@ uint8_t Communicate::discover(uint8_t _comm) {
 
       uint8_t receive;
       do {
-        Serial.print("Checking for FAILURE in DISCOVER:  ");
-        Serial.println(seq);
-
         (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
         receive = send(_comm, (*this).communicationState->master);
         //to control SYN & FIN in discover
@@ -229,14 +89,11 @@ uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, u
           (*this).communicationState->master.digitalPayload = new uint8_t[ _payloadSize + DIGDXT_OFFSET ];
           (*this).communicationState->master.digitalPayload[0] = _type;
           (*this).communicationState->master.digitalPayload[1] = _payloadSize;
-          Serial.print("PAYLOAD SIZE: "); Serial.println(_payloadSize, DEC);
 
-          Serial.print("Digital Payload: ");
           for(int i = 0; i < _payloadSize; i++){
             (*this).communicationState->master.digitalPayload[i + DIGDXT_OFFSET] = _payloadState[i];
-            Serial.print((*this).communicationState->master.digitalPayload[i]); Serial.print(" ");
           }
-          Serial.println();
+
         break;
         case DXT:
           (*this).communicationState->master.digitalPayload = new uint8_t[ _payloadSize + DIGDXT_OFFSET ];
@@ -250,10 +107,6 @@ uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, u
 
       uint8_t receive;
       do {
-
-          Serial.print("Checking for FAILURE in SHARE:  ");
-          Serial.println(seq);
-
           (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
           receive = send(_comm, (*this).communicationState->master);
           if(receive == 0) { return 0; }
@@ -291,14 +144,16 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
       uint8_t receive = 0;
       do {
           //ALWAYS TRANSMIT THE PREAMBLE {SYN, CNT or FIN}
-          for(int i = 0; i < PREAMBLE_SIZE; i++)
+          for(int i = 0; i < PREAMBLE_SIZE; i++) {
             (*this).slip(channel.preamble[i]);
+            delay(5);
+          }
 
           //CNT
           if(channel.preamble[6] == CNT) {
             for(int i = 0; i < 14; i++) {
               (*this).slip((*this).communicationState->master.digitalPayload[i]);
-              //Serial.write((*this).communicationState->master.digitalPayload[i]);
+              delay(5);
             }
           }
 
@@ -343,13 +198,17 @@ uint8_t Communicate::receive(uint8_t _comm, uint8_t _counter, transmit & channel
 
 uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
 
-  //Serial.println("WE HAVE A MESSAGE TO PEEK AT AND VERIFY");
   uint8_t * response = new uint8_t[PREAMBLE_SIZE];
-  Serial.print("R PREAMBLE: ");
+  Serial.print("RECIEVED PREAMBLE: ");
   for(int i = 0; i < PREAMBLE_SIZE; i++) {
     response[i] = Serial.read();
-    Serial.print(response[i]); Serial.print(" ");
   }
+
+  for(int i = 0; i < PREAMBLE_SIZE; i++) {
+    Serial.print(response[i]); Serial.print(" ");
+    delay(5);
+  }
+  Serial.println(" ");
   Serial.println(" ");
 
   if(response[0] != HELLO) { return 0; }

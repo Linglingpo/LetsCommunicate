@@ -5,9 +5,9 @@ Serial communicate;
 void setup() {
   size(200, 200);
 
-  String portName = Serial.list()[5]; //3
+  String portName = Serial.list()[3]; //5
   println(Serial.list());
-  communicate = new Serial(this, portName, 115200);
+  communicate = new Serial(this, portName, 115200); //115200
   communicate.bufferUntil('\n');
 }
 
@@ -26,7 +26,6 @@ void serialEvent(Serial p) {
     int available = p.available();
     short temp = (short) p.read();
     if (temp == HELLO) {
-      System.out.println("IN SERIALEVENT - DISCOVER");
       discover(p, temp, available, discovered);
     }
   }
@@ -43,62 +42,24 @@ void send(Serial p, short[] r) {
 short[] receive(Serial p, short t, int available) {
 
   /* CAPTURE ENTIRE SERIAL MSG FROM ARDUINO FROM '~' to '\n' */
-  System.out.println("IN RECEIVE - UNPACK");
   short[] temp = new short[ available - 1 ];
-  System.out.print("Temp Array M READ: ");
-  //126
+
   temp[0] = t;
-  for (int m = 1; m < temp.length; m++) {
-    temp[m] = (short) p.read();
-    System.out.print(temp[m]); 
-    System.out.print(" ");
-  }
+  for (int i = 1; i < temp.length; i++)
+    temp[i] = (short) p.read();
 
-  System.out.println("IN RECEIVE - INPLACE");
-  /* IN-PLACE SORT, SELECT & CORRECT OF SERIAL DATA FROM ARDUINO */
+    int position = 1;
+    for(int i = 1; i < temp.length; i++) {
+      /* NEW AND IMPROVED */
+      if( i < temp.length - 2 && ( temp[ i ] == '!' && temp[ i + 2 ] == '?' ) ) {
+        temp[ position++ ] = (short) (temp[ i + 1 ] + 1);
+        i += 2;
+      } else {
+        temp[ position++ ] = temp[ i ];
+      }
 
-  //  int i = 0;
-  //  for (i = 1; i < temp.length; i++) {
-  //    System.out.println("IN RECEIVE - IN FOR");
-  //    if (temp[ i ] == '!' && temp[ i + 2 ] == '?') {
-  //      System.out.println("IN RECEIVE - IN!9?");
-  //      temp[ position++ ] = (short) (temp[ i + 1 ] + 1);
-  //      System.out.println("What is in temp[ position++ ]: " + temp[ position++ ]);
-  //      System.out.println("What is in (short) (temp[ i + 1 ] + 1) ");
-  //      System.out.println("i is (Before ADD): " + i);
-  //      i += 3;
-  //      System.out.println("i is: (AFTER ADD)" + i);
-  //    } else {
-  //      System.out.println("IN RECEIVE - ELSE");
-  //      System.out.println("i is: " + i);
-  //      System.out.println(temp[ position ]); 
-  //      System.out.println(" ");
-  //      position++;
-  //      //temp[ position++ ] = temp[ i ];
-  //    }
-  //  }
-
-  int position = 1;
-  int i = 1;
-  //System.out.print("TEMP ARRAY is: "); 
-  while (i < temp.length) {
-    System.out.print("i is: " + i); 
-    System.out.print(" ");
-    if (temp[ i ] == '!' && temp[ i + 2 ] == '?') {
-      temp[ position++ ] = (short) (temp[ i + 1 ] + 1);
-      i += 4;
-    } else {
-      position++;
-      i++;
     }
-  }
 
-  System.out.print("Temp Array: ");
-  for (int h = 0; h <temp.length; h++) {
-    System.out.print(temp[h]); 
-    System.out.print(" ");
-  }
-  //System.out.println();
   /* CLEAR THE INCOMING SERIAL BUFFER - WE HAVE WHAT WE WANT */
   p.clear();
   /* RETURNS SORTED, SELECTED ARRAY FOR FURTHER "PROCESSING" OF SERIAL DATA */
@@ -117,9 +78,7 @@ void discover(Serial p, short t, int available, boolean d) {
 short[] check(short[] incoming, boolean d) {
 
   /* RESPONSE BACK FROM PROCESSING BASED ON INCOMING MSG */
-  short[] response = { 
-    0
-  };
+  short[] response = { 0 };
 
   /* CHECK PREAMBLE SIZE = WHAT WE EXPECT FOR THE PREAMBLE SIZE! */
   if ( incoming[ 1 ] != PREAMBLE_SIZE ) return null;
@@ -132,47 +91,36 @@ short[] check(short[] incoming, boolean d) {
     payload[ index % 3 ] = null;
   }
 
-  /* DEBUG! WHAT PROCESSING RECEIVED */
-  System.out.print("ARDUINO PREABMLE: ");
-  for (int i = 0; i < in[index % 3].length; i++) {
-    System.out.print( in[index % 3][i] );
-    System.out.print(" ");
-  }
-  System.out.println(" ");
+//  /* DEBUG! WHAT PROCESSING RECEIVED */
+//  System.out.print("ARDUINO PREABMLE: ");
+//  for (int i = 0; i < in[index % 3].length; i++) {
+//    System.out.print( in[index % 3][i] );
+//    System.out.print(" ");
+//  }
+//  System.out.println(" ");
 
-  /* DEBUG! WHAT PROCESSING RECEIVED */
-  System.out.print("ARDUINO PAYLOAD : ");
-  if ( payload[ index % 3 ] != null) {
-    for (int i = 0; i < payload[index % 3].length; i++) {
-      System.out.print( payload[index % 3][i] );
-      System.out.print(" ");
-    }
-    System.out.println(" ");
-  }
-  System.out.println(" ");
-  // if the arduino msg is the same as last one
+//  /* DEBUG! WHAT PROCESSING RECEIVED */
+//  System.out.print("ARDUINO PAYLOAD : ");
+//  if ( payload[ index % 3 ] != null) {
+//    for (int i = 0; i < payload[index % 3].length; i++) {
+//      System.out.print( payload[index % 3][i] );
+//      System.out.print(" ");
+//    }
+//    System.out.println(" ");
+//  }
+//  System.out.println(" ");
 
   if (index != 0) {
 
     int selector = index % 3;
     int selected = 0;
-    if (selector == 0) { 
+    if (selector == 0) {
       selected = 2;
-    } else { 
+    } else {
       selected = selector - 1;
     }
 
-    println("CHECKING HISTORY: " + (index % 3));
-
     if ( in[ selector ][ 4 ] == in[ selected ][ 4 ] /* && in[ selector ][ 5 ] == in[ selected ][ 5 ]*/ ) {
-      System.out.print("PROCESS RETRANSMIT: ");
-      for (int i = 0; i < out[selected].length; i++) {
-        System.out.print( out[selected][i] );
-        System.out.print(" ");
-      }
-      System.out.println(" ");
-      System.out.println(" ");
-
       return out[ selected ];
     }
   }
@@ -181,9 +129,6 @@ short[] check(short[] incoming, boolean d) {
   /* WE NEED TO VERIFY THE INCOMING DATA TO WHAT WE KNOW OF THE NETWORK */
   //if (!d || ( in[ index % 3 ][2] != source && in[ index % 3 ][3] != MYID ) ) {
   if ( !d ) {
-    System.out.println("FIRST TIME ");
-
-
 
     if ( ( response = this.peek( incoming ) ) != null ) {
 
@@ -191,13 +136,13 @@ short[] check(short[] incoming, boolean d) {
       out[ index % 3 ] = Arrays.copyOfRange(response, 0, PREAMBLE_SIZE);
 
       /* DEBUG! WHAT PROCESSING SENT */
-      System.out.print("PROCESS SENT: ");
-      for (int i = 0; i < out[index % 3].length; i++) {
-        System.out.print( out[index % 3][i] );
-        System.out.print(" ");
-      }
-      System.out.println(" ");
-      System.out.println(" ");
+//      System.out.print("PROCESS SENT: ");
+//      for (int i = 0; i < out[index % 3].length; i++) {
+//        System.out.print( out[index % 3][i] );
+//        System.out.print(" ");
+//      }
+//      System.out.println(" ");
+//      System.out.println(" ");
       index++;
       return response;
     }
@@ -206,13 +151,13 @@ short[] check(short[] incoming, boolean d) {
     if ( ( response = this.peek(incoming) ) != null ) {
       out[ index % 3 ] = Arrays.copyOfRange(response, 0, PREAMBLE_SIZE);
       /* DEBUG! WHAT PROCESSING SENT */
-      System.out.print("PROCESS SENT: ");
-      for (int i = 0; i < out[index % 3].length; i++) {
-        System.out.print( out[index % 3][i] );
-        System.out.print(" ");
-      }
-      System.out.println(" ");
-      System.out.println(" ");
+//      System.out.print("PROCESS SENT: ");
+//      for (int i = 0; i < out[index % 3].length; i++) {
+//        System.out.print( out[index % 3][i] );
+//        System.out.print(" ");
+//      }
+//      System.out.println(" ");
+//      System.out.println(" ");
       index++;
       return response;
     }
@@ -230,7 +175,7 @@ short[] peek(short[] type) {
   _temp[2] = MYID;
   _temp[3] = ( !discovered ) ? source = type[2] : source;
 
-  if (syn >= 255) syn = 0; 
+  if (syn >= 255) syn = 0;
   else syn++;
 
   switch(type[6]) {
