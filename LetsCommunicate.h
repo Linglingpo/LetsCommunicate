@@ -25,10 +25,11 @@ struct letscommunicate {
   uint8_t analogDataSize  = 0; // Each Analog pin need to have 2 bytes to store its value
 
   // about to transmit (ready to send)
-  uint8_t * currentDigitalState;
-  uint8_t * currentAnalogState;
+  uint32_t digitalState;
+  uint32_t previousDigitalState;
+  uint8_t analogState [PAYLOAD_ANALOG_SIZE]; //12 bit
   // just receive (What is reading now)
-  uint8_t * presentDigitalState;
+  //uint8_t * presentDigitalState;
   uint8_t * presentAnalogState;
   //FLAG - If the state is changed, then transmit the msg
   bool stateChanged = false;

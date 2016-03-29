@@ -30,15 +30,17 @@ void LetsCommunicate::initialiseDIGDXT(uint8_t _payloadType) {
   (*this).state->digitalPinCount = (_payloadType == DIG) ? DIGSIZE : (DIGSIZE + DXTSIZE);
   //presentDigitalState = array to keep the state of IO
   Serial.print("DIGITAL PIN COUNT: "); Serial.println((*this).state->digitalPinCount, DEC);
-  (*this).state->presentDigitalState = new uint8_t[(*this).state->digitalPinCount];
-  //currentDigitalState = history
-  (*this).state->currentDigitalState = new uint8_t[(*this).state->digitalPinCount];
+  // (*this).state->presentDigitalState = new uint8_t[(*this).state->digitalPinCount];
+  // delete (*this).state->presentDigitalState;
+  // //currentDigitalState = history
+   //(*this).state->digitalState = new uint32_t[(*this).state->digitalPinCount];
+  // delete (*this).state->currentDigitalState;
 
   for(int i = 0; i < (*this).state->digitalPinCount; i++) {
     //no interrupt
     pinMode(OFFSET + i, INPUT_PULLUP);
-    (*this).state->presentDigitalState[i] = 0;
-    (*this).state->currentDigitalState[i] = 0;
+    // (*this).state->presentDigitalState[i] = 0;
+    // (*this).state->currentDigitalState[i] = 0;
     //interrupt
     /* 1st parameter: pin
     * 2nd para: user Function
@@ -185,15 +187,13 @@ void LetsCommunicate::stateOfTheUnion() {
 
 }
 
-void LetsCommunicate::checkState(uint8_t* _presentState, uint8_t* _currentState){
+void LetsCommunicate::checkState(uint32_t _previousDigitalState, uint32_t _currentDigitalState){
   //Serial.print("I AM CHECKING !!!!! ------------------");
   //Serial.println();
-  for(int i = 0; i < (*this).state-> digitalPinCount; i ++){
-    if(_presentState [i] != _currentState [i]){
+    if(_previousDigitalState != _currentDigitalState){
       (*this).state-> stateChanged = true;
       //update array
-      _currentState [i] = _presentState[i];
-    }
+      _previousDigitalState = _currentDigitalState;
   }
 }
 
@@ -230,29 +230,41 @@ void LetsCommunicate::run() {
   //DIG / DXT + interruptsEnabled
   //when using interrupt (only for digital)
   // check current state and pre state ...
+  if((*this).state->interruptsEnabled){
+    Serial.print("Digital Read: ");
+      if(digitalRead(interrupt_id) == HIGH) {
+        digitalState |= 1 << interrupt_id;
+      } else if(digitalRead(interrupt_id) == LOW){
+        digitalState &= 0 << interrupt_id;
+      }
+    }
+
+
+  /*
   if((*this).state->interruptsEnabled) {
     delay(25);
     if(digitalRead(interrupt_id) == LOW) {
-      (*this).state->presentDigitalState[interrupt_id - OFFSET] = 1;
+      (*this).state->digitalState[interrupt_id - OFFSET] = 1;
     } else if(digitalRead(interrupt_id) == HIGH){
-      (*this).state->presentDigitalState[interrupt_id - OFFSET] = 0;
+      (*this).state->digitalState[interrupt_id - OFFSET] = 0;
     }
     interrupted = false;
     interrupt_id = -1;
     (*this).checkState((*this).state->presentDigitalState, (*this).state->currentDigitalState);
   }
+  */
 
   //DIG / DXT + NO interruptsEnabled
   if(( (*this).state->payloadType[0] || (*this).state->payloadType[1] ) && !(*this).state->interruptsEnabled) {
     for(int i = 0; i < (*this).state->digitalPinCount; i++) {
       uint8_t _digitalPin = digitalRead(i + OFFSET);
       if(_digitalPin == LOW) {
-        (*this).state->presentDigitalState[i] = 1;
-      } else {
-        (*this).state->presentDigitalState[i] = 0;
+        digitalState &= 0 << _digitalPin;
+      } else if (_digitalPin == HIGH){
+        digitalState |= 1 << _digitalPin;
       }
     }
-    (*this).checkState((*this).state->presentDigitalState, (*this).state->currentDigitalState);
+    (*this).checkState((*this).state->previousDigitalState, (*this).state->digitalState);
   }
 
   //ANA

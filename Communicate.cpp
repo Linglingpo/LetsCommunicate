@@ -86,22 +86,22 @@ uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, u
       /* PREPARE THE PAYLOAD and ASSOCIATE WITH CHANNEL */
       switch(_type) {
         case DIG:
-          (*this).communicationState->master.digitalPayload = new uint8_t[ _payloadSize + DIGDXT_OFFSET ];
-          (*this).communicationState->master.digitalPayload[0] = _type;
-          (*this).communicationState->master.digitalPayload[1] = _payloadSize;
+          (*this).communicationState->master.payload = new uint8_t[ _payloadSize + DIGDXT_OFFSET ];
+          (*this).communicationState->master.payload[0] = _type;
+          (*this).communicationState->master.payload[1] = _payloadSize;
 
           for(int i = 0; i < _payloadSize; i++){
-            (*this).communicationState->master.digitalPayload[i + DIGDXT_OFFSET] = _payloadState[i];
+            (*this).communicationState->master.payload[i + DIGDXT_OFFSET] = _payloadState[i];
           }
 
         break;
         case DXT:
-          (*this).communicationState->master.digitalPayload = new uint8_t[ _payloadSize + DIGDXT_OFFSET ];
-          (*this).communicationState->master.digitalPayload[0] = _type;
-          (*this).communicationState->master.digitalPayload[1] = _payloadSize;
+          (*this).communicationState->master.payload = new uint8_t[ _payloadSize + DIGDXT_OFFSET ];
+          (*this).communicationState->master.payload[0] = _type;
+          (*this).communicationState->master.payload[1] = _payloadSize;
 
           for(int i = 0; i < _payloadSize; i++)
-            (*this).communicationState->master.digitalPayload[i + DIGDXT_OFFSET] = _payloadState[i];
+            (*this).communicationState->master.payload[i + DIGDXT_OFFSET] = _payloadState[i];
         break;
       }
 
@@ -152,7 +152,7 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
           //CNT
           if(channel.preamble[6] == CNT) {
             for(int i = 0; i < 14; i++) {
-              (*this).slip((*this).communicationState->master.digitalPayload[i]);
+              (*this).slip((*this).communicationState->master.payload[i]);
               //delay(5);
             }
           }
