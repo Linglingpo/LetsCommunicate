@@ -45,7 +45,7 @@
 struct transmit {
   bool discovered = false;
   uint8_t preamble[PREAMBLE_SIZE];
-  //uint8_t payload_digital[PAYLOAD_DIGITAL_SIZE];
+  //uint8_t preamble[HISTORY_SIZE][PREAMBLE_SIZE];
   uint8_t * digitalPayload;
   uint8_t * payload;
 

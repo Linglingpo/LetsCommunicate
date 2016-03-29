@@ -18,7 +18,8 @@ const letscommunicate * state = new letscommunicate();
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(115200);
+  //Serial.begin(115200);
+  Serial.begin(57600);
   /* ARDUINO -> PROCESSING CONFIGURATION */
   first = LetsCommunicate(MASTERCOMM, THISARDUINOID);
 

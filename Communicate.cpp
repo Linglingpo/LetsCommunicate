@@ -146,14 +146,14 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
           //ALWAYS TRANSMIT THE PREAMBLE {SYN, CNT or FIN}
           for(int i = 0; i < PREAMBLE_SIZE; i++) {
             (*this).slip(channel.preamble[i]);
-            delay(5);
+            //delay(5);
           }
 
           //CNT
           if(channel.preamble[6] == CNT) {
             for(int i = 0; i < 14; i++) {
               (*this).slip((*this).communicationState->master.digitalPayload[i]);
-              delay(5);
+              //delay(5);
             }
           }
 
@@ -202,11 +202,12 @@ uint8_t Communicate::peek(uint8_t _comm, transmit & channel) {
   Serial.print("RECIEVED PREAMBLE: ");
   for(int i = 0; i < PREAMBLE_SIZE; i++) {
     response[i] = Serial.read();
+    delay(2);
   }
 
   for(int i = 0; i < PREAMBLE_SIZE; i++) {
     Serial.print(response[i]); Serial.print(" ");
-    delay(5);
+    //delay(5);
   }
   Serial.println(" ");
   Serial.println(" ");
