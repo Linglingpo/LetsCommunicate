@@ -75,7 +75,23 @@ uint8_t Communicate::discover(uint8_t _comm) {
   return _return;
 }
 
+uint8_t Communicate::shareDigital(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, uint32_t  _digitalState) {
+ // do whatever....
+ uint8_t _payloadState [4] ={0};
+
+Serial.println("In SHAR Digital payloadState: ");
+ for(int i = 3; i >= 0 ; i --){
+_payloadState[i] = _digitalState >> 8 * i;
+Serial.print(_payloadState[i], DEC); Serial.print(" ");
+ }
+ Serial.println(" ");
+
+share( _comm,  _type,  _payloadSize, _payloadState);
+}
+
+
 uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, uint8_t * _payloadState) {
+  Serial.println("In second SHAR ============================");
   uint8_t _return     = 0;
   uint8_t seq         = 0;
   uint8_t sequence[3] = { SYN, CNT, FIN };
@@ -83,16 +99,24 @@ uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, u
   switch(_comm) {
 
     case HARDSERIAL:
-      /* PREPARE THE PAYLOAD and ASSOCIATE WITH CHANNEL */
+      /* PREPARE THE PAYLOAD and ASSOCIATE WITH CHANNEL*/
       switch(_type) {
         case DIG:
-          (*this).communicationState->master.payload = new uint8_t[ _payloadSize + DIGDXT_OFFSET ];
+          (*this).communicationState->master.payload = new uint8_t[ PAYLOAD_DIGITAL_SIZE + DIGDXT_OFFSET ];
           (*this).communicationState->master.payload[0] = _type;
-          (*this).communicationState->master.payload[1] = _payloadSize;
+          (*this).communicationState->master.payload[1] = PAYLOAD_DIGITAL_SIZE;
 
-          for(int i = 0; i < _payloadSize; i++){
+          for(int i = 0; i < PAYLOAD_DIGITAL_SIZE; i++){
             (*this).communicationState->master.payload[i + DIGDXT_OFFSET] = _payloadState[i];
           }
+
+          //debug
+          Serial.println("IN SHARE, payload ARRAY: ");
+          for(int i = 0; i < PAYLOAD_DIGITAL_SIZE + DIGDXT_OFFSET; i++){
+            Serial.print((*this).communicationState->master.payload[i]);
+            Serial.print(" ");
+          }
+          Serial.println(" ");
 
         break;
         case DXT:
@@ -109,6 +133,7 @@ uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, u
       do {
           (*this).constructPreamble(_comm, (*this).communicationState->source, sequence[seq++], (*this).communicationState->master);
           receive = send(_comm, (*this).communicationState->master);
+          //--- (*this).state-> stateChanged = false;?
           if(receive == 0) { return 0; }
       } while(seq < 3);
       return 1;
@@ -123,6 +148,7 @@ uint8_t Communicate::share(uint8_t _comm, uint8_t _type, uint8_t _payloadSize, u
     }
   return _return;
 }
+
 
 void Communicate::slip(uint8_t s) {
   if(s == 10) { //'/n'
@@ -151,7 +177,8 @@ uint8_t Communicate::send(uint8_t _comm, transmit & channel) {
 
           //CNT
           if(channel.preamble[6] == CNT) {
-            for(int i = 0; i < 14; i++) {
+            //need to change
+            for(int i = 0; i < 6; i++) {
               (*this).slip((*this).communicationState->master.payload[i]);
               //delay(5);
             }

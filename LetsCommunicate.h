@@ -27,10 +27,13 @@ struct letscommunicate {
   // about to transmit (ready to send)
   uint32_t digitalState;
   uint32_t previousDigitalState;
+  
+  //Ana
   uint8_t analogState [PAYLOAD_ANALOG_SIZE]; //12 bit
   // just receive (What is reading now)
   //uint8_t * presentDigitalState;
   uint8_t * presentAnalogState;
+  uint8_t * currentAnalogState;
   //FLAG - If the state is changed, then transmit the msg
   bool stateChanged = false;
 };
@@ -83,7 +86,8 @@ public:
   const letscommunicate * getLetsCommunicateState() const;
 
   /* FUNTION TO CHECK IF THE PRESENT STATE IS DIFF THAN THE CURRENT STATE */
-  void checkState(uint8_t*, uint8_t*);
+  //void checkState(uint8_t*, uint8_t*);
+  void checkDigitalState(uint32_t, uint32_t);
 
   /* FUNTION TO CONSTRUCT PREABLE + DATA MSG AND TRANSMIT (SEND) */
   //SOME WORK NEEDS TO DO - OVERRIDE TO COMMUNICATE BY LETSCOMMUNICATE...

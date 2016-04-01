@@ -6,7 +6,7 @@
 
 #define HISTORY_SIZE         0x03
 #define PREAMBLE_SIZE        0x07
-#define PAYLOAD_DIGITAL_SIZE 0x03 //3 ???
+#define PAYLOAD_DIGITAL_SIZE 0x04 //4 - 32 bytes
 #define PAYLOAD_ANALOG_SIZE  0x0C //12
 
 #define HELLO 0x7E // ~
@@ -75,7 +75,9 @@ public:
   Communicate(uint8_t , uint8_t , uint8_t);
 
   uint8_t discover(uint8_t);
+  //digital state now is uint32_t
   uint8_t share(uint8_t, uint8_t, uint8_t, uint8_t * );
+  uint8_t shareDigital(uint8_t, uint8_t, uint8_t, uint32_t);
   /* virtual??? - Change function name to "transmit"
   transmissionMsg function that will be override in LetsCommunicate.cpp
   (communication type, payload type, payload size, *payload stats); */

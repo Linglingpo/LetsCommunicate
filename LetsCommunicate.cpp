@@ -152,17 +152,19 @@ void LetsCommunicate::stateOfTheUnion() {
   if((*this).state->payloadType[0] || (*this).state->payloadType[1]) {
 
     //Present
-    Serial.println("Digital Pins Input Present State: ");
-    for(int i = 0; i < (*this).state->digitalPinCount; i++) {
-      Serial.print((*this).state->presentDigitalState[i]); Serial.print(" ");
-    }
+    Serial.println("Digital Pins Input Previous State: ");
+    Serial.print((*this).state->previousDigitalState); Serial.print(" ");
+    // for(int i = 0; i < (*this).state->digitalPinCount; i++) {
+    //   Serial.print((*this).state->presentDigitalState[i]); Serial.print(" ");
+    // }
     Serial.println(" ");
 
     //Current
     Serial.println("Digital Pins Current State: ");
-      for(int i = 0; i < (*this).state->digitalPinCount; i++) {
-        Serial.print((*this).state->currentDigitalState[i]); Serial.print(" ");
-      }
+    Serial.print((*this).state->digitalState); Serial.print(" ");
+      // for(int i = 0; i < (*this).state->digitalPinCount; i++) {
+      //   Serial.print((*this).state->currentDigitalState[i]); Serial.print(" ");
+      // }
       Serial.println(" ");
   }// end of if
 
@@ -187,27 +189,48 @@ void LetsCommunicate::stateOfTheUnion() {
 
 }
 
-void LetsCommunicate::checkState(uint32_t _previousDigitalState, uint32_t _currentDigitalState){
-  //Serial.print("I AM CHECKING !!!!! ------------------");
-  //Serial.println();
-    if(_previousDigitalState != _currentDigitalState){
-      (*this).state-> stateChanged = true;
-      //update array
-      _previousDigitalState = _currentDigitalState;
-  }
+void LetsCommunicate::checkDigitalState(uint32_t _previousState, uint32_t _currentState){
+  if(_previousState != _currentState){
+    (*this).state-> stateChanged = true;
+    Serial.println();
+    Serial.println(" CHECKING !!!!! ------------------");
+    Serial.print(" _previousState: ");
+    Serial.print(_previousState);
+    Serial.print(" _currentState: ");
+    Serial.print(_currentState);
+    Serial.print(" digitalState: ");
+    Serial.print((*this).state->digitalState);
+    Serial.println();
+      //update
+    (*this).state->previousDigitalState = (*this).state->digitalState;
+    } else {
+  (*this).state-> stateChanged = false;
+ }
+ // Serial.println();
+ // Serial.print("StateChanged: ");
+ // Serial.print((*this).state->stateChanged);
+ // Serial.println();
 }
 
 /* FUNTION TO CONSTRUCT PREABLE + DATA MSG AND TRANSMIT (SEND) */
 // NEED TO WORK ON IT - OVERRIDE transmit with diff parameters from the one in communicate calss
 // CHECK THE FLAG THAT IF THERE IS DATA READY TO TRANSMIT
 void LetsCommunicate::transmit(uint8_t _comm, uint8_t _payloadType){
+
+
     // call transmission function from Communicate.cpp
     switch(_payloadType) {
       case DIG:
       if((*this).state-> stateChanged){
-      (*this).share(_comm, _payloadType, (*this).state-> digitalPinCount, (*this).state->presentDigitalState);
+
+      // Serial.println(" === In Transmit === ");
+      // Serial.print("digitalState: ");
+      // Serial.print((*this).state->digitalState);
+      // Serial.println(" ");
+
+      (*this).shareDigital(_comm, _payloadType, (*this).state-> digitalPinCount, (*this).state->digitalState);
       //(*this).transmissionMsg(_comm, _payloadType, (*this).state-> digitalPinCount, (*this).state->presentDigitalState);
-      (*this).state-> stateChanged = false;
+      //(*this).state-> stateChanged = false;
       //(*this).stateOfTheUnion();
       }
       break;
@@ -231,14 +254,15 @@ void LetsCommunicate::run() {
   //when using interrupt (only for digital)
   // check current state and pre state ...
   if((*this).state->interruptsEnabled){
-    Serial.print("Digital Read: ");
+    //Serial.print("Digital Read: ");
       if(digitalRead(interrupt_id) == HIGH) {
-        digitalState |= 1 << interrupt_id;
+        (*this).state->digitalState &= 0 << interrupt_id;
       } else if(digitalRead(interrupt_id) == LOW){
-        digitalState &= 0 << interrupt_id;
+        (*this).state->digitalState |= 1 << interrupt_id;
       }
+      Serial.println((*this).state->digitalState,BIN);
+      (*this).checkDigitalState((*this).state->previousDigitalState, (*this).state->digitalState);
     }
-
 
   /*
   if((*this).state->interruptsEnabled) {
@@ -259,12 +283,12 @@ void LetsCommunicate::run() {
     for(int i = 0; i < (*this).state->digitalPinCount; i++) {
       uint8_t _digitalPin = digitalRead(i + OFFSET);
       if(_digitalPin == LOW) {
-        digitalState &= 0 << _digitalPin;
+        (*this).state->digitalState &= 0 << _digitalPin;
       } else if (_digitalPin == HIGH){
-        digitalState |= 1 << _digitalPin;
+        (*this).state->digitalState |= 1 << _digitalPin;
       }
     }
-    (*this).checkState((*this).state->previousDigitalState, (*this).state->digitalState);
+    (*this).checkDigitalState((*this).state->previousDigitalState, (*this).state->digitalState);
   }
 
   //ANA
@@ -276,9 +300,8 @@ void LetsCommunicate::run() {
       //Serial.print("Analog Read: "); Serial.println(anaReadTempNumber);
       (*this).state->presentAnalogState[i] = anaReadTempNumber >> 8;
       (*this).state->presentAnalogState[i + 1] = anaReadTempNumber;
+      // ANA not Working - State always change ???
       delay(5);
     }
-    // ANA not Working - State always change ???
-    (*this).checkState((*this).state->presentAnalogState, (*this).state->currentAnalogState);
   }
 }

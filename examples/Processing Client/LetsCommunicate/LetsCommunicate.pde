@@ -7,7 +7,7 @@ int dubugCount = 0;
 void setup() {
   size(200, 200);
 
-  String portName = Serial.list()[5]; //5
+  String portName = Serial.list()[6]; //5
   println(Serial.list());
   communicate = new Serial(this, portName, 115200); //115200
   communicate.bufferUntil('\n');
@@ -100,7 +100,8 @@ short[] receive(Serial p, short t, int available) {
       temp[ position++ ] = temp[ i ];
     }
   }
-
+  
+  System.out.println("position: " + position);
   /* CLEAR THE INCOMING SERIAL BUFFER - WE HAVE WHAT WE WANT */
   p.clear();
   /* RETURNS SORTED, SELECTED ARRAY FOR FURTHER "PROCESSING" OF SERIAL DATA */
@@ -114,19 +115,24 @@ void discover(Serial p, short t, int available, boolean d) {
   if ( (response = check( receive(p, t, available), d )) != null ) {
     
     send( p, response );
-    //debugPrint();
+    debugPrint();
   }
 }
 
 short[] check(short[] incoming, boolean d) {
   /* RESPONSE BACK FROM PROCESSING BASED ON INCOMING MSG */
-  short[] response = {
-    0
-  };
+  short[] response = {0};
 
   /* CHECK PREAMBLE SIZE = WHAT WE EXPECT FOR THE PREAMBLE SIZE! */
   if ( incoming[ 1 ] != PREAMBLE_SIZE ) return null;
-
+  
+  System.out.println("IN CHECK ======= incoming ======"); 
+  for(int i = 0 ; i < incoming.length; i++){
+  System.out.print(incoming[i]);
+  System.out.print(" ");
+  }
+  System.out.println(" ");
+  
   /* SAVE TO HISTORY */
   in[ index % 3 ] = Arrays.copyOfRange(incoming, 0, PREAMBLE_SIZE);
   if (in[ index % 3 ][6] == CNT) {
@@ -251,8 +257,8 @@ final short ALL = 0xFF; // 255 - ALL = DIGITAL + ANALOG
 
 /* PAYLOAD MESSAGE LENGTHS (Will possibly change)*/
 final short OFFSET  = 0x02;
-final short DIGSIZE = 0x0C; //12
-final short DXTSIZE = 0x06; //6
+final short DIGSIZE = 0x0C; //4 - 32 bytes
+final short DXTSIZE = 0x06; //6 - will be changed
 final short ANASIZE = 0x06; //6 Pin count
 
 /* SYN RESET CONTROL */
