@@ -4,8 +4,8 @@
 
 /* INTERRUPT GLOBALLY SCOPED VARIABLES */
 // For interrupt pin numbers
-volatile uint8_t interrupt_id = -1;
-volatile uint8_t previousInterrupt_id = -1;
+volatile uint8_t interrupt_id = 0;
+volatile uint8_t previousInterrupt_id = 0;
 volatile uint8_t interrupted = false;
 /* INTERRUPT GLOBALLY SCOPED VARIBLES */
 
@@ -255,14 +255,27 @@ void LetsCommunicate::run() {
   // check current state and pre state ...
   if((*this).state->interruptsEnabled){
     //Serial.print("Digital Read: ");
+
+
       if(digitalRead(interrupt_id) == HIGH) {
-        (*this).state->digitalState &= 0 << interrupt_id;
+        //ref link: http://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
+        //number &= ~(1 << x);
+        (*this).state->digitalState &= ~(1 << interrupt_id);
+        Serial.print("Interrupt ID - HIGHT: ");
+        Serial.print(interrupt_id);
+        Serial.println(" ");
       } else if(digitalRead(interrupt_id) == LOW){
         (*this).state->digitalState |= 1 << interrupt_id;
+        Serial.print("Interrupt ID - LOW: ");
+        Serial.print(interrupt_id);
+        Serial.println(" ");
       }
-      Serial.println((*this).state->digitalState,BIN);
+      Serial.println("digitalState: ");
+      Serial.print((*this).state->digitalState,BIN);
+      Serial.println(" ");
       (*this).checkDigitalState((*this).state->previousDigitalState, (*this).state->digitalState);
     }
+
 
   /*
   if((*this).state->interruptsEnabled) {
